@@ -327,6 +327,11 @@ Batch generation across a collection. Full provider abstraction with a second pr
 | D8 | No auth, no `users` table in V1 | Single operator |
 | D9 | Store resolved prompt, model, seed, params, and cost on every job | Reproducibility and cost visibility; two columns now vs. impossible later |
 | D10 | Print pipeline planned from the start, built at Stage 4 | Generation resolution does not meet print requirements |
+| D11 | Business units table is named `brands` | Clearer than `ventures` now that the tool itself is not a venture |
+| D12 | OpenAI (`gpt-image-1`) is the Stage 1 provider | Strongest instruction-following, which is what coloring-page negative constraints actually require. One file to change later |
+| D13 | PostgreSQL runs locally, not on Railway | Matches D7. No account, no cost, no network dependency during development |
+| D14 | Code lives at `~/esoh-studio`, not on the MyFiles mount | File watching is broken on the ChromeOS shared mount, which breaks hot reload. Writes are also ~8x slower there. Linux files remain browsable from the ChromeOS Files app |
+| D15 | Git remote must be set up early | Container files are lost if the Crostini container is ever reset; MyFiles would have survived that, `~` does not |
 
 ---
 
@@ -335,12 +340,11 @@ Batch generation across a collection. Full provider abstraction with a second pr
 Carried forward from the earlier documents, plus new ones. None of these block Stage 1.
 
 **Naming and structure**
-- `ventures` or `brands` as the table name? (See 6.2)
-- What is the internal product name? "Esoh Creations AI Image Studio" is descriptive but long.
+- What is the internal product name? Working name is "Esoh Studio" (used in the UI and repo). Confirm or change before it spreads further.
 
 **Product**
 - Does Results Review need side-by-side comparison, or is favorite/select sufficient?
-- Should templates be global, venture-specific, or both? (Schema already supports both via nullable `venture_id`.)
+- Should templates be global, brand-specific, or both? (Schema supports both via nullable `brand_id`; the first template is global.)
 - Which metadata must always be visible on an asset card?
 - Should export be available from Results, Project, and Library — or only Library?
 
@@ -350,8 +354,9 @@ Carried forward from the earlier documents, plus new ones. None of these block S
 - File naming convention for exports — needs to be decided before Stage 4.
 
 **Technical**
-- Which image provider for Stage 1? Recommendation: whichever is already set up and paid for. It is one file to change later.
 - Are print dimensions template-based or manually configurable?
+- `gpt-image-1` offers 1024x1536 portrait (2:3). A coloring page is 8.5x11 (0.773:1). Neither matches. Decide at Stage 4 whether to crop, pad, or outpaint to reach true page proportions.
+- Verify the estimated rates in `lib/pricing.ts` against current OpenAI pricing.
 
 ---
 
