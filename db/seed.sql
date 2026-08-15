@@ -26,27 +26,37 @@ on conflict (code) do nothing;
 insert into prompt_blocks (kind, slug, label, body_text) values
 
   ('base_style', 'cb-base', 'Coloring Book — Base Style',
-   'A black and white line art illustration drawn for an adult coloring book page.'),
+   'A clean flat vector-style black and white line art illustration drawn for an adult coloring book page. The artwork fills the whole image edge to edge.'),
 
   ('subject', 'cb-subject', 'Coloring Book — Subject',
    'The subject is {{subject}}. The emotional tone of the scene is {{mood}}.'),
 
   ('composition', 'cb-composition', 'Coloring Book — Full Page Portrait',
-   'Full-page portrait composition. The subject is centered and clearly separated from the background. Balanced use of the full page with generous negative space.'),
+   'Full-page portrait composition. The entire subject is visible inside the frame and is not cropped by any edge of the image. The subject is centered and clearly separated from the background, with a clear margin of empty white space around the outside of the composition. Balanced use of the full page with generous negative space.'),
 
   ('environment', 'cb-environment', 'Coloring Book — Environment',
    'The surrounding environment is {{environment}}.'),
 
   ('print_req', 'cb-linework', 'Coloring Book — Line Work Rules',
-   'Clean, unbroken black outlines of consistent medium weight. Large open uncluttered areas that are easy to color inside. Strong exterior contours around every major shape. Simple interior detail only.'),
+   'Every shape is enclosed by one smooth continuous vector path of bold uniform black, thick enough to print and color cleanly. Trees, grass, leaves and petals are drawn as simple closed outlined shapes. Large open uncluttered areas that are easy to color inside. Simple interior detail only. Hair is drawn as a few large outlined flowing sections, left white and open inside.'),
 
   ('output', 'cb-output', 'Coloring Book — Output',
-   'Pure white background. Pure black lines only. Nothing but line art from edge to edge.'),
+   'Bold black vector outlines on a plain white background. Every enclosed area is left empty white so it can be colored in by hand. The illustration runs to all four edges of the image.'),
 
+  -- Kept deliberately short. A long "do not" list performs WORSE with image
+  -- models: naming a thing makes it more likely to appear. The border in the
+  -- second test run was invited by the words "borders or page frames" in the
+  -- previous version of this block. Say what you want, not what you fear.
   ('negative', 'cb-negative', 'Coloring Book — Restrictions',
-   'Do not include any of the following: grey tones, shading, gradients, cross-hatching, stippling, solid black filled areas, photorealism, three-dimensional rendering, tiny cluttered details, text, lettering, captions, watermarks, signatures, logos, decorative borders or page frames.')
+   'Flat pure black and white only, with no grey, no shading, no gradients and no filled-in black areas. No pencil, sketch, hatched or textured strokes. No photorealism and no text.')
 
-on conflict (slug) do nothing;
+-- Re-running the seed refreshes block text. The Style Library is meant to be
+-- tuned repeatedly — a style fix should be one edit here plus `npm run db:seed`,
+-- never a code change.
+on conflict (slug) do update set
+  kind      = excluded.kind,
+  label     = excluded.label,
+  body_text = excluded.body_text;
 
 
 -- Template: Adult Coloring — Clean Line ---------------------------------------
