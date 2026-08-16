@@ -255,19 +255,21 @@ Stage E may need to move earlier if publishing deadlines demand it.
 | D20 | Style consistency is driven by reference images, not longer prompts. |
 | D21 | Adopt `{data, meta, error}` envelope and `/api/v1` paths. |
 | D22 | Approved pages can be promoted to style references. |
+| D23 | Quote text is overlaid as real type after generation, never drawn by the model. Guarantees correct spelling and accented Spanish, and allows restyling or translation without regenerating. Quote-page prompts must therefore **reserve clear empty space** for the type to land in. |
+| D24 | The black page border is added by the print pipeline, not generated. Consistent margins across all 180 pages, and the model stops spending detail on the edge. Prompts should generate borderless with a safe margin. |
+| D25 | The series is **3 lines × 4 seasons = 12 books, 180 pages.** Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books. |
 
 ---
 
 ## 9. Open questions
 
 **Production**
-- Spreadsheet A lists "flagship 1–4" per line/season. Are those four separate books, or four candidate titles for one book?
-- Are all 180 pages one series, or 12 separately published books?
-- Do quote pages need the quote rendered by the image model, or laid in afterwards as type? Laying it in afterwards would be far more reliable and would guarantee correct Spanish.
+- **Naming:** spreadsheet B says "Multiracial"; the line has also been called "Multicultural". One name needs to win before it becomes data.
+- Are the 12 books published separately, or bundled as one series?
+- Which font/treatment should overlaid quote type use? Needs to work for both English and accented Spanish.
 
 **Style**
 - Which references are canonical for each page type? Currently there are none for Symbol, Decorative or Quote pages.
-- Should the black border be generated, or added in the print pipeline? Adding it later would be more consistent.
 
 **Structure**
 - Do VV-Styles and social content need collections and items, or is coloring-book production the only planned workflow?
