@@ -100,17 +100,36 @@ The references are 1024×1536 — exactly `gpt-image-1` output. The model is dem
 
 The two spreadsheets reveal a structure no earlier document captured.
 
-### Spreadsheet A — book listing metadata
-`ethnicity_line | season | flagship_slug | book_title | keywords | description`
+Both live in `docs/references/` as CSV exports. **Both are living documents** — incomplete and still being added to. Import must be re-runnable, never a one-time load.
 
-Commercial/marketing data. Titles, search keywords, and store descriptions for publication.
+### Spreadsheet A — book listing metadata
+`keyword_listing_plan_african_american...csv` — 15 rows
+`ethnicity_line | season | product_id | title | keywords | description`
+
+Commercial data for store listings. **African American only so far**; Hispanic and Multiracial still to come.
 
 ### Spreadsheet B — page production plan
+`recovery_coloring_book_tracker...csv` — 180 rows
 `title | ethnicity_line | season | page_type | prompt_notes | quote_text | commercial_priority`
 
-The actual production queue. 3 lines × 4 seasons × 15 pages = **180 pages**.
+The production queue. 3 lines × 4 seasons × 15 pages = **180 pages**, verified.
 
-**Ethnicity lines:** African American, Hispanic, Multiracial
+Page type distribution:
+
+| Page type | Count | Has figures |
+|---|---|---|
+| Solo portrait | 48 | yes |
+| Community scene | 48 | yes |
+| Quote page | 36 | no — decorative frame around open centre |
+| Environment page | 24 | no |
+| Symbol page | 12 | no |
+| Decorative page | 12 | no |
+
+Priority: 101 High, 51 Medium (remainder blank).
+
+**Import note:** quoted fields contain commas ("Braids, flowers, hearts, doves, and healing motifs"). Use a real CSV parser.
+
+**Ethnicity lines:** African American, Hispanic, **Multiracial** (the correct term — "Multicultural" appeared once in discussion and is not used)
 **Seasons:** Spring, Summer, Fall, Winter
 **Page types:** Solo portrait, Community scene, Quote page, Symbol page, Decorative page, Environment page
 **Priority:** High / Medium
@@ -256,7 +275,7 @@ Stage E may need to move earlier if publishing deadlines demand it.
 | D21 | Adopt `{data, meta, error}` envelope and `/api/v1` paths. |
 | D22 | Approved pages can be promoted to style references. |
 | D23 | Quote text is overlaid as real type after generation, never drawn by the model. Guarantees correct spelling and accented Spanish, and allows restyling or translation without regenerating. Quote-page prompts must therefore **reserve clear empty space** for the type to land in. |
-| D24 | The black page border is added by the print pipeline, not generated. Consistent margins across all 180 pages, and the model stops spending detail on the edge. Prompts should generate borderless with a safe margin. |
+| D24 | **No page border at all.** Pages are borderless by design — the reference border was incidental, not wanted. Prompts generate borderless with a safe margin; the print pipeline adds nothing. Simpler than either earlier option. |
 | D25 | The series is **3 lines × 4 seasons = 12 books, 180 pages.** Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books. |
 
 ---
@@ -264,9 +283,10 @@ Stage E may need to move earlier if publishing deadlines demand it.
 ## 9. Open questions
 
 **Production**
-- **Naming:** spreadsheet B says "Multiracial"; the line has also been called "Multicultural". One name needs to win before it becomes data.
 - Are the 12 books published separately, or bundled as one series?
 - Which font/treatment should overlaid quote type use? Needs to work for both English and accented Spanish.
+- The keyword listing plan covers African American only. Hispanic and Multiracial listings are still to come.
+- VV-Styles phrases and sayings are not yet recorded anywhere. A spreadsheet is planned, covering both in-production and new phrases.
 
 **Style**
 - Which references are canonical for each page type? Currently there are none for Symbol, Decorative or Quote pages.
