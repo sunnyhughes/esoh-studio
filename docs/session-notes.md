@@ -85,12 +85,14 @@ gitignored.
 1. **Not pushed to GitHub.** Remote is set (`git@github.com:sunnyhughes/esoh-studio.git`,
    branch `main`, 5 commits). The user must run
    `git -C ~/esoh-studio push -u origin main` because of the key passphrase.
-2. **`/mnt/chromeos/MyFiles/imagine` still exists** as a staging copy. It holds
-   the original 5 docs plus files the user added. Two things there have not yet
-   been copied across and **should be**: the complete `build-plan.md` (12.5 KB —
-   the copy originally reviewed was truncated to 2.2 KB) and `api-route-map.md`.
-   Its mock API route stubs and `packages/db/schema.sql` are superseded — discard.
-   Delete the folder only after the push and after those two files are moved.
+2. **`/mnt/chromeos/MyFiles/imagine` — everything worth keeping has been copied
+   across.** The complete `build-plan.md` (12.5 KB; the copy first reviewed was
+   truncated to 2.2 KB), `api-route-map.md`, and `continuationdiscussion.md` are
+   all in `docs/` and committed. What remains there — 5 mock API route stubs and
+   `packages/db/schema.sql` — is superseded by the working DB-backed build.
+   The folder cannot be deleted from the Linux container (`/mnt/chromeos/MyFiles`
+   is a ChromeOS-managed mount and denies permission); the user removes it via
+   the ChromeOS Files app.
 3. **The user is reading `direction.md`** and will report back on whether it
    matches their vision. Do not build against it until they confirm.
 
