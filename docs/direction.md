@@ -92,15 +92,46 @@ Eight reference images and four scanned pages define the target style. Measured 
 | no solid black areas | **Stage 1 was right.** A coloring page has no filled areas at all — see §3.4 |
 | no text or lettering | "Healing Seasons" lettered on a mug — an occasional name-drop, see §3.3 |
 | no borders or frames | every page has a black border; it is part of the style |
-| centred subject, generous white space | dense environmental storytelling, edge to edge |
+| centred subject, generous white space | **Stage 1 was closer.** See §3.5 — the density premise was wrong |
 | simple interior detail only | cable-knit stitches, rug patterns, book spines, wood grain |
 
 Confirmed style attributes — **how** a page is drawn:
 
 - Dense, editorial line illustration with full environmental context
-- Texture rendered as **pattern**, never as shading
+- Form described by **outline**, never by shading, hatching or texture fill (§3.5)
 - Line weight varies deliberately: bold on figures, fine on background
 - Ethnicity rendered specifically and respectfully, never generically
+
+### 3.5 Correction: the density premise was wrong
+
+The single largest error in this document, and the root of most of the others.
+
+§3 recorded "dense environmental storytelling, edge to edge" and "texture
+rendered as pattern" as confirmed style attributes. Pages built on them read as
+**seek-and-find puzzles** — every surface carrying marks, nowhere for the eye to
+rest, no open area large enough to colour comfortably. The book exists to give
+someone a calm hour with a pencil. Busy defeats it.
+
+Measured against the two pages Esoh identified as closest to target
+(`storage/exemplars/journaling-under-tree.png` and `walking-with-mug.png`):
+
+| | Actual style |
+|---|---|
+| Subject | **Open.** Clothing and skin are large white areas described by outline alone — a seam, a cuff, a fold. The hoodie and sweatpants carry almost no interior line. |
+| Background | **Countable shapes, not pattern.** Individual outlined leaves with white between them, each one colourable. |
+| Page | **Breathing room.** Open sky, open ground, subject reads instantly. |
+
+The distinction that was missing: *detail* and *fill* are not the same thing. A
+page can carry a great many drawn elements and stay calm, as long as each is a
+separate closed shape with white around it. What made the generated pages busy
+was continuous surface texture — which is also, not coincidentally, the one kind
+of mark that cannot be coloured.
+
+Governing principle, replacing "texture as pattern": **form is described by
+outline.** Nothing is filled, shaded, hatched or textured.
+
+Density now describes how much of the page carries subject matter, not how
+filled its surfaces are.
 
 ### 3.4 Correction: nothing on the page is filled in
 
@@ -479,6 +510,8 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
 | D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
 | D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D47 | **Form is described by outline; nothing is filled, shaded, hatched or textured.** Replaces "texture rendered as pattern", which produced seek-and-find pages (§3.5). Detail and fill are different: many separate outlined shapes with white between them stay calm and remain colourable. |
+| D48 | **`journaling-under-tree` and `walking-with-mug` are the canonical Solo portrait exemplars**, registered with `usable_as_input = true`. Both are Esoh's own work, so D31 does not apply. |
 | D44 | **Nothing on a coloring page is filled in.** Every enclosed area is open white. Hair included. |
 | D45 | **Hair is item data, never a style block.** Encoding one texture as a rule stereotypes and removes variety. |
 | D46 | **Technique is stated positively; only content is excluded by name.** Four occurrences of the §2.5 trap, all of them technique negatives. |
