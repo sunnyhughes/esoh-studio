@@ -186,8 +186,22 @@ A user can download a selected saved asset from the interface.
 - Advanced print packaging/export sets.
 
 ## Open Questions
-- What should the internal product name be?
-- Which image provider should V1 use first?
-- Should “VV-Styles” and “Coloring Books” be separate ventures or job types under one venture structure?
-- What file naming convention should exports follow?
-- Should print dimensions be template-based or manually configurable in V1?
+
+All five are answered. See docs/direction.md for the authoritative record.
+
+- ~~What should the internal product name be?~~ **Esoh Studio.**
+- ~~Which image provider should V1 use first?~~ **OpenAI `gpt-image-1`** (D12).
+- ~~Should "VV-Styles" and "Coloring Books" be separate ventures or job types?~~
+  **Neither — one `categories` table** (D3). Esoh Studio serves every venture
+  under Esoh Creations LLC, so there is no brand dimension. Note the levels
+  differ: VV-Styles is a category; Healing Seasons is a *series* inside the
+  coloring-books category (D40).
+- ~~What file naming convention should exports follow?~~ **Spelled out in full,
+  including page type and art style** (D42):
+  `coloring-books/healing-seasons/african-american-fall/african-american-fall-09-quote-page-zentangle-pattern-v2.png`
+- ~~Should print dimensions be template-based or manually configurable?~~
+  **Template-based, resolved per product.** Generation sizes are fixed per
+  category (§5.1, D29). Delivery size is not: a tee, a hoodie and a tote have
+  different print areas. `categories.deliver_*` currently holds one size per
+  category, which is known to be too coarse — a `products` lookup populated from
+  the real Printify blueprints lands at Stage C rather than being guessed now.

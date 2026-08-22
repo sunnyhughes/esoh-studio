@@ -78,18 +78,49 @@ Eight reference images and four scanned pages define the target style. Measured 
 |---|---|
 | uniform line weight | bold on figures, fine on background — deliberate variation |
 | no solid black areas | hair is dense intricate curl texture reading near-black |
-| no text or lettering | "Healing Seasons" lettered on mugs — a brand signature |
+| no text or lettering | "Healing Seasons" lettered on a mug — an occasional name-drop, see §3.3 |
 | no borders or frames | every page has a black border; it is part of the style |
 | centred subject, generous white space | dense environmental storytelling, edge to edge |
 | simple interior detail only | cable-knit stitches, rug patterns, book spines, wood grain |
 
-Confirmed style attributes:
+Confirmed style attributes — **how** a page is drawn:
 
 - Dense, editorial line illustration with full environmental context
 - Texture rendered as **pattern**, never as shading
-- Recurring motifs: the Healing Seasons mug, seasonal foliage, candles, chunky knits, windows, books, lanterns
-- Multiple figures and full scenes, not isolated portraits
+- Line weight varies deliberately: bold on figures, fine on background
 - Ethnicity rendered specifically and respectfully, never generically
+
+### 3.3 Correction: the motifs are not motifs
+
+An earlier draft listed "recurring motifs: the Healing Seasons mug, seasonal
+foliage, candles, chunky knits, windows, books, lanterns" as a confirmed style
+attribute, and called the lettered mug a brand signature. **Both are wrong**, and
+wrong in the way that matters most.
+
+Those objects were the content of *those particular reference images*. A woman
+happened to be wrapped in a knit blanket holding a mug by a window. That is what
+that page is about — not a rule every Fall page inherits.
+
+Promoted into a style block, the list would put candles, knits and a window into
+all 180 pages. That is precisely the repetitiveness Stage 1 produced, arriving by
+a new route: not from generic prompts this time, but from over-generalising six
+specific images into a house style.
+
+**The dividing line, and the core principle for Stage B:**
+
+| Layer | Answers | Source | Varies |
+|---|---|---|---|
+| Style block | *How* is it drawn? | the reference images | per art style |
+| Item brief | *What* is drawn? | the tracker's `prompt notes` | per page |
+
+Every one of the 180 rows already carries its own subject — "Woman journaling by
+a rainy window with plants", "Man walking at sunrise in a neighborhood park".
+The motifs come from there, per page, written by Esoh. They must never be
+hoisted into a style block.
+
+The lettered mug is the same case: a name-drop wanted on a few pages, not a
+signature. It is now `items.brand_mark`, null by default, and may carry
+'Healing Seasons' or 'Esoh Creations'. Per item, opt-in, never in a style block.
 
 ### 3.1 Correction: the references are not all page-shaped
 
@@ -415,6 +446,10 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
 | D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
 | D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D39 | **Style blocks describe how a page is drawn; item briefs describe what is in it.** Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 180 pages repeat (§3.3). |
+| D40 | **`Healing Seasons` is a series**, recorded on `collections.series`, sitting between category and collection so a second series never collides with the first. |
+| D41 | **The in-scene name-drop is per-item and opt-in** — `items.brand_mark`, null by default, either 'Healing Seasons' or 'Esoh Creations'. An occasional touch, never a signature. |
+| D42 | **Export filenames are spelled out in full**, including page type and art style: `african-american-fall-09-quote-page-zentangle-pattern-v2.png`. Internal storage keys stay opaque; the descriptive name is generated at export, because an exported file leaves the database behind and has to describe itself. |
 | D37 | **Every live product exists as a library row.** `Listenin' for the GOOD E.S.H.` is currently live but unrecorded. |
 | D38 | **Transparent artwork is the Stage C priority, ahead of new designs.** It unlocks the garment-colour range and multiplies the catalogue from existing art. |
 | D33 | The VV-Styles master list is **`VV-Styles Designs Library Original`**. The two ChatGPT-expanded exports added no quotes — only one boilerplate visual string per category and a single templated prompt — and are retired. `vv-styles-master.csv` is its restructured form. |
