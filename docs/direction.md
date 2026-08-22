@@ -430,7 +430,12 @@ The cause is designing inside the Printify editor, which could not produce a kno
 
 Planned approach, strongest first:
 
-1. **Reference images as input.** `gpt-image-1` accepts image input. Feeding two or three approved pages as style exemplars is far more reliable than describing the style in words. Not mentioned in any earlier document; likely the highest-leverage change available.
+1. **Reference images as input.** `gpt-image-1` accepts image input. Feeding approved pages as style exemplars is far more reliable than describing the style in words. Two qualifications learned at Stage B, both the hard way:
+
+   - **An exemplar transfers its faults along with its virtues.** `hoodie-on-sofa` is the right target for rendering and contemporary dress, and it also has near-black filled hair and leaves on every surface. Sent as image input it reproduced both — the two things Esoh had explicitly rejected. An exemplar has to be a page that would be accepted whole, not a page that is mostly right.
+   - **Mixed exemplars average out.** Three were active at once: two sparse, one rich. The model split the difference and produced pages that were never open enough nor full enough. Exemplars must agree with each other.
+
+   The consequence: **D20 cannot carry a style until one fully approved page exists.** Until then the Style Library is running on words alone, which is where the drift comes from.
 2. **Style locked in blocks, subject varying per item.** Style blocks never mention ethnicity, subject or season.
 3. **Approved pages become references.** Every approved page can be promoted to an exemplar, so the style tightens as the book progresses.
 
@@ -510,6 +515,8 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
 | D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
 | D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D49 | **Nothing in the Style Library described the people or places as contemporary**, so the model produced dated figures in vague settings. The line is meant to mirror present-day life; that has to be stated. |
+| D50 | **An exemplar must be a page acceptable in full.** Image input copies faults as faithfully as virtues, and mixed exemplars average into mush. |
 | D47 | **Form is described by outline; nothing is filled, shaded, hatched or textured.** Replaces "texture rendered as pattern", which produced seek-and-find pages (§3.5). Detail and fill are different: many separate outlined shapes with white between them stay calm and remain colourable. |
 | D48 | **`journaling-under-tree` and `walking-with-mug` are the canonical Solo portrait exemplars**, registered with `usable_as_input = true`. Both are Esoh's own work, so D31 does not apply. |
 | D44 | **Nothing on a coloring page is filled in.** Every enclosed area is open white. Hair included. |
