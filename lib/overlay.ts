@@ -177,14 +177,33 @@ function fit(
   return best;
 }
 
-/** One line of type as SVG path data, in font units, starting at the origin. */
-function lineToPath(font: Font, text: string): { d: string; width: number } {
+/**
+ * One line of type, already transformed into page coordinates: y down, origin
+ * top-left, units the same pixels as `width` and `height`.
+ *
+ * Baking the transform into the path data rather than leaving it on a wrapping
+ * <g> is what lets the PDF export reuse this. A PDF has no group transforms to
+ * inherit, and a scaled group also scales its own stroke — the SVG had to
+ * divide the stroke width back out to compensate. Absolute paths need neither
+ * workaround, and both outputs draw identical geometry.
+ */
+function lineToPath(
+  font: Font,
+  text: string,
+  scale: number,
+  x: number,
+  baseline: number
+): { d: string; width: number } {
   const run = font.layout(text);
   let pen = 0;
   const parts: string[] = [];
 
   run.glyphs.forEach((glyph, i) => {
-    const d = glyph.path.translate(pen, 0).toSVG();
+    const d = glyph.path
+      .translate(pen, 0)
+      .scale(scale, -scale)
+      .translate(x, baseline)
+      .toSVG();
     if (d) parts.push(d);
     pen += run.positions[i].xAdvance;
   });
@@ -192,12 +211,22 @@ function lineToPath(font: Font, text: string): { d: string; width: number } {
   return { d: parts.join(" "), width: run.advanceWidth };
 }
 
+export type QuoteLayout = {
+  /** Absolute path data in page coordinates, one entry per line. */
+  paths: string[];
+  /** Outline weight in the same page pixels. */
+  stroke: number;
+  size: number;
+  lines: string[];
+  color: string;
+};
+
 /**
- * Build the overlay as standalone SVG. Nothing here depends on a font being
- * installed anywhere — the glyphs are already geometry by this point, which is
- * what makes accented Spanish safe rather than hopeful.
+ * Set the quote and return its geometry. The single source of truth for the
+ * typography — the SVG and the PDF are two renderings of this, not two
+ * implementations of it.
  */
-export async function buildQuoteSvg(opts: OverlayOptions): Promise<string> {
+export async function layoutQuote(opts: OverlayOptions): Promise<QuoteLayout> {
   const face = await getFace(opts.letteringStyle);
   const { files, paired } = facesFor(face);
   const primary = load(files[0], face.weight);
@@ -228,27 +257,34 @@ export async function buildQuoteSvg(opts: OverlayOptions): Promise<string> {
   );
   const top = boxY + (boxH - block) / 2;
 
-  const groups = lines.map((text, i) => {
-    const font = paired && i > 0 ? secondary : primary;
-    const scale = size / font.unitsPerEm;
-    const { d, width } = lineToPath(font, text);
-    if (!d) return "";
+  const paths = lines
+    .map((text, i) => {
+      const font = paired && i > 0 ? secondary : primary;
+      const scale = size / font.unitsPerEm;
+      const measured = font.layout(text).advanceWidth * scale;
+      const x = boxX + (boxW - measured) / 2;
+      const baseline = top + ascent + i * size * lineHeight;
+      return lineToPath(font, text, scale, x, baseline).d;
+    })
+    .filter(Boolean);
 
-    const x = boxX + (boxW - width * scale) / 2;
-    const baseline = top + ascent + i * size * lineHeight;
+  return { paths, stroke, size, lines, color };
+}
 
-    // Stroke width is given in font units because the group is scaled; the
-    // division keeps the drawn line at `stroke` output pixels regardless of
-    // type size. librsvg does not honour vector-effect, so this is not
-    // something the renderer can be asked to do.
-    return (
-      `<g transform="translate(${x.toFixed(2)} ${baseline.toFixed(2)}) ` +
-      `scale(${scale.toFixed(6)} ${(-scale).toFixed(6)})">` +
+/**
+ * Build the overlay as standalone SVG. Nothing here depends on a font being
+ * installed anywhere — the glyphs are already geometry by this point, which is
+ * what makes accented Spanish safe rather than hopeful.
+ */
+export async function buildQuoteSvg(opts: OverlayOptions): Promise<string> {
+  const { paths, stroke, color } = await layoutQuote(opts);
+
+  const groups = paths.map(
+    (d) =>
       `<path d="${d}" fill="none" stroke="${color}" ` +
-      `stroke-width="${(stroke / scale).toFixed(2)}" ` +
-      `stroke-linejoin="round" stroke-linecap="round"/></g>`
-    );
-  });
+      `stroke-width="${stroke.toFixed(2)}" ` +
+      `stroke-linejoin="round" stroke-linecap="round"/>`
+  );
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${opts.width}" ` +
