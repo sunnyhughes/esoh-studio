@@ -18,7 +18,8 @@ import { query, one } from "./db";
 export type TemplateVariable = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "select";
+  /** `combo` offers options in a dropdown but still accepts anything typed. */
+  type: "text" | "textarea" | "select" | "combo";
   required?: boolean;
   placeholder?: string;
   options?: string[];

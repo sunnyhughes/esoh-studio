@@ -14,7 +14,7 @@ type Collection = { id: string; category_id: string; name: string; slug: string 
 type Variable = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "select";
+  type: "text" | "textarea" | "select" | "combo";
   required?: boolean;
   placeholder?: string;
   options?: string[];
@@ -246,6 +246,24 @@ export default function NewJobPage() {
                     </option>
                   ))}
                 </select>
+              ) : v.type === "combo" ? (
+                // Suggestions, not a fixed menu — anything typed is accepted.
+                <>
+                  <input
+                    id={v.name}
+                    list={`${v.name}-options`}
+                    placeholder={v.placeholder}
+                    value={inputs[v.name] ?? ""}
+                    onChange={(e) =>
+                      setInputs({ ...inputs, [v.name]: e.target.value })
+                    }
+                  />
+                  <datalist id={`${v.name}-options`}>
+                    {(v.options ?? []).map((o) => (
+                      <option key={o} value={o} />
+                    ))}
+                  </datalist>
+                </>
               ) : v.type === "textarea" ? (
                 <textarea
                   id={v.name}

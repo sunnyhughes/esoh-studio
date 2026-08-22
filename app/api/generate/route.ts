@@ -54,10 +54,14 @@ export async function POST(req: Request) {
           brand_mark: string | null;
           ethnicity_line: string | null;
           season: string | null;
+          hair: string | null;
+          facial_hair: string | null;
+          visual_elements: string | null;
           collection_id: string;
         }>(
           `select brief, art_style, background_density, brand_mark,
-                  ethnicity_line, season, collection_id
+                  ethnicity_line, season, hair, facial_hair, visual_elements,
+                  collection_id
              from items where id = $1`,
           [body.itemId]
         )
@@ -75,6 +79,21 @@ export async function POST(req: Request) {
     }
     if (item?.brand_mark && !inputs.brand_mark?.trim()) {
       inputs.brand_mark = item.brand_mark;
+    }
+
+    // Hair is item data, not a style rule (D45) — a block that names no style
+    // leaves the model to copy the exemplar's, which is how filled hair kept
+    // coming back. Left blank, the hair blocks drop out and hair goes unstated.
+    if (item?.hair && !inputs.hair?.trim()) inputs.hair = item.hair;
+    if (item?.facial_hair && !inputs.facial_hair?.trim()) {
+      inputs.facial_hair = item.facial_hair;
+    }
+
+    // What is in the room comes from the item (D39). Without this the
+    // {{environment}} block was dropped from every item-driven generation and
+    // the setting was left entirely to the model.
+    if (item?.visual_elements && !inputs.environment?.trim()) {
+      inputs.environment = item.visual_elements;
     }
 
     const artStyle = body.artStyle ?? item?.art_style ?? null;
