@@ -72,8 +72,13 @@ Rule: state what is wanted. Keep restrictions short and specific. Do not enumera
 stippling or grey fill" produced a page stippled on every surface — skin, sky,
 wall and tabletop. Removing the sentence and stating positively where pattern
 belongs ("fabric shows its stitch, wood its grain... skin and sky stay clean and
-unmarked") fixed it in one pass. The pattern is now reliable enough to treat as
-a law: **if a block names something unwanted, the model draws it.**
+unmarked") fixed it in one pass. Refined after two further occurrences at Stage B. Negatives about **content**
+hold — "No people" and "No border or frame" were obeyed in every generation.
+Negatives about **rendering technique** backfire: "no stippling" produced a
+stippled page, and "never as shading" produced a hatched face.
+
+**Law: technique is stated positively, never negatively. Content may be
+excluded by name.**
 
 ---
 
@@ -84,7 +89,7 @@ Eight reference images and four scanned pages define the target style. Measured 
 | Stage 1 rule | Reference reality |
 |---|---|
 | uniform line weight | bold on figures, fine on background — deliberate variation |
-| no solid black areas | hair is dense intricate curl texture reading near-black |
+| no solid black areas | **Stage 1 was right.** A coloring page has no filled areas at all — see §3.4 |
 | no text or lettering | "Healing Seasons" lettered on a mug — an occasional name-drop, see §3.3 |
 | no borders or frames | every page has a black border; it is part of the style |
 | centred subject, generous white space | dense environmental storytelling, edge to edge |
@@ -96,6 +101,27 @@ Confirmed style attributes — **how** a page is drawn:
 - Texture rendered as **pattern**, never as shading
 - Line weight varies deliberately: bold on figures, fine on background
 - Ethnicity rendered specifically and respectfully, never generically
+
+### 3.4 Correction: nothing on the page is filled in
+
+An earlier draft listed "no solid black areas" as a Stage 1 rule that the
+references had disproved, on the grounds that hair in them "reads near-black".
+
+That inverted the product. **A coloring page has no filled, shaded or darkened
+areas anywhere** — not hair, not background, not texture used as tone. Every
+enclosed area is open white or there is nothing for the reader to colour. The
+Stage 1 rule was correct and should not have been overturned.
+
+Related, and more serious: the figure block carried "hair is rendered as dense
+drawn curl", generalised from the same observation. Written as a style rule it
+gives all 180 pages the same hair and forecloses locs, braids, twists, fades,
+bantu knots, headwraps and everything else the subject might wear — a
+stereotype encoded in the prompt engine, and a variety failure on top.
+
+**Hair is content, not style.** It belongs in the item brief, which already
+specifies it where it matters. Style blocks say only how hair is *drawn*:
+outlined sections, left open inside. With the rule removed, three consecutive
+generations produced an afro, braids and a short fade without being asked.
 
 ### 3.3 Correction: the motifs are not motifs
 
@@ -453,6 +479,9 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
 | D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
 | D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D44 | **Nothing on a coloring page is filled in.** Every enclosed area is open white. Hair included. |
+| D45 | **Hair is item data, never a style block.** Encoding one texture as a rule stereotypes and removes variety. |
+| D46 | **Technique is stated positively; only content is excluded by name.** Four occurrences of the §2.5 trap, all of them technique negatives. |
 | D43 | **Density means the composition reaches every edge, not that every surface carries marks.** "Leaving no empty ground" left the model nowhere to stop and it textured skin and sky. A coloring page needs clean enclosed areas to put colour into. |
 | D39 | **Style blocks describe how a page is drawn; item briefs describe what is in it.** Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 180 pages repeat (§3.3). |
 | D40 | **`Healing Seasons` is a series**, recorded on `collections.series`, sitting between category and collection so a second series never collides with the first. |
