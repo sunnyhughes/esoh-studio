@@ -68,11 +68,23 @@ export async function POST(req: Request) {
         )
       : null;
 
+    // A page of pattern has no figure, so the ethnicity line would read as a
+    // stray instruction about someone who is not there (D62).
+    const hasPeople =
+      (
+        await one<{ has_people: boolean }>(
+          `select has_people from prompt_templates where id = $1`,
+          [body.templateId]
+        )
+      )?.has_people ?? true;
+
     const inputs = { ...(body.inputs ?? {}) };
     if (item && !inputs.subject?.trim()) {
       inputs.subject = [
         item.brief,
-        item.ethnicity_line ? `The figure is ${item.ethnicity_line}.` : "",
+        hasPeople && item.ethnicity_line
+          ? `The figure is ${item.ethnicity_line}.`
+          : "",
         item.season ? `The season is ${item.season}.` : "",
       ]
         .filter(Boolean)

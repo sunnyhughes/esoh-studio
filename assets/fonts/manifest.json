@@ -1,0 +1,37 @@
+{
+  "Baloo 2": {
+    "file": "Baloo2[wght].ttf",
+    "license": "OFL",
+    "bytes": 683200
+  },
+  "Caveat Brush": {
+    "file": "CaveatBrush-Regular.ttf",
+    "license": "OFL",
+    "bytes": 295568
+  },
+  "Archivo Black": {
+    "file": "ArchivoBlack-Regular.ttf",
+    "license": "OFL",
+    "bytes": 90988
+  },
+  "Libre Baskerville": {
+    "file": "LibreBaskerville[wght].ttf",
+    "license": "OFL",
+    "bytes": 171900
+  },
+  "Permanent Marker": {
+    "file": "PermanentMarker-Regular.ttf",
+    "license": "APACHE",
+    "bytes": 74632
+  },
+  "Montserrat": {
+    "file": "Montserrat[wght].ttf",
+    "license": "OFL",
+    "bytes": 744936
+  },
+  "Big Shoulders Stencil Text": {
+    "file": "BigShouldersStencilText[wght].ttf",
+    "license": "OFL",
+    "bytes": 225152
+  }
+}
