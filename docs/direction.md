@@ -4,7 +4,7 @@
 Esoh Studio
 
 ## Status
-Draft v1 — supersedes conflicting guidance in PRD.md, design-plan.md, build-plan.md, schema-notes.md, api-route-map.md and review-and-recommendations.md.
+Draft v2 — supersedes conflicting guidance in PRD.md, design-plan.md, build-plan.md, schema-notes.md, api-route-map.md and review-and-recommendations.md.
 
 ## Purpose
 One document that consolidates the Perplexity document set, the ChatGPT architecture conversation, the working Stage 1 build, the reference images, and the two production spreadsheets into a single agreed direction.
@@ -72,7 +72,7 @@ Rule: state what is wanted. Keep restrictions short and specific. Do not enumera
 
 ## 3. What the reference images establish
 
-Six reference pages define the target style. Measured against them, nearly every rule written in Stage 1 was inverted:
+Eight reference images and four scanned pages define the target style. Measured against them, nearly every rule written in Stage 1 was inverted:
 
 | Stage 1 rule | Reference reality |
 |---|---|
@@ -89,10 +89,40 @@ Confirmed style attributes:
 - Texture rendered as **pattern**, never as shading
 - Recurring motifs: the Healing Seasons mug, seasonal foliage, candles, chunky knits, windows, books, lanterns
 - Multiple figures and full scenes, not isolated portraits
-- Black page border
 - Ethnicity rendered specifically and respectfully, never generically
 
-The references are 1024×1536 — exactly `gpt-image-1` output. The model is demonstrably capable of this style. The gap was entirely the prompt.
+### 3.1 Correction: the references are not all page-shaped
+
+An earlier draft stated "the references are 1024×1536 — exactly `gpt-image-1` output." Only four of the eight are.
+
+| Count | Size | Ratio | Note |
+|---|---|---|---|
+| 4 | 1024×1536 | 0.667 | page-shaped, thin black border present |
+| 3 | 1408×768 | 1.833 | **landscape** — not page-shaped; one is a two-panel A/B variant sheet, not a finished page |
+| 1 | 896×1200 | 0.747 | near letter |
+
+This matters. Some of the strongest style evidence — the couch scene, the journaling page — came from landscape banner-ratio images that could never be a book page. Style notes drawn from them describe a composition the format cannot hold.
+
+The border claim splits the same way: the portrait references have one, the landscape ones do not.
+
+The model is still demonstrably capable of the style. The gap was the prompt. But the shape evidence was mixed, and only the scanned pages below are in true letter proportion.
+
+### 3.2 Four scanned pages — quote, symbol and decorative
+
+`more design references.pdf`, four pages at 0.73–0.77 — the first references in real letter proportion. They fill the gap named in §9: there were no references for Quote, Symbol or Decorative pages.
+
+| Page | Type | Treatment |
+|---|---|---|
+| p1 | Quote | Bubble caps mixed with script, abstract geometric wedge background, border |
+| p2 | Quote | Lettering interlocked with an edge-to-edge mandala/zentangle field, border |
+| p3 | Quote | Huge outline caps in dotted rule-bands, mostly empty page, border |
+| p4 | Symbol / Decorative | Zentangle cat on a sunburst, no text, no border, bleeds off the edge |
+
+**The key finding is p2 against p3.** Same page type, same category, opposite density — one wall-to-wall pattern, one nearly empty. Density is therefore a per-item setting, not a house rule. An earlier draft canonized "dense environmental storytelling, edge to edge" as *the* style; that is one option among three, and applying it globally would have produced 36 identical dense quote pages.
+
+The lettering on all three quote pages is **hollow outline art meant to be colored in** — on p2 physically interlocked with the pattern behind it. This refines D23 rather than reversing it: see the decision table.
+
+Three of the four carry a `creativecolorlab.com` watermark and p4 shows colored-pencil marks. They are scans of another publisher's book. Fine as style study for authoring templates — see D31 for the limit.
 
 ---
 
@@ -103,14 +133,16 @@ The two spreadsheets reveal a structure no earlier document captured.
 Both live in `docs/references/` as CSV exports. **Both are living documents** — incomplete and still being added to. Import must be re-runnable, never a one-time load.
 
 ### Spreadsheet A — book listing metadata
-`keyword_listing_plan_african_american...csv` — 15 rows
-`ethnicity_line | season | product_id | title | keywords | description`
+`keyword_listing_plan_african_american...csv` — **16 rows**
+`ethnicity line | season | product id | title | keywords | description`
 
 Commercial data for store listings. **African American only so far**; Hispanic and Multiracial still to come.
 
 ### Spreadsheet B — page production plan
 `recovery_coloring_book_tracker...csv` — 180 rows
-`title | ethnicity_line | season | page_type | prompt_notes | quote_text | commercial_priority`
+`title | ethnicity line | season | page type | prompt notes | quote text | commercial priority`
+
+**Header names use spaces, not underscores.** An earlier draft transcribed them with underscores; import code written from that would fail on every row. The spreadsheet is correct as it stands — nothing to fix on the sheet.
 
 The production queue. 3 lines × 4 seasons × 15 pages = **180 pages**, verified.
 
@@ -125,7 +157,9 @@ Page type distribution:
 | Symbol page | 12 | no |
 | Decorative page | 12 | no |
 
-Priority: 101 High, 51 Medium (remainder blank).
+Priority: **103 High, 77 Medium, none blank.** (An earlier draft said 101/51 with a remainder — verified wrong against the file.)
+
+All 180 rows carry prompt notes, and exactly 36 carry quote text — matching the 36 Quote pages precisely. The data is clean.
 
 **Import note:** quoted fields contain commas ("Braids, flowers, hearts, doves, and healing motifs"). Use a real CSV parser.
 
@@ -163,6 +197,45 @@ It varies per row and drives the subject. It belongs in the production data — 
 
 ---
 
+### 4.4 The missing dimension: Art Style
+
+Nothing in any spreadsheet or any earlier document recorded **visual aesthetic**.
+
+The VV-Styles sheet has `Category` (what the message is about) and `Style` (bold, sassy, supportive — the **tone of voice**). Neither says what the design *looks like*. "Sassy" does not distinguish 70s groovy from graffiti from retro comic — three completely different shirts carrying the same attitude. The two columns also overlap on six values (Sassy, Truth, Confident, Motivational, Boundaries, Accountability).
+
+This is the root cause of generic output, and it applies to coloring pages as much as apparel — p1, p2 and p3 are three art styles of one page type.
+
+**Decision: three new dimensions, orthogonal to category, tone and page type.**
+
+**Art Style** — twelve values:
+
+| Art Style | Look | Coloring | Apparel | Social |
+|---|---|---|---|---|
+| Editorial Scene | Full environment, figures in context, texture as pattern — the current house style | ✅ | | |
+| Zentangle Pattern | Dense abstract pattern-fill, no scene | ✅ | ✅ | |
+| Botanical Line | Flowers, foliage, vines — medium density | ✅ | ✅ | ✅ |
+| Geometric Abstract | Rays, facets, wedges, arcs as structure | ✅ | ✅ | ✅ |
+| Bold Minimal | One idea, huge scale, generous empty space | ✅ | ✅ | ✅ |
+| Vintage Badge | Emblem, banner ribbon, clean-date slot | | ✅ | ✅ |
+| Streetwear Graffiti | Spray and marker letterforms, drips, tags | | ✅ | ✅ |
+| Retro Groovy | 70s bubble type, wavy baselines, sun rays | | ✅ | ✅ |
+| Tattoo Linework | Heavy outline, flames, roses, daggers, banners | | ✅ | ✅ |
+| Retro Comic | Halftone, burst panels, speech bubbles | | ✅ | ✅ |
+| Editorial Typographic | The type is the design — restrained, magazine-like | | ✅ | ✅ |
+| Celestial | Moon phases, stars, dawn | ✅ | ✅ | ✅ |
+| Photoreal Composite | Photographic subject with rendered type over it | | ✅ | ✅ |
+| Hand-Drawn Doodle | Marker lettering and simple drawn motifs, primary colors, playful | ✅ | ✅ | ✅ |
+
+**Photoreal Composite** is included because it is in the live line (the phoenix shirt), not because it is recommended. Two cautions: photoreal art prints muddier on DTF than it appears on screen, and metallic gradients flatten. Reviewable.
+
+**Lettering Style** — for any item carrying words: Bubble Caps · Brush Script · Block Outline · Serif Editorial · Hand-Marker · Mixed Caps + Script.
+
+**Background Density** — Open · Medium · Dense. Derived from p3 / p1 / p2.
+
+Twelve is deliberate. Enough that 129 designs need not repeat; few enough to choose from in seconds.
+
+---
+
 ## 5. Revised structure
 
 ```
@@ -183,6 +256,24 @@ An item may have many jobs; a job many assets. That is how a page gets reworked 
 
 Templates attach to a category and correspond to page types. The Style Library holds their blocks.
 
+### 5.1 Output sizes
+
+`gpt-image-1` offers exactly three shapes: 1024×1024, 1024×1536, 1536×1024. **Landscape (1536×1024) is never used** — it does not fit any planned product.
+
+| Category | Generate | Deliver |
+|---|---|---|
+| Coloring books | 1024×1536 | pad to 2550×3300 (8.5×11 @ 300 DPI) |
+| Social — feed | 1024×1024 | square |
+| Social — Pinterest | 1024×1536 | 2:3 is already ideal |
+| Social — stories/reels | 1024×1536 | pad to 9:16, compose inside a safe zone |
+| VV-Styles apparel | 1024×1024, transparent background | upscale to 4500×5400 (15×18" @ 300 DPI) |
+
+**Coloring pages pad, never crop.** 1024×1536 is 0.667; letter is 0.773. Cropping to letter cuts ~13% off top and bottom and loses art. Padding fits the art to 2200×3300 and leaves ~0.58" of white each side — which KDP requires anyway for margin and gutter. The margin does double duty.
+
+This closes the open question in §9.
+
+Apparel is raster, not vector. `gpt-image-1` supports transparent backgrounds, so 4500×5400 transparent PNG is genuinely print-ready for DTF. True vector would need a separate trace step — worth doing later, not a blocker.
+
 ### What carries over from the Stage 1 build
 
 Working and correct — kept as-is:
@@ -202,6 +293,39 @@ Adopted from `api-route-map.md`:
 - `{data, meta, error}` response envelope
 - `/api/v1` base path
 - resource-oriented route naming
+
+---
+
+### 4.5 What the live VV-Styles products show
+
+Eight product images in `docs/references/` are the only finished VV-Styles designs in existence. Seven are `.png`; `feeldealheal.jpg` is the eighth.
+
+| File | Garment | Design | Art Style | Background |
+|---|---|---|---|---|
+| `stillhere` | white | "Still here… Still CLEAN" — sun over water | Retro Groovy | box hidden by white fabric |
+| `recoveringoutloud` | white | "RECOVERING OUT LOUD / EST. 1995" — arched collegiate | Vintage Badge | box hidden by white fabric |
+| `worstidea` | white | "I SURVIVED MY OWN WORST IDEA" — stencil type, lightbulb | Bold Minimal | box hidden by white fabric |
+| `recoveringest` | pink | "RECOVERING / est. 2006" — arched lettering, dice, flame | Vintage Badge | **knocked out correctly** |
+| `cleanserene` | gray | "CLEAN & SERENE SINCE 1953" — Victorian filigree | Editorial Typographic | white square visible |
+| `proud` | dark heather | "PROUD to be RECOVERING" — photoreal phoenix | Photoreal Composite | orange rectangle visible |
+| `listenin` | red | "Listenin' for the GOOD E.S.H." — thin pink type | Editorial Typographic | white square, very visible |
+| `feeldealheal` | white | "Feel / DEAL / Heal" — marker lettering, sine wave, daisies | Hand-Drawn Doodle | indeterminate on white fabric |
+
+**The defect, stated correctly.** Only one of eight is verifiably knocked out. Four more *appear* clean solely because the garment is white and hides the box — on white fabric a white background and a transparent one are indistinguishable, so their true state is unknown until they are placed on a colored garment. The artwork is sound throughout — the enclosing background is not.
+
+This is not primarily a cosmetic problem. **It locks the line to white and near-white garments.** An existing design cannot be offered in navy, forest, maroon or heather without the box appearing. Transparent artwork multiplies the catalogue without any new design work: 8 designs × 6 garment colors ≈ 48 products from art already owned. Given that the store needs product before launch, this is the highest-leverage single fix in the project, and it is what Stage C must deliver first.
+
+The cause is designing inside the Printify editor, which could not produce a knocked-out background despite repeated attempts. `gpt-image-1` returns transparent PNGs directly (§5.1).
+
+**Clean date is a template variable.** Three of the seven carry one — `est. 2006`, `SINCE 1953`, `EST. 1995` — and the library row reads "Clean & Serene since 1953 (or clean date)". It is a personalization slot, not decoration, and belongs in the prompt engine as `{{clean_date}}`.
+
+**Print-quality notes.**
+- `listenin` uses thin, light-weight pink type at low contrast — the two things DTF reproduces worst. Rework rather than reprint.
+- `feeldealheal` has white daisy petals that vanish on white fabric. It needs a colored garment to read at all — a concrete instance of why the colour range matters.
+
+**Vocabulary grew from real work, twice.** The live line required two lettering values the original list lacked (`Sans Display`, `Stencil`) and a fourteenth art style (`Hand-Drawn Doodle`). This is the §2.2 principle working as intended: the vocabulary is seeded by what Esoh actually makes, not by what was imagined in advance. Expect it to keep growing; validation rules warn rather than reject for this reason.
+
+**Library gap.** Six of the seven exist as rows in the 129-quote library. `Listenin' for the GOOD E.S.H.` does not, and carries fellowship language (`E.S.H.`) that belongs with the other flagged rows. Every live product must exist as a row or the library is not the source of truth.
 
 ---
 
@@ -229,22 +353,26 @@ Migrate to categories/collections/items. Import both spreadsheets. 180 items lan
 Six page-type templates. Blocks derived from the reference images and prompt notes. Reference-image input wired in.
 **Done when:** a generated Solo portrait is judged close enough to the references to use.
 
-### Stage C — Library and retrieval
+### Stage C — VV-Styles apparel
+The first real test of the engine on a whole category. Square transparent output, the twelve art styles, 129 items already written. No page-type templates, no 180-item queue, no bilingual lettering — the simplest path from prompt to sellable product.
+**Done when:** a design goes from library row to print-ready transparent PNG without touching Printify's editor.
+
+### Stage D — Library and retrieval
 Asset library with filters across category, collection, item, page type, status, priority. Items show their attempts.
 **Done when:** any page from any book is findable in seconds.
 
-### Stage D — Batch
+### Stage E — Batch
 Generate a whole collection unattended. Review queue for the results.
 **Done when:** "generate every High priority Fall page" is one action.
 
-### Stage E — Print pipeline
+### Stage F — Print pipeline
 Upscale to 300 DPI, page proportions, bleed and margins, print-ready PDF export.
 **Done when:** an approved page can go straight to KDP.
 
-### Stage F — Other categories
-VV-Styles apparel, social content, print designs — with their own presets and templates.
+### Stage G — Remaining categories
+Social content and print designs, with their own presets and templates.
 
-Stage E may need to move earlier if publishing deadlines demand it.
+Stage F may need to move earlier if publishing deadlines demand it.
 
 ---
 
@@ -274,27 +402,51 @@ Stage E may need to move earlier if publishing deadlines demand it.
 | D20 | Style consistency is driven by reference images, not longer prompts. |
 | D21 | Adopt `{data, meta, error}` envelope and `/api/v1` paths. |
 | D22 | Approved pages can be promoted to style references. |
-| D23 | Quote text is overlaid as real type after generation, never drawn by the model. Guarantees correct spelling and accented Spanish, and allows restyling or translation without regenerating. Quote-page prompts must therefore **reserve clear empty space** for the type to land in. |
-| D24 | **No page border at all.** Pages are borderless by design — the reference border was incidental, not wanted. Prompts generate borderless with a safe margin; the print pipeline adds nothing. Simpler than either earlier option. |
+| D23 | **Refined.** Quote text is overlaid after generation as **outlined vector type** — a real font, stroked and unfilled — never drawn by the model. The scanned quote pages show lettering as hollow outline art meant to be colored in; flat filled type would sit on the page like a sticker and could not be colored. Outlined vector keeps the letters colorable *and* guarantees correct spelling and accented Spanish, and still allows restyling or translation without regenerating. Quote-page prompts must **reserve clear space** for the type to land in. |
+| D24 | **The model never draws a border.** Seven of eight page-shaped references have one, so it is a genre convention rather than an accident — but a drawn border bakes in, varies page to page, and was the one Stage 1 instruction the model reliably ignored. Prompts generate borderless with a safe margin. The print pipeline *may* add a border as a vector rule at export: exact, identical on every page, removable. Default off. Same principle as D23 — generate the art, add the precise parts afterward. |
 | D25 | The series is **3 lines × 4 seasons = 12 books, 180 pages.** Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books. |
+| D26 | **Art Style is a first-class dimension**, separate from category and tone. Twelve values (§4.4). This is the mechanism for variety; without it the tool has no axis to vary. |
+| D27 | **Background Density** (Open / Medium / Dense) is a per-item setting on any template with a background. Never a global rule. |
+| D28 | **Lettering Style** applies to any item carrying words, coloring page or apparel. |
+| D29 | Output sizes are fixed per category (§5.1). **Landscape 1536×1024 is never used.** |
+| D30 | Coloring pages **pad, never crop**, from 1024×1536 to 8.5×11. The padding becomes the KDP margin. |
+| D31 | Third-party reference scans (the watermarked pages) inform how templates are *written*, but are **never sent to the model as image input**. D20 style exemplars come only from our own approved pages, per D22. |
+| D32 | **VV-Styles moves to Stage C**, ahead of library, batch and print. It is the simplest complete path through the engine and the store needs product before launch. |
+| D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
+| D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
+| D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D37 | **Every live product exists as a library row.** `Listenin' for the GOOD E.S.H.` is currently live but unrecorded. |
+| D38 | **Transparent artwork is the Stage C priority, ahead of new designs.** It unlocks the garment-colour range and multiplies the catalogue from existing art. |
+| D33 | The VV-Styles master list is **`VV-Styles Designs Library Original`**. The two ChatGPT-expanded exports added no quotes — only one boilerplate visual string per category and a single templated prompt — and are retired. `vv-styles-master.csv` is its restructured form. |
 
 ---
 
 ## 9. Open questions
 
+**Answered since the last draft**
+- ~~VV-Styles phrases are not recorded anywhere~~ → 129 quotes exist; see D33.
+- ~~No references for Symbol, Decorative or Quote pages~~ → four scanned pages, §3.2.
+- ~~Crop, pad or outpaint?~~ → pad, D30.
+- ~~Do VV-Styles and social need collections and items?~~ → yes. One VV-Styles item is one design; the 129 rows map onto category → collection → item with no model change. They need separate categories because the output ratios differ.
+
 **Production**
 - Are the 12 books published separately, or bundled as one series?
-- Which font/treatment should overlaid quote type use? Needs to work for both English and accented Spanish.
-- The keyword listing plan covers African American only. Hispanic and Multiracial listings are still to come.
-- VV-Styles phrases and sayings are not yet recorded anywhere. A spreadsheet is planned, covering both in-production and new phrases.
+- Which font should overlaid quote type use? Must carry accented Spanish and read as outline at 300 DPI.
+- The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.
+- Should the 19 VV-Styles categories consolidate to the proposed 9? Listed in `vv-styles-lists.csv`, not applied.
+- 14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged `Brand / Legal Review`. Decide before printing.
+
+**Current state of VV-Styles**
+- Store is built but **not public**. 8 shirt styles live, one tester shirt ordered and approved. Designs are currently made by hand in the Printify web editor — slow, and the reason this tool exists.
 
 **Style**
-- Which references are canonical for each page type? Currently there are none for Symbol, Decorative or Quote pages.
+- All seven existing shirts are catalogued in §4.5.
+- Photoreal Composite is **kept** (D36). Open: does the phoenix keep its poster rectangle, or get knocked out to phoenix-and-type only? One test print decides it.
+- No approved in-house exemplars exist yet for Quote, Symbol or Decorative pages. Stage B must produce the first ones.
 
 **Structure**
-- Do VV-Styles and social content need collections and items, or is coloring-book production the only planned workflow?
 - Should the tool write back to the spreadsheets, or replace them?
 
 **Technical**
 - Verify the estimated rates in `lib/pricing.ts`.
-- `gpt-image-1` offers 1024×1536 (2:3). A page is 8.5×11 (0.773:1). Crop, pad or outpaint?
+- Vector trace step for apparel — later, not blocking.
