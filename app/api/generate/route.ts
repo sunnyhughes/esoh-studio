@@ -54,14 +54,15 @@ export async function POST(req: Request) {
           brand_mark: string | null;
           ethnicity_line: string | null;
           season: string | null;
+          page_type: string | null;
           hair: string | null;
           facial_hair: string | null;
           visual_elements: string | null;
           collection_id: string;
         }>(
           `select brief, art_style, background_density, brand_mark,
-                  ethnicity_line, season, hair, facial_hair, visual_elements,
-                  collection_id
+                  ethnicity_line, season, page_type, hair, facial_hair,
+                  visual_elements, collection_id
              from items where id = $1`,
           [body.itemId]
         )
@@ -106,7 +107,23 @@ export async function POST(req: Request) {
       density
     );
 
-    // 2. Check every required variable actually arrived.
+    // 2. A Quote page drawn by the Solo Portrait template is a silently wrong
+    //    page, not an error, so it has to be caught here. Items with no page
+    //    type set are left alone.
+    if (item?.page_type && template.page_type &&
+        item.page_type !== template.page_type) {
+      return NextResponse.json(
+        {
+          error:
+            `This item is a ${item.page_type}, but "${template.name}" draws ` +
+            `${template.page_type} pages. Pick the matching template, or ` +
+            `clear the item to describe the page by hand.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Check every required variable actually arrived.
     const missing = (template.variables_json ?? [])
       .filter((v) => v.required && !(inputs[v.name] ?? "").trim())
       .map((v) => v.label);
@@ -124,7 +141,7 @@ export async function POST(req: Request) {
     const n = body.n ?? settings.n ?? 4;
     const model = OPENAI_DEFAULT_MODEL;
 
-    // 3. Record the request BEFORE calling out, so a failure still leaves a
+    // 4. Record the request BEFORE calling out, so a failure still leaves a
     //    trace with the exact prompt that caused it.
     const job = await one<{ id: string }>(
       `insert into generation_jobs
@@ -148,7 +165,7 @@ export async function POST(req: Request) {
     );
     jobId = job!.id;
 
-    // 4. Generate. Exemplars are opt-in and only ever our own approved work —
+    // 5. Generate. Exemplars are opt-in and only ever our own approved work —
     //    reference_images.usable_as_input is false by default (D31).
     const references = body.useReferences
       ? await query<{ storage_path: string }>(
@@ -173,7 +190,7 @@ export async function POST(req: Request) {
       referenceImages: referenceImages.length ? referenceImages : undefined,
     });
 
-    // 5. Persist each image, then its row.
+    // 6. Persist each image, then its row.
     const assets = [];
     for (const image of result.images) {
       const key = assetKey(jobId, image.index);
@@ -206,7 +223,7 @@ export async function POST(req: Request) {
       assets.push(asset);
     }
 
-    // 6. Close the job out with usage and cost (D9).
+    // 7. Close the job out with usage and cost (D9).
     await query(
       `update generation_jobs
           set status = 'succeeded',

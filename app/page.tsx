@@ -24,8 +24,30 @@ type Template = {
   name: string;
   slug: string;
   description: string | null;
+  page_type: string | null;
   variables_json: Variable[];
   default_settings: { size?: string; quality?: string; n?: number };
+};
+/** A planned page from the queue. The item says WHAT is on the page (D39). */
+type Item = {
+  id: string;
+  collection_id: string;
+  category_id: string;
+  ref: string;
+  title: string;
+  page_type: string | null;
+  art_style: string | null;
+  background_density: string | null;
+  season: string | null;
+  ethnicity_line: string | null;
+  hair: string | null;
+  facial_hair: string | null;
+  brief: string | null;
+  visual_elements: string | null;
+  brand_mark: string | null;
+  quote_text: string | null;
+  lettering_style: string | null;
+  status: string;
 };
 type Asset = {
   id: string;
@@ -39,10 +61,17 @@ export default function NewJobPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
+  const [artStyles, setArtStyles] = useState<string[]>([]);
+  const [densities, setDensities] = useState<string[]>([]);
 
   const [categoryId, setCategoryId] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [templateId, setTemplateId] = useState("");
+  const [itemId, setItemId] = useState("");
+  const [artStyle, setArtStyle] = useState("");
+  const [density, setDensity] = useState("");
+  const [useReferences, setUseReferences] = useState(true);
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [size, setSize] = useState("1024x1536");
   const [quality, setQuality] = useState("medium");
@@ -59,10 +88,14 @@ export default function NewJobPage() {
       .then((r) => r.json())
       .then((d) => {
         if (d.error) return setError(d.error);
-        const { categories, collections, templates } = d.data;
+        const { categories, collections, templates, items, artStyles, densities } =
+          d.data;
         setCategories(categories);
         setCollections(collections);
         setTemplates(templates);
+        setItems(items ?? []);
+        setArtStyles(artStyles ?? []);
+        setDensities(densities ?? []);
         if (categories[0]) setCategoryId(categories[0].id);
         if (templates[0]) setTemplateId(templates[0].id);
       })
@@ -78,6 +111,40 @@ export default function NewJobPage() {
     () => collections.filter((c) => c.category_id === categoryId),
     [collections, categoryId]
   );
+
+  const item = useMemo(
+    () => items.find((i) => i.id === itemId) ?? null,
+    [items, itemId]
+  );
+
+  // The queue is long, so it is filtered to whatever is selected above it.
+  const scopedItems = useMemo(
+    () =>
+      items.filter(
+        (i) =>
+          i.category_id === categoryId &&
+          (!collectionId || i.collection_id === collectionId)
+      ),
+    [items, categoryId, collectionId]
+  );
+
+  // Choosing an item settles the three things it already knows about itself:
+  // which template draws this page type, and its own art style and density.
+  // Each stays editable — the row is a starting point, not a lock.
+  useEffect(() => {
+    if (!item) return;
+    const match = templates.find(
+      (t) => t.page_type && t.page_type === item.page_type
+    );
+    if (match) setTemplateId(match.id);
+    if (item.art_style) setArtStyle(item.art_style);
+    if (item.background_density) setDensity(item.background_density);
+  }, [item, templates]);
+
+  // Drop the item if it no longer belongs to what is selected above it.
+  useEffect(() => {
+    if (itemId && !scopedItems.some((i) => i.id === itemId)) setItemId("");
+  }, [scopedItems, itemId]);
 
   // Keep the collection selection valid whenever the category changes.
   useEffect(() => {
@@ -128,6 +195,10 @@ export default function NewJobPage() {
           templateId,
           categoryId,
           collectionId: collectionId || undefined,
+          itemId: itemId || undefined,
+          artStyle: artStyle || undefined,
+          density: density || undefined,
+          useReferences,
           inputs,
           size,
           quality,
@@ -158,7 +229,7 @@ export default function NewJobPage() {
     );
   }
 
-  const ready = categoryId && templateId && !busy;
+  const ready = categoryId && templateId && artStyle && !busy;
 
   return (
     <div className="shell">
@@ -209,6 +280,54 @@ export default function NewJobPage() {
           </div>
 
           <div className="field">
+            <label htmlFor="item">Page from the queue</label>
+            <select
+              id="item"
+              value={itemId}
+              onChange={(e) => setItemId(e.target.value)}
+            >
+              <option value="">None — describe it by hand below</option>
+              {scopedItems.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.ref} — {i.title}
+                  {i.page_type ? ` (${i.page_type})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* What the row already knows, shown before anything is spent. An
+              empty field here is a field the prompt will not receive. */}
+          {item && (
+            <div className="item-summary">
+              {(
+                [
+                  ["Brief", item.brief],
+                  ["Setting", item.visual_elements],
+                  ["Hair", item.hair],
+                  ["Facial hair", item.facial_hair],
+                  ["Figure", item.ethnicity_line],
+                  ["Season", item.season],
+                  ["Name drop", item.brand_mark],
+                ] as const
+              ).map(([label, value]) => (
+                <div key={label} className={value ? "has" : "missing"}>
+                  <span>{label}</span>
+                  <span>{value || "not set"}</span>
+                </div>
+              ))}
+
+              {item.quote_text && (
+                <p className="hint">
+                  Quote: “{item.quote_text}” — overlaid as outlined type after
+                  generation, never drawn by the model (D23). The page reserves
+                  space for it.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="field">
             <label htmlFor="template">Template</label>
             <select
               id="template"
@@ -222,6 +341,48 @@ export default function NewJobPage() {
               ))}
             </select>
           </div>
+
+          <div className="row">
+            <div className="field">
+              <label htmlFor="artStyle">Art style</label>
+              <select
+                id="artStyle"
+                value={artStyle}
+                onChange={(e) => setArtStyle(e.target.value)}
+              >
+                <option value="">Choose…</option>
+                {artStyles.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="density">Density</label>
+              <select
+                id="density"
+                value={density}
+                onChange={(e) => setDensity(e.target.value)}
+              >
+                <option value="">Art style decides</option>
+                {densities.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={useReferences}
+              onChange={(e) => setUseReferences(e.target.checked)}
+            />
+            Send approved exemplars as reference (D20)
+          </label>
 
           {/* Fields are driven by the template's variables_json, so adding a
               template in SQL adds its form here with no code change. */}

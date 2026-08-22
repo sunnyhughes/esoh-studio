@@ -165,3 +165,34 @@ details.prompt pre {
   margin: 12px 0 0; color: var(--text);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+
+/* What the selected queue row already knows. Shown before generating, so a
+   blank field is visible as a blank field rather than as a bland page. */
+.item-summary {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.item-summary > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 8px;
+  padding: 3px 0;
+}
+.item-summary > div + div { border-top: 1px solid var(--border); }
+.item-summary span:first-child { color: var(--muted); }
+.item-summary .missing span:last-child { color: var(--muted); font-style: italic; }
+.item-summary .hint { margin: 8px 0 0; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.check input { width: auto; }
