@@ -35,8 +35,9 @@ export type Template = {
   name: string;
   slug: string;
   description: string | null;
-  job_type_id: string;
-  job_type_code: string;
+  category_id: string;
+  category_code: string;
+  page_type: string | null;
   variables_json: TemplateVariable[];
   default_settings: TemplateSettings;
 };
@@ -52,10 +53,10 @@ const SLOT = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
 
 export async function getTemplates(): Promise<Template[]> {
   return query<Template>(`
-    select t.id, t.name, t.slug, t.description, t.job_type_id,
-           j.code as job_type_code, t.variables_json, t.default_settings
+    select t.id, t.name, t.slug, t.description, t.category_id, t.page_type,
+           c.code as category_code, t.variables_json, t.default_settings
       from prompt_templates t
-      join job_types j on j.id = t.job_type_id
+      join categories c on c.id = t.category_id
      where t.is_active
      order by t.name
   `);
@@ -64,10 +65,10 @@ export async function getTemplates(): Promise<Template[]> {
 export async function getTemplate(id: string): Promise<Template | null> {
   return one<Template>(
     `
-    select t.id, t.name, t.slug, t.description, t.job_type_id,
-           j.code as job_type_code, t.variables_json, t.default_settings
+    select t.id, t.name, t.slug, t.description, t.category_id, t.page_type,
+           c.code as category_code, t.variables_json, t.default_settings
       from prompt_templates t
-      join job_types j on j.id = t.job_type_id
+      join categories c on c.id = t.category_id
      where t.id = $1
   `,
     [id]

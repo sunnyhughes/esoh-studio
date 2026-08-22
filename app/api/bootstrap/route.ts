@@ -7,14 +7,15 @@ export const dynamic = "force-dynamic";
 /** Everything the New Job form needs to render itself. */
 export async function GET() {
   try {
-    const [brands, projects, templates] = await Promise.all([
-      query(`select id, slug, name from brands where is_active order by name`),
-      query(`select id, brand_id, name, slug from projects
+    const [categories, collections, templates] = await Promise.all([
+      query(`select id, code, label, output_width, output_height, transparent
+               from categories where is_active order by label`),
+      query(`select id, category_id, name, slug from collections
               where status = 'active' order by name`),
       getTemplates(),
     ]);
 
-    return NextResponse.json({ brands, projects, templates });
+    return NextResponse.json({ data: { categories, collections, templates } });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });

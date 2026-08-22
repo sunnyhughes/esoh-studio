@@ -12,8 +12,11 @@ export const maxDuration = 300;
 
 type Body = {
   templateId: string;
-  brandId: string;
-  projectId: string;
+  /** Optional — defaults to the template's own category. */
+  categoryId?: string;
+  /** Optional. Set when generating against a planned item (docs/direction.md §5). */
+  collectionId?: string;
+  itemId?: string;
   inputs: Record<string, string>;
   title?: string;
   size?: string;
@@ -27,9 +30,9 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as Body;
 
-    if (!body.templateId || !body.brandId || !body.projectId) {
+    if (!body.templateId) {
       return NextResponse.json(
-        { error: "templateId, brandId and projectId are all required." },
+        { error: "templateId is required." },
         { status: 400 }
       );
     }
@@ -62,15 +65,15 @@ export async function POST(req: Request) {
     //    trace with the exact prompt that caused it.
     const job = await one<{ id: string }>(
       `insert into generation_jobs
-         (brand_id, project_id, job_type_id, prompt_template_id, title,
+         (category_id, collection_id, item_id, prompt_template_id, title,
           prompt_text, inputs_json, provider_name, provider_model,
           params_json, status)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'processing')
        returning id`,
       [
-        body.brandId,
-        body.projectId,
-        template.job_type_id,
+        body.categoryId ?? template.category_id,
+        body.collectionId ?? null,
+        body.itemId ?? null,
         template.id,
         body.title ?? null,
         prompt,
@@ -95,15 +98,17 @@ export async function POST(req: Request) {
 
       const asset = await one(
         `insert into generated_assets
-           (generation_job_id, brand_id, project_id, asset_name, storage_path,
-            width, height, file_size_bytes, source_variant_index, metadata_json)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+           (generation_job_id, category_id, collection_id, item_id, asset_name,
+            storage_path, width, height, file_size_bytes, source_variant_index,
+            metadata_json)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
          returning id, asset_name, storage_path, status, is_favorite,
                    source_variant_index`,
         [
           jobId,
-          body.brandId,
-          body.projectId,
+          body.categoryId ?? template.category_id,
+          body.collectionId ?? null,
+          body.itemId ?? null,
           `${template.slug}-${image.index + 1}`,
           key,
           Number.isFinite(w) ? w : null,

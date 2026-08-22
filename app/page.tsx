@@ -2,8 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type Brand = { id: string; slug: string; name: string };
-type Project = { id: string; brand_id: string; name: string; slug: string };
+type Category = {
+  id: string;
+  code: string;
+  label: string;
+  output_width: number;
+  output_height: number;
+  transparent: boolean;
+};
+type Collection = { id: string; category_id: string; name: string; slug: string };
 type Variable = {
   name: string;
   label: string;
@@ -29,12 +36,12 @@ type Asset = {
 };
 
 export default function NewJobPage() {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
 
-  const [brandId, setBrandId] = useState("");
-  const [projectId, setProjectId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [collectionId, setCollectionId] = useState("");
   const [templateId, setTemplateId] = useState("");
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [size, setSize] = useState("1024x1536");
@@ -52,11 +59,12 @@ export default function NewJobPage() {
       .then((r) => r.json())
       .then((d) => {
         if (d.error) return setError(d.error);
-        setBrands(d.brands);
-        setProjects(d.projects);
-        setTemplates(d.templates);
-        if (d.brands[0]) setBrandId(d.brands[0].id);
-        if (d.templates[0]) setTemplateId(d.templates[0].id);
+        const { categories, collections, templates } = d.data;
+        setCategories(categories);
+        setCollections(collections);
+        setTemplates(templates);
+        if (categories[0]) setCategoryId(categories[0].id);
+        if (templates[0]) setTemplateId(templates[0].id);
       })
       .catch((e) => setError(String(e)));
   }, []);
@@ -66,17 +74,26 @@ export default function NewJobPage() {
     [templates, templateId]
   );
 
-  const brandProjects = useMemo(
-    () => projects.filter((p) => p.brand_id === brandId),
-    [projects, brandId]
+  const categoryCollections = useMemo(
+    () => collections.filter((c) => c.category_id === categoryId),
+    [collections, categoryId]
   );
 
-  // Keep the project selection valid whenever the brand changes.
+  // Keep the collection selection valid whenever the category changes.
   useEffect(() => {
-    if (!brandProjects.some((p) => p.id === projectId)) {
-      setProjectId(brandProjects[0]?.id ?? "");
+    if (!categoryCollections.some((c) => c.id === collectionId)) {
+      setCollectionId(categoryCollections[0]?.id ?? "");
     }
-  }, [brandProjects, projectId]);
+  }, [categoryCollections, collectionId]);
+
+  // Each category fixes its own output size (docs/direction.md §5.1, D29).
+  const category = useMemo(
+    () => categories.find((c) => c.id === categoryId),
+    [categories, categoryId]
+  );
+  useEffect(() => {
+    if (category) setSize(`${category.output_width}x${category.output_height}`);
+  }, [category]);
 
   // Adopt the template's own defaults, and seed selects with their first option.
   useEffect(() => {
@@ -109,8 +126,8 @@ export default function NewJobPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           templateId,
-          brandId,
-          projectId,
+          categoryId,
+          collectionId: collectionId || undefined,
           inputs,
           size,
           quality,
@@ -141,13 +158,13 @@ export default function NewJobPage() {
     );
   }
 
-  const ready = brandId && projectId && templateId && !busy;
+  const ready = categoryId && templateId && !busy;
 
   return (
     <div className="shell">
       <header className="top">
         <h1>Esoh Studio</h1>
-        <span className="tag">Stage 1 — New Job</span>
+        <span className="tag">Stage A — New Job</span>
       </header>
 
       {error && <div className="error">{error}</div>}
@@ -161,30 +178,31 @@ export default function NewJobPage() {
           }}
         >
           <div className="field">
-            <label htmlFor="brand">Brand</label>
+            <label htmlFor="category">Category</label>
             <select
-              id="brand"
-              value={brandId}
-              onChange={(e) => setBrandId(e.target.value)}
+              id="category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
             >
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="field">
-            <label htmlFor="project">Project</label>
+            <label htmlFor="collection">Collection</label>
             <select
-              id="project"
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
+              id="collection"
+              value={collectionId}
+              onChange={(e) => setCollectionId(e.target.value)}
             >
-              {brandProjects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
+              {categoryCollections.length === 0 && <option value="">None yet</option>}
+              {categoryCollections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
