@@ -4,7 +4,7 @@ import { buildPrompt } from "@/lib/prompt-engine";
 import { getProvider, DEFAULT_PROVIDER } from "@/lib/providers";
 import { OPENAI_DEFAULT_MODEL } from "@/lib/providers/openai";
 import { estimateCostUsd } from "@/lib/pricing";
-import { assetKey, save } from "@/lib/storage";
+import { assetKey, save, read } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 // Image generation is slow; don't let the platform cut it off mid-flight.
@@ -17,6 +17,12 @@ type Body = {
   /** Optional. Set when generating against a planned item (docs/direction.md §5). */
   collectionId?: string;
   itemId?: string;
+  /** D26 — selects the base style block. Required unless the item carries one. */
+  artStyle?: string;
+  /** D27 — Open | Medium | Dense. Optional; the art style sets its own if absent. */
+  density?: string;
+  /** Pass approved exemplars as image input (D20). Ignored if none are usable. */
+  useReferences?: boolean;
   inputs: Record<string, string>;
   title?: string;
   size?: string;
@@ -37,15 +43,53 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Compose the prompt from the template's ordered blocks.
+    // 1. When generating against a planned item, the item's own brief supplies
+    //    the subject (D39: the item says WHAT, the style blocks say HOW). Values
+    //    posted in `inputs` still win, so a one-off tweak needs no row edit.
+    const item = body.itemId
+      ? await one<{
+          brief: string | null;
+          art_style: string | null;
+          background_density: string | null;
+          brand_mark: string | null;
+          ethnicity_line: string | null;
+          season: string | null;
+          collection_id: string;
+        }>(
+          `select brief, art_style, background_density, brand_mark,
+                  ethnicity_line, season, collection_id
+             from items where id = $1`,
+          [body.itemId]
+        )
+      : null;
+
+    const inputs = { ...(body.inputs ?? {}) };
+    if (item && !inputs.subject?.trim()) {
+      inputs.subject = [
+        item.brief,
+        item.ethnicity_line ? `The figure is ${item.ethnicity_line}.` : "",
+        item.season ? `The season is ${item.season}.` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+    if (item?.brand_mark && !inputs.brand_mark?.trim()) {
+      inputs.brand_mark = item.brand_mark;
+    }
+
+    const artStyle = body.artStyle ?? item?.art_style ?? null;
+    const density = body.density ?? item?.background_density ?? null;
+
     const { template, prompt } = await buildPrompt(
       body.templateId,
-      body.inputs ?? {}
+      inputs,
+      artStyle,
+      density
     );
 
     // 2. Check every required variable actually arrived.
     const missing = (template.variables_json ?? [])
-      .filter((v) => v.required && !(body.inputs?.[v.name] ?? "").trim())
+      .filter((v) => v.required && !(inputs[v.name] ?? "").trim())
       .map((v) => v.label);
 
     if (missing.length > 0) {
@@ -72,7 +116,7 @@ export async function POST(req: Request) {
        returning id`,
       [
         body.categoryId ?? template.category_id,
-        body.collectionId ?? null,
+        body.collectionId ?? item?.collection_id ?? null,
         body.itemId ?? null,
         template.id,
         body.title ?? null,
@@ -80,13 +124,35 @@ export async function POST(req: Request) {
         JSON.stringify(body.inputs ?? {}),
         DEFAULT_PROVIDER,
         model,
-        JSON.stringify({ size, quality, n }),
+        JSON.stringify({ size, quality, n, artStyle, density }),
       ]
     );
     jobId = job!.id;
 
-    // 4. Generate.
-    const result = await getProvider()({ prompt, size, quality, n, model });
+    // 4. Generate. Exemplars are opt-in and only ever our own approved work —
+    //    reference_images.usable_as_input is false by default (D31).
+    const references = body.useReferences
+      ? await query<{ storage_path: string }>(
+          `select storage_path from reference_images
+            where usable_as_input
+              and (category_id = $1 or category_id is null)
+            order by created_at desc limit 3`,
+          [body.categoryId ?? template.category_id]
+        )
+      : [];
+
+    const referenceImages = await Promise.all(
+      references.map((r) => read(r.storage_path))
+    );
+
+    const result = await getProvider()({
+      prompt,
+      size,
+      quality,
+      n,
+      model,
+      referenceImages: referenceImages.length ? referenceImages : undefined,
+    });
 
     // 5. Persist each image, then its row.
     const assets = [];
@@ -107,7 +173,7 @@ export async function POST(req: Request) {
         [
           jobId,
           body.categoryId ?? template.category_id,
-          body.collectionId ?? null,
+          body.collectionId ?? item?.collection_id ?? null,
           body.itemId ?? null,
           `${template.slug}-${image.index + 1}`,
           key,

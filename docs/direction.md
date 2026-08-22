@@ -68,6 +68,13 @@ Observed directly: a block reading "no decorative borders or page frames" produc
 
 Rule: state what is wanted. Keep restrictions short and specific. Do not enumerate fears.
 
+**Observed a third time at Stage B.** A texture block ending "No hatching,
+stippling or grey fill" produced a page stippled on every surface — skin, sky,
+wall and tabletop. Removing the sentence and stating positively where pattern
+belongs ("fabric shows its stitch, wood its grain... skin and sky stay clean and
+unmarked") fixed it in one pass. The pattern is now reliable enough to treat as
+a law: **if a block names something unwanted, the model draws it.**
+
 ---
 
 ## 3. What the reference images establish
@@ -446,6 +453,7 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D34 | **Apparel artwork is generated with a transparent background and no enclosing shape.** Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove. |
 | D35 | **Clean date is a prompt slot** (`{{clean_date}}`), not baked into the design. Supports per-buyer personalization. |
 | D36 | **Photoreal Composite** is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed. |
+| D43 | **Density means the composition reaches every edge, not that every surface carries marks.** "Leaving no empty ground" left the model nowhere to stop and it textured skin and sky. A coloring page needs clean enclosed areas to put colour into. |
 | D39 | **Style blocks describe how a page is drawn; item briefs describe what is in it.** Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 180 pages repeat (§3.3). |
 | D40 | **`Healing Seasons` is a series**, recorded on `collections.series`, sitting between category and collection so a second series never collides with the first. |
 | D41 | **The in-scene name-drop is per-item and opt-in** — `items.brand_mark`, null by default, either 'Healing Seasons' or 'Esoh Creations'. An occasional touch, never a signature. |

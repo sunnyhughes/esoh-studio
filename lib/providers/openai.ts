@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import type { GenerateRequest, GenerateResult } from "./index";
 
 export const OPENAI_DEFAULT_MODEL = "gpt-image-1";
@@ -20,15 +20,36 @@ export async function generateOpenAI(
 ): Promise<GenerateResult> {
   const model = req.model ?? OPENAI_DEFAULT_MODEL;
 
-  const res = await getClient().images.generate({
-    model,
-    prompt: req.prompt,
-    n: req.n,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    size: req.size as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    quality: req.quality as any,
-  });
+  const refs = req.referenceImages ?? [];
+
+  // With exemplars this becomes an edit call, which is how gpt-image-1 accepts
+  // image input; without them it is a plain generation. Same prompt either way.
+  const res = refs.length
+    ? await getClient().images.edit({
+        model,
+        prompt: req.prompt,
+        n: req.n,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        size: req.size as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        quality: req.quality as any,
+        image: await Promise.all(
+          refs.map((buf, i) =>
+            toFile(buf, `reference-${i + 1}.png`, { type: "image/png" })
+          )
+        ),
+        ...(req.transparent ? { background: "transparent" as const } : {}),
+      })
+    : await getClient().images.generate({
+        model,
+        prompt: req.prompt,
+        n: req.n,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        size: req.size as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        quality: req.quality as any,
+        ...(req.transparent ? { background: "transparent" as const } : {}),
+      });
 
   // gpt-image-1 always returns base64; there is no URL response mode.
   const images = (res.data ?? []).flatMap((img, index) =>

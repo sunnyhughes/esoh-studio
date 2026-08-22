@@ -47,6 +47,8 @@ export type Block = {
   kind: string;
   body_text: string;
   position: number;
+  art_style: string | null;
+  background_density: string | null;
 };
 
 const SLOT = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
@@ -75,17 +77,33 @@ export async function getTemplate(id: string): Promise<Template | null> {
   );
 }
 
-export async function getBlocks(templateId: string): Promise<Block[]> {
+/**
+ * Art style (D26) crosses page type (D17), so a template carries every
+ * art-style variant of its base_style block and exactly one is chosen here.
+ * Blocks with art_style null apply to every style.
+ *
+ * Passing no art style yields only the universal blocks — useful for seeing
+ * what a template contributes on its own, but it will not produce a usable
+ * page, since the base_style block is where the drawing style is described.
+ */
+export async function getBlocks(
+  templateId: string,
+  artStyle?: string | null,
+  density?: string | null
+): Promise<Block[]> {
   return query<Block>(
     `
-    select b.slug, b.kind, b.body_text, tb.position
+    select b.slug, b.kind, b.body_text, tb.position,
+           b.art_style, b.background_density
       from template_blocks tb
       join prompt_blocks b on b.id = tb.block_id
      where tb.template_id = $1
        and b.is_active
+       and (b.art_style is null or b.art_style = $2)
+       and (b.background_density is null or b.background_density = $3)
      order by tb.position
   `,
-    [templateId]
+    [templateId, artStyle ?? null, density ?? null]
   );
 }
 
@@ -127,14 +145,24 @@ export function composePrompt(
 /** Load a template, compose its prompt, and hand back everything the job needs. */
 export async function buildPrompt(
   templateId: string,
-  inputs: Record<string, string>
+  inputs: Record<string, string>,
+  artStyle?: string | null,
+  density?: string | null
 ): Promise<{ template: Template; prompt: string; blocks: Block[] }> {
   const template = await getTemplate(templateId);
   if (!template) throw new Error(`Template not found: ${templateId}`);
 
-  const blocks = await getBlocks(templateId);
+  const blocks = await getBlocks(templateId, artStyle, density);
   if (blocks.length === 0) {
     throw new Error(`Template "${template.name}" has no blocks attached.`);
+  }
+
+  if (!blocks.some((b) => b.kind === "base_style")) {
+    throw new Error(
+      artStyle
+        ? `No base style block for art style "${artStyle}".`
+        : "An art style is required — it supplies the base style block."
+    );
   }
 
   return { template, prompt: composePrompt(blocks, inputs), blocks };

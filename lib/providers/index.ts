@@ -15,6 +15,17 @@ export type GenerateRequest = {
   quality: string;
   n: number;
   model?: string;
+  /**
+   * Style exemplars passed as image input (D20). Feeding two or three approved
+   * pages holds a style across a long run far better than describing it in
+   * words — Stage 1 drifted within three generations on text alone.
+   *
+   * D31: only our own approved work belongs here. The watermarked third-party
+   * scans inform how blocks are written and must never be sent to the model.
+   */
+  referenceImages?: Buffer[];
+  /** Transparent background, for apparel (D34). */
+  transparent?: boolean;
 };
 
 export type GeneratedImage = {
