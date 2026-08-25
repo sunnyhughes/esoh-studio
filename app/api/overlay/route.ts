@@ -1,6 +1,12 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { one } from "@/lib/db";
-import { overlayQuote, DEFAULT_BOX, type Box } from "@/lib/overlay";
+import {
+  overlayQuote,
+  detectReservedArea,
+  DEFAULT_AREA,
+  type Area,
+} from "@/lib/overlay";
 import { save, read } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +18,8 @@ type Body = {
   text?: string;
   /** Defaults to the item's lettering_style, then Block Outline. */
   letteringStyle?: string;
-  box?: Box;
+  /** Overrides the oval measured off the page. */
+  area?: Area;
   strokeWidth?: number;
 };
 
@@ -56,6 +63,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Asset not found." }, { status: 404 });
     }
 
+    // D56 for lettering: Quote page is the only page type that carries words,
+    // and lettering anything else lays type over the middle of a drawing. The
+    // portrait that proved it came back with "Rest is not a reward." across
+    // the figure's face. An asset with no item behind it is ad hoc and allowed
+    // through — there is no page type to contradict.
+    if (asset.page_type && asset.page_type !== "Quote page") {
+      return NextResponse.json(
+        {
+          error:
+            `This is a ${asset.page_type}, which reserves no area for type. ` +
+            "Only a Quote page can be lettered.",
+        },
+        { status: 409 }
+      );
+    }
+
     const text = (body.text ?? asset.quote_text ?? "").trim();
     if (!text) {
       return NextResponse.json(
@@ -70,18 +93,29 @@ export async function POST(req: Request) {
     const letteringStyle =
       body.letteringStyle ?? asset.lettering_style ?? "Block Outline";
 
-    const box = body.box ?? DEFAULT_BOX;
     const page = await read(asset.storage_path);
+
+    // The oval the model drew, not the one it was asked for. It differs on
+    // every page, and fitting to a fixed area is what ran the last line of the
+    // first real quote out into the pattern.
+    const area = body.area ?? (await detectReservedArea(page)) ?? DEFAULT_AREA;
+
     const { png, svg, width, height } = await overlayQuote(page, {
       text,
       letteringStyle,
-      box,
+      area,
       strokeWidth: body.strokeWidth,
     });
 
+    // Unique per lettering, not per page. Keying on the source page alone made
+    // every re-letter overwrite the one before it: the older asset row survived
+    // pointing at a file that now held different words, and since the SVG is
+    // what goes to print (D61), that row would have printed the wrong quote.
+    // D65 protects the art from being replaced; the letterings need the same.
     const base = asset.storage_path.replace(/\.png$/, "");
-    const pngKey = `${base}-quote.png`;
-    const svgKey = `${base}-quote.svg`;
+    const stamp = randomUUID().slice(0, 8);
+    const pngKey = `${base}-quote-${stamp}.png`;
+    const svgKey = `${base}-quote-${stamp}.svg`;
     const bytes = await save(pngKey, png);
     await save(svgKey, Buffer.from(svg, "utf8"));
 
@@ -105,14 +139,14 @@ export async function POST(req: Request) {
         bytes,
         asset.source_variant_index,
         JSON.stringify({
-          // box and strokeWidth are recorded because the print export re-lays
+          // area and strokeWidth are recorded because the print export re-lays
           // this type as vector against the original art (D61) rather than
-          // printing the flattened PNG. Without them the PDF would re-layout
-          // at the default box and disagree with the SVG stored here.
+          // printing the flattened PNG. Without them the PDF would re-measure
+          // the page and could settle on a different oval than the SVG here.
           overlay: {
             text,
             letteringStyle,
-            box,
+            area,
             strokeWidth: body.strokeWidth ?? null,
             svgPath: svgKey,
             from: asset.id,

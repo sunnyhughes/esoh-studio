@@ -29,24 +29,36 @@ export type Face = {
   font_file: string;
 };
 
-/** Where the type lands, as fractions of the page. */
-export type Box = { x: number; y: number; w: number; h: number };
+/**
+ * The reserved area, as the bounding box of an upright ellipse, in fractions
+ * of the page. The type is fitted to the ellipse, not to this rectangle.
+ *
+ * It used to be the rectangle, described as "the largest that sits comfortably
+ * inside that oval". It was not: measured against a real page the rectangle
+ * was half again as wide as the oval at its widest point, and centred lower,
+ * so the last line ran out into the pattern — the failure §9 predicted.
+ */
+export type Area = { x: number; y: number; w: number; h: number };
 
 /**
- * The composition block reserves an upright oval at the centre, about
- * two-thirds the page width and half the page height. This box is the largest
- * rectangle that sits comfortably inside that oval — a box matching the oval's
- * full width would put the first and last lines out in the pattern, which is
- * exactly what the first real Quote page did.
+ * Fallback reserved area, measured off a generated Quote page rather than read
+ * off the prompt. The composition block asks for "about two-thirds the page
+ * width and half the page height"; the model drew an oval half the page wide
+ * and 0.43 of it tall, centred a little above the middle. What the model does
+ * is the fact that matters, so the measurement wins over the instruction.
+ *
+ * Only a fallback: `detectReservedArea` measures the real oval per page,
+ * because the model draws a different one every time and any fixed area is a
+ * guess that is wrong by a different amount on each page.
  */
-export const DEFAULT_BOX: Box = { x: 0.19, y: 0.33, w: 0.62, h: 0.34 };
+export const DEFAULT_AREA: Area = { x: 0.25, y: 0.25, w: 0.5, h: 0.43 };
 
 export type OverlayOptions = {
   text: string;
   letteringStyle: string;
   width: number;
   height: number;
-  box?: Box;
+  area?: Area;
   /** Outline weight in output pixels. Defaults to a ratio of the type size. */
   strokeWidth?: number;
   color?: string;
@@ -100,12 +112,19 @@ function advance(font: Font, text: string): number {
   return font.layout(text).advanceWidth;
 }
 
-/** Greedy word wrap at a given type size. Returns null if any word overflows. */
-function wrap(
+/**
+ * Greedy word wrap where the available width changes line by line.
+ *
+ * `widthAt` is consulted as each line opens, because the reserved area is an
+ * ellipse: a line near the top or bottom has far less room than one across the
+ * middle. Returns null when a single word cannot fit the line it lands on,
+ * which is the signal to try a smaller size.
+ */
+function wrapVariable(
   font: Font,
   text: string,
   size: number,
-  maxWidth: number
+  widthAt: (line: number) => number
 ): string[] | null {
   const scale = size / font.unitsPerEm;
   const words = text.split(/\s+/).filter(Boolean);
@@ -113,46 +132,137 @@ function wrap(
   let line = "";
 
   for (const word of words) {
-    if (advance(font, word) * scale > maxWidth) return null; // unbreakable
     const candidate = line ? `${line} ${word}` : word;
-    if (advance(font, candidate) * scale <= maxWidth) {
+    if (advance(font, candidate) * scale <= widthAt(lines.length)) {
       line = candidate;
-    } else {
-      lines.push(line);
-      line = word;
+      continue;
     }
+    if (line) {
+      lines.push(line);
+      line = "";
+    }
+    // The word opens the next line down, which is a different width.
+    if (advance(font, word) * scale > widthAt(lines.length)) return null;
+    line = word;
   }
   if (line) lines.push(line);
+  return lines.length ? lines : null;
+}
+
+type Ellipse = { cx: number; cy: number; rx: number; ry: number };
+
+function ellipseOf(area: Area, width: number, height: number): Ellipse {
+  return {
+    cx: (area.x + area.w / 2) * width,
+    cy: (area.y + area.h / 2) * height,
+    rx: (area.w / 2) * width,
+    ry: (area.h / 2) * height,
+  };
+}
+
+/**
+ * Vertical metrics of a set block: the height of the ink, and for each line the
+ * baseline and the band it covers from ascender to descender.
+ *
+ * Measuring to the descender rather than counting whole line-heights is what
+ * keeps the tail of a "g" on the last line off the pattern.
+ */
+function blockOf(
+  font: Font,
+  size: number,
+  lines: number,
+  lineHeight: number,
+  e: Ellipse
+) {
+  const scale = size / font.unitsPerEm;
+  const ascent = font.ascent * scale;
+  const descent = Math.abs(font.descent) * scale;
+  const height = (lines - 1) * size * lineHeight + ascent + descent;
+  const top = e.cy - height / 2;
+
+  const bands = Array.from({ length: lines }, (_, i) => {
+    const baseline = top + ascent + i * size * lineHeight;
+    return { baseline, top: baseline - ascent, bottom: baseline + descent };
+  });
+
+  return { height, bands };
+}
+
+/**
+ * How wide a line may be, taken from the ellipse at whichever of its edges
+ * sits furthest from the centre.
+ *
+ * The worst case is the honest one. An ascender at the top of a high line and
+ * a descender at the bottom of a low one are exactly where the oval has closed
+ * in, and measuring at the baseline instead is what let a descender through.
+ */
+function widthFor(e: Ellipse, band: { top: number; bottom: number }): number {
+  const dy = Math.max(Math.abs(band.top - e.cy), Math.abs(band.bottom - e.cy));
+  const t = dy / e.ry;
+  return t >= 1 ? 0 : 2 * e.rx * Math.sqrt(1 - t * t);
+}
+
+/** Does this exact set of lines sit inside the ellipse at this size? */
+function fitsEllipse(
+  font: Font,
+  lines: string[],
+  size: number,
+  lineHeight: number,
+  e: Ellipse
+): boolean {
+  const { height, bands } = blockOf(font, size, lines.length, lineHeight, e);
+  if (height > e.ry * 2) return false;
+  const scale = size / font.unitsPerEm;
+  return lines.every(
+    (text, i) => advance(font, text) * scale <= widthFor(e, bands[i])
+  );
+}
+
+/**
+ * Wrap the quote inside the ellipse at a given size.
+ *
+ * How wide each line may be depends on where it sits, and where it sits
+ * depends on how many lines there are — so this settles by iteration from a
+ * one-line guess, re-wrapping until the line count stops moving. The result is
+ * checked by `fitsEllipse` regardless, so a run that does not settle is
+ * rejected rather than trusted.
+ */
+function wrapInEllipse(
+  font: Font,
+  text: string,
+  size: number,
+  lineHeight: number,
+  e: Ellipse
+): string[] | null {
+  let n = 1;
+  let lines: string[] | null = null;
+
+  for (let i = 0; i < 8; i++) {
+    const { height, bands } = blockOf(font, size, n, lineHeight, e);
+    if (height > e.ry * 2) return null;
+
+    const widths = bands.map((b) => widthFor(e, b));
+    lines = wrapVariable(font, text, size, (l) =>
+      widths[Math.min(l, widths.length - 1)]
+    );
+    if (!lines) return null;
+    if (lines.length === n) return lines;
+    n = lines.length;
+  }
+
   return lines;
 }
 
 /**
- * Height of a set block, measured from the top of the first line's ascenders
- * to the bottom of the last line's descenders.
- *
- * Counting whole line-heights instead — `lines * size * lineHeight` — measures
- * to a baseline and leaves the final descender hanging below the box. On a page
- * where the blank area is an oval that the pattern closes in around, the tail
- * of a "g" on the last line lands in the pattern.
- */
-function blockHeight(font: Font, size: number, lines: number, lineHeight: number) {
-  const scale = size / font.unitsPerEm;
-  const ascent = font.ascent * scale;
-  const descent = Math.abs(font.descent) * scale;
-  return { height: (lines - 1) * size * lineHeight + ascent + descent, ascent };
-}
-
-/**
- * The largest type size at which the whole quote fits the reserved box.
+ * The largest type size at which the whole quote fits the reserved oval.
  *
  * Bisection rather than a stepped search: type size is continuous, and landing
- * a point or two under the true maximum is visible as slack in the box.
+ * a point or two under the true maximum is visible as slack in the oval.
  */
 function fit(
   font: Font,
   text: string,
-  boxW: number,
-  boxH: number,
+  e: Ellipse,
   lineHeight: number,
   maxSize: number
 ): { size: number; lines: string[] } {
@@ -162,18 +272,21 @@ function fit(
 
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
-    const lines = wrap(font, text, mid, boxW);
-    const fits =
-      lines !== null &&
-      blockHeight(font, mid, lines.length, lineHeight).height <= boxH;
-    if (fits) {
-      best = { size: mid, lines: lines! };
+    const lines = wrapInEllipse(font, text, mid, lineHeight, e);
+    if (lines && fitsEllipse(font, lines, mid, lineHeight, e)) {
+      best = { size: mid, lines };
       lo = mid;
     } else {
       hi = mid;
     }
-    if (hi - lo < 0.25) break;
+    // Relative, not absolute. The SVG is laid out in page pixels and the PDF
+    // in points, so a fixed tolerance stops at a different place in each and
+    // the two settle on type sizes a pixel apart. Scaling it to the search
+    // range makes both converge identically, which is what lets the PDF and
+    // the stored SVG claim to be one geometry (D61).
+    if (hi - lo < maxSize * 1e-4) break;
   }
+
   return best;
 }
 
@@ -232,15 +345,11 @@ export async function layoutQuote(opts: OverlayOptions): Promise<QuoteLayout> {
   const primary = load(files[0], face.weight);
   const secondary = paired ? load(files[1], face.weight) : primary;
 
-  const box = opts.box ?? DEFAULT_BOX;
-  const boxX = box.x * opts.width;
-  const boxY = box.y * opts.height;
-  const boxW = box.w * opts.width;
-  const boxH = box.h * opts.height;
+  const e = ellipseOf(opts.area ?? DEFAULT_AREA, opts.width, opts.height);
 
   const lineHeight = 1.24;
   const maxSize = (opts.maxSizeRatio ?? 0.14) * opts.height;
-  const { size, lines } = fit(primary, opts.text, boxW, boxH, lineHeight, maxSize);
+  const { size, lines } = fit(primary, opts.text, e, lineHeight, maxSize);
 
   // Outline weight tracks type size so a short quote set large and a long one
   // set small carry the same visual line, and both sit in the same weight
@@ -248,23 +357,15 @@ export async function layoutQuote(opts: OverlayOptions): Promise<QuoteLayout> {
   const stroke = opts.strokeWidth ?? Math.max(2, size * 0.036);
   const color = opts.color ?? "#000000";
 
-  // Centre the inked block, not the run of baselines.
-  const { height: block, ascent } = blockHeight(
-    primary,
-    size,
-    lines.length,
-    lineHeight
-  );
-  const top = boxY + (boxH - block) / 2;
+  // Centre the inked block on the oval, not the run of baselines.
+  const { bands } = blockOf(primary, size, lines.length, lineHeight, e);
 
   const paths = lines
     .map((text, i) => {
       const font = paired && i > 0 ? secondary : primary;
       const scale = size / font.unitsPerEm;
       const measured = font.layout(text).advanceWidth * scale;
-      const x = boxX + (boxW - measured) / 2;
-      const baseline = top + ascent + i * size * lineHeight;
-      return lineToPath(font, text, scale, x, baseline).d;
+      return lineToPath(font, text, scale, e.cx - measured / 2, bands[i].baseline).d;
     })
     .filter(Boolean);
 
@@ -292,6 +393,80 @@ export async function buildQuoteSvg(opts: OverlayOptions): Promise<string> {
     groups.join("") +
     `</svg>`
   );
+}
+
+/**
+ * Measure the oval the model actually left blank.
+ *
+ * The prompt reserves a centre, but the model draws a different one every
+ * time — so a fixed area is a guess that is wrong by a different amount on
+ * every page. This reads the real one off the art: on each row, the run of
+ * white through the page's vertical centreline; the longest unbroken stretch
+ * of rows wide enough to be the reserved area gives its extent, and the widest
+ * row in that stretch gives its width.
+ *
+ * The longest *contiguous* stretch matters rather than every qualifying row,
+ * so a white band elsewhere on the page cannot stretch the measurement to meet
+ * it. Returns null when nothing plausible is found — an unusually open page
+ * can read as one enormous run — and the caller falls back to DEFAULT_AREA.
+ */
+export async function detectReservedArea(page: Buffer): Promise<Area | null> {
+  const { data, info } = await sharp(page)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const W = info.width;
+  const H = info.height;
+  const centre = W >> 1;
+  const WHITE = 250;
+
+  const rows: ({ l: number; r: number } | null)[] = [];
+  for (let y = 0; y < H; y++) {
+    if (data[y * W + centre] < WHITE) {
+      rows.push(null);
+      continue;
+    }
+    let l = centre;
+    let r = centre;
+    while (l > 0 && data[y * W + l - 1] >= WHITE) l--;
+    while (r < W - 1 && data[y * W + r + 1] >= WHITE) r++;
+    const run = r - l;
+    // Too narrow is a gap in the pattern; too wide is a blank band, not an oval.
+    rows.push(run >= W * 0.15 && run <= W * 0.92 ? { l, r } : null);
+  }
+
+  let start = -1;
+  let bestStart = -1;
+  let bestLen = 0;
+  for (let y = 0; y <= H; y++) {
+    const ok = y < H && rows[y] !== null;
+    if (ok && start < 0) start = y;
+    if (!ok && start >= 0) {
+      if (y - start > bestLen) {
+        bestLen = y - start;
+        bestStart = start;
+      }
+      start = -1;
+    }
+  }
+  if (bestLen === 0) return null;
+
+  let widest = 0;
+  let left = 0;
+  for (let y = bestStart; y < bestStart + bestLen; y++) {
+    const r = rows[y]!;
+    if (r.r - r.l > widest) {
+      widest = r.r - r.l;
+      left = r.l;
+    }
+  }
+
+  const w = widest / W;
+  const h = bestLen / H;
+  if (h < 0.15 || h > 0.75 || w < 0.15 || w > 0.85) return null;
+
+  return { x: left / W, y: bestStart / H, w, h };
 }
 
 /**

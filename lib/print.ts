@@ -202,7 +202,7 @@ export async function buildPagePdf(
  * setting the type against the art's size in points means the coordinates
  * pdf-lib receives are already the coordinates it draws, and the outline
  * weight means what it says. Proportionally this is the same layout the SVG
- * produces, because `layoutQuote()` derives everything from the box it is
+ * produces, because `layoutQuote()` derives everything from the oval it is
  * given.
  */
 export async function buildQuotePdf(

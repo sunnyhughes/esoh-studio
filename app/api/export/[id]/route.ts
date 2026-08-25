@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { one } from "@/lib/db";
 import { read } from "@/lib/storage";
 import { exportNameForAsset } from "@/lib/export-name";
-import { DEFAULT_BOX, type Box } from "@/lib/overlay";
+import { DEFAULT_AREA, type Area } from "@/lib/overlay";
 import {
   buildPagePdf,
   buildPagePng,
@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
 type Overlay = {
   text: string;
   letteringStyle: string;
-  box?: Box | null;
+  area?: Area | null;
   strokeWidth?: number | null;
   from: string;
 };
@@ -123,9 +123,9 @@ export async function GET(
 
 /**
  * A lettered asset prints as art plus vector type; anything else prints as it
- * stands. The overlay's own `box` and `strokeWidth` are read back so the
+ * stands. The overlay's own `area` and `strokeWidth` are read back so the
  * printed type lands exactly where the stored SVG put it — older assets
- * predate those being recorded and fall back to the default box.
+ * predate those being recorded and fall back to the default oval.
  */
 async function render(
   asset: AssetRow,
@@ -154,7 +154,7 @@ async function render(
   const quote = {
     text: overlay.text,
     letteringStyle: overlay.letteringStyle,
-    box: overlay.box ?? DEFAULT_BOX,
+    area: overlay.area ?? DEFAULT_AREA,
     strokeWidth: overlay.strokeWidth ?? undefined,
   };
 
