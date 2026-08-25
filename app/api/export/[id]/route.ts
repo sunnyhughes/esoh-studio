@@ -8,6 +8,9 @@ import {
   buildPagePng,
   buildQuotePdf,
   buildQuotePng,
+  placeOnPaper,
+  LETTER,
+  PRINT_DPI,
   type PrintOptions,
   type PrintResult,
 } from "@/lib/print";
@@ -17,7 +20,12 @@ export const dynamic = "force-dynamic";
 /**
  * Print export for one page (Stage F).
  *
- * GET /api/export/<assetId>?format=pdf|png[&margin=<inches>][&exact=1]
+ * GET /api/export/<assetId>?format=pdf|png|json[&margin=<inches>][&exact=1]
+ *
+ * `format=json` returns the sheet geometry alone and rasterises nothing, so
+ * the print preview in the app can read the placement from `placeOnPaper()`
+ * instead of reimplementing the arithmetic against it. Two implementations of
+ * one layout is the mistake the overlay already made once.
  *
  * Streams the file with its spelled-out export name attached (D42) rather than
  * writing it to storage. An export is a file leaving the studio, not another
@@ -46,14 +54,17 @@ type AssetRow = {
   id: string;
   storage_path: string;
   metadata_json: { overlay?: Overlay } | null;
+  width: number | null;
+  height: number | null;
 };
 
-const FORMATS = ["pdf", "png"] as const;
+const FORMATS = ["pdf", "png", "json"] as const;
 type Format = (typeof FORMATS)[number];
 
 const TYPES: Record<Format, string> = {
   pdf: "application/pdf",
   png: "image/png",
+  json: "application/json",
 };
 
 export async function GET(
@@ -90,14 +101,35 @@ export async function GET(
     }
 
     const asset = await one<AssetRow>(
-      "select id, storage_path, metadata_json from generated_assets where id = $1",
+      `select id, storage_path, metadata_json, width, height
+         from generated_assets where id = $1`,
       [id]
     );
     if (!asset) {
       return NextResponse.json({ error: "Asset not found." }, { status: 404 });
     }
 
-    const result = await render(asset, format, opts);
+    if (format === "json") {
+      if (!asset.width || !asset.height) {
+        return NextResponse.json(
+          { error: "This asset has no recorded dimensions to place." },
+          { status: 409 }
+        );
+      }
+      const sheet = placeOnPaper(
+        { width: asset.width, height: asset.height },
+        opts
+      );
+      return NextResponse.json({
+        sheet,
+        paper: LETTER,
+        dpi: PRINT_DPI,
+        marginIn: opts.marginIn ?? 0,
+        name: (await exportNameForAsset(asset.id, "pdf")) ?? null,
+      });
+    }
+
+    const result = await render(asset, format as Exclude<Format, "json">, opts);
 
     const name = await exportNameForAsset(asset.id, format);
     const filename = name
@@ -129,7 +161,7 @@ export async function GET(
  */
 async function render(
   asset: AssetRow,
-  format: Format,
+  format: Exclude<Format, "json">,
   opts: PrintOptions
 ): Promise<PrintResult> {
   const overlay = asset.metadata_json?.overlay;

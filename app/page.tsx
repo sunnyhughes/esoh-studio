@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import PrintPanel from "./print-panel";
 
 type Category = {
   id: string;
@@ -80,9 +81,24 @@ export default function NewJobPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [printing, setPrinting] = useState<Asset | null>(null);
+  /** True once this session has generated, so recent pages give way to results. */
+  const [generated, setGenerated] = useState(false);
   const [prompt, setPrompt] = useState<string | null>(null);
 
   // Load form data once.
+  // Without this the grid is empty until something is generated, which put
+  // every page made before today — and the print export reached from it —
+  // out of the app's reach.
+  useEffect(() => {
+    fetch("/api/assets?limit=12")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.error) setAssets(d.assets);
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     fetch("/api/bootstrap")
       .then((r) => r.json())
@@ -208,6 +224,7 @@ export default function NewJobPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
       setAssets(data.assets);
+      setGenerated(true);
       setPrompt(data.prompt);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -512,6 +529,12 @@ export default function NewJobPage() {
             </div>
           )}
 
+          {!busy && !generated && assets.length > 0 && (
+            <div className="empty recent">
+              Recent pages. Generating replaces them with this run&rsquo;s results.
+            </div>
+          )}
+
           {assets.length > 0 && (
             <>
               <div className="grid">
@@ -539,8 +562,9 @@ export default function NewJobPage() {
                         href={`/api/files/${a.storage_path}`}
                         download={`${a.asset_name}.png`}
                       >
-                        Save
+                        Art
                       </a>
+                      <button onClick={() => setPrinting(a)}>Print…</button>
                     </div>
                   </div>
                 ))}
@@ -556,6 +580,10 @@ export default function NewJobPage() {
           )}
         </section>
       </div>
+
+      {printing && (
+        <PrintPanel asset={printing} onClose={() => setPrinting(null)} />
+      )}
     </div>
   );
 }

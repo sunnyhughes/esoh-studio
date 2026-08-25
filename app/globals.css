@@ -196,3 +196,103 @@ details.prompt pre {
   margin-bottom: 16px;
 }
 .check input { width: auto; }
+
+/* Print preview (Stage F) --------------------------------------------- */
+
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.sheet-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: min(920px, 100%);
+  max-height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sheet-panel > header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-panel > header .hint {
+  color: var(--muted); font-size: 12px; margin-left: 10px;
+}
+.sheet-panel > header button {
+  padding: 4px 10px; line-height: 1;
+}
+
+.sheet-body {
+  display: grid; grid-template-columns: 1fr 300px;
+  gap: 18px; padding: 16px; overflow: auto;
+}
+@media (max-width: 760px) {
+  .sheet-body { grid-template-columns: 1fr; }
+}
+
+/* A mid grey so the sheet's own white reads as paper rather than as page. */
+.sheet-stage {
+  background: #8e8e8e;
+  border-radius: var(--radius);
+  padding: 18px;
+  height: min(64vh, 620px);
+  display: flex; align-items: center; justify-content: center;
+}
+/* Height drives the size and aspect-ratio derives the width. Sizing from the
+   width instead and capping the height leaves the width at 100% while the
+   height is clamped, which silently prints the sheet at the wrong proportion —
+   the one thing this preview exists to show correctly. */
+.sheet-paper {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.sheet-paper img { position: absolute; display: block; }
+.sheet-paper .art-edge {
+  position: absolute;
+  outline: 1px dashed rgba(0, 90, 200, 0.75);
+  pointer-events: none;
+}
+.sheet-paper .border-guide {
+  position: absolute;
+  border: 1px dashed rgba(200, 40, 40, 0.85);
+  pointer-events: none;
+}
+.sheet-empty {
+  color: #fff; font-size: 13px; padding: 40px 0; text-align: center;
+}
+
+.sheet-controls { display: flex; flex-direction: column; gap: 10px; }
+.sheet-controls .field { display: flex; flex-direction: column; gap: 4px; }
+.sheet-controls .field > span {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.sheet-controls .check {
+  display: flex; align-items: center; gap: 8px; font-size: 13px;
+}
+.sheet-controls .check input { width: auto; }
+.sheet-controls .note {
+  margin: -4px 0 4px; font-size: 12px; color: var(--muted); line-height: 1.45;
+}
+.sheet-controls .note.warn { color: var(--danger); }
+.sheet-controls .note.filename {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; word-break: break-all;
+}
+.sheet-actions { margin-top: auto; padding-top: 6px; }
+.sheet-actions a {
+  display: block; text-align: center; padding: 9px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--accent); color: var(--accent-text);
+  text-decoration: none; font-size: 14px;
+}
+.sheet-actions a:hover { filter: brightness(1.08); }
+.empty.recent { margin-bottom: 12px; }
