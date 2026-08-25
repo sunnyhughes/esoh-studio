@@ -70,11 +70,12 @@ export async function POST(req: Request) {
     const letteringStyle =
       body.letteringStyle ?? asset.lettering_style ?? "Block Outline";
 
+    const box = body.box ?? DEFAULT_BOX;
     const page = await read(asset.storage_path);
     const { png, svg, width, height } = await overlayQuote(page, {
       text,
       letteringStyle,
-      box: body.box ?? DEFAULT_BOX,
+      box,
       strokeWidth: body.strokeWidth,
     });
 
@@ -104,7 +105,18 @@ export async function POST(req: Request) {
         bytes,
         asset.source_variant_index,
         JSON.stringify({
-          overlay: { text, letteringStyle, svgPath: svgKey, from: asset.id },
+          // box and strokeWidth are recorded because the print export re-lays
+          // this type as vector against the original art (D61) rather than
+          // printing the flattened PNG. Without them the PDF would re-layout
+          // at the default box and disagree with the SVG stored here.
+          overlay: {
+            text,
+            letteringStyle,
+            box,
+            strokeWidth: body.strokeWidth ?? null,
+            svgPath: svgKey,
+            from: asset.id,
+          },
         }),
       ]
     );

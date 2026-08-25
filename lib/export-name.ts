@@ -93,7 +93,10 @@ type AssetRow = {
  * item, so a rework never overwrites the attempt it replaces. Assets generated
  * ad hoc — no item attached — fall back to counting within their own job.
  */
-export async function exportNameForAsset(assetId: string): Promise<string | null> {
+export async function exportNameForAsset(
+  assetId: string,
+  extension = "png"
+): Promise<string | null> {
   const row = await one<AssetRow>(
     `
     select cat.code as category_code,
@@ -132,5 +135,6 @@ export async function exportNameForAsset(assetId: string): Promise<string | null
     pageType: row.page_type,
     artStyle: row.art_style,
     version: Number(row.version) || 1,
+    extension,
   });
 }
