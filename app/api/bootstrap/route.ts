@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /** Everything the New Job form needs to render itself. */
 export async function GET() {
   try {
-    const [categories, collections, templates, items, vocab] =
+    const [categories, collections, templates, items, vocab, letteringStyles] =
       await Promise.all([
         query(`select id, code, label, output_width, output_height, transparent
                  from categories where is_active order by label`),
@@ -32,6 +32,8 @@ export async function GET() {
                      filter (where background_density is not null),
                    '{}') as densities
                  from prompt_blocks where is_active`),
+        query(`select lettering_style, family from lettering_faces
+                 order by lettering_style`),
       ]);
 
     return NextResponse.json({
@@ -42,6 +44,7 @@ export async function GET() {
         items,
         artStyles: (vocab[0] as { art_styles: string[] })?.art_styles ?? [],
         densities: (vocab[0] as { densities: string[] })?.densities ?? [],
+        letteringStyles,
       },
     });
   } catch (err) {

@@ -19,9 +19,12 @@ export async function GET(req: Request) {
     const limit = Math.min(Math.max(Number(q.get("limit") ?? 12), 1), 60);
 
     const assets = await query(
-      `select id, asset_name, storage_path, status, is_favorite
-         from generated_assets
-        order by created_at desc
+      `select a.id, a.asset_name, a.storage_path, a.status, a.is_favorite,
+              i.page_type, i.quote_text, i.lettering_style,
+              (a.metadata_json -> 'overlay') is not null as is_lettering
+         from generated_assets a
+    left join items i on i.id = a.item_id
+        order by a.created_at desc
         limit $1`,
       [limit]
     );

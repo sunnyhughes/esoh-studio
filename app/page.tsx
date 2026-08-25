@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import PrintPanel from "./print-panel";
+import LetterPanel, { type Face } from "./letter-panel";
 
 type Category = {
   id: string;
@@ -56,6 +57,11 @@ type Asset = {
   storage_path: string;
   status: string;
   is_favorite: boolean;
+  /** From the item behind the page: what can be lettered, and with what. */
+  page_type?: string | null;
+  quote_text?: string | null;
+  lettering_style?: string | null;
+  is_lettering?: boolean;
 };
 
 export default function NewJobPage() {
@@ -82,6 +88,8 @@ export default function NewJobPage() {
   const [error, setError] = useState<string | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [printing, setPrinting] = useState<Asset | null>(null);
+  const [lettering, setLettering] = useState<Asset | null>(null);
+  const [faces, setFaces] = useState<Face[]>([]);
   /** True once this session has generated, so recent pages give way to results. */
   const [generated, setGenerated] = useState(false);
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -104,8 +112,16 @@ export default function NewJobPage() {
       .then((r) => r.json())
       .then((d) => {
         if (d.error) return setError(d.error);
-        const { categories, collections, templates, items, artStyles, densities } =
-          d.data;
+        const {
+          categories,
+          collections,
+          templates,
+          items,
+          artStyles,
+          densities,
+          letteringStyles,
+        } = d.data;
+        setFaces(letteringStyles ?? []);
         setCategories(categories);
         setCollections(collections);
         setTemplates(templates);
@@ -564,6 +580,9 @@ export default function NewJobPage() {
                       >
                         Art
                       </a>
+                      {a.page_type === "Quote page" && !a.is_lettering && (
+                        <button onClick={() => setLettering(a)}>Letter…</button>
+                      )}
                       <button onClick={() => setPrinting(a)}>Print…</button>
                     </div>
                   </div>
@@ -583,6 +602,38 @@ export default function NewJobPage() {
 
       {printing && (
         <PrintPanel asset={printing} onClose={() => setPrinting(null)} />
+      )}
+
+      {lettering && (
+        <LetterPanel
+          asset={{
+            id: lettering.id,
+            asset_name: lettering.asset_name,
+            storage_path: lettering.storage_path,
+            quote_text: lettering.quote_text ?? null,
+            lettering_style: lettering.lettering_style ?? null,
+          }}
+          faces={faces}
+          onClose={() => setLettering(null)}
+          onLettered={(created) => {
+            // The lettered page joins the grid next to the art it came from,
+            // so the next step — Print… — is right there.
+            const made = created as Asset;
+            setAssets((prev) => {
+              const at = prev.findIndex((p) => p.id === lettering.id);
+              const row: Asset = {
+                ...made,
+                page_type: lettering.page_type,
+                quote_text: lettering.quote_text,
+                lettering_style: lettering.lettering_style,
+                is_lettering: true,
+              };
+              const next = [...prev];
+              next.splice(at < 0 ? prev.length : at + 1, 0, row);
+              return next;
+            });
+          }}
+        />
       )}
     </div>
   );

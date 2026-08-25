@@ -107,6 +107,20 @@ export async function POST(req: Request) {
       strokeWidth: body.strokeWidth,
     });
 
+    // A preview persists nothing. Settling on wording and a face takes several
+    // attempts, and every attempt is an asset row and a pair of files under
+    // D65 and D68 — so trying things would silently fill the library with
+    // rejected drafts. Only the commit writes.
+    if (new URL(req.url).searchParams.has("preview")) {
+      return new NextResponse(new Uint8Array(png), {
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "no-store",
+          "X-Lettering-Style": letteringStyle,
+        },
+      });
+    }
+
     // Unique per lettering, not per page. Keying on the source page alone made
     // every re-letter overwrite the one before it: the older asset row survived
     // pointing at a file that now held different words, and since the SVG is

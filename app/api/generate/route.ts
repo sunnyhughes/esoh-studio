@@ -59,10 +59,12 @@ export async function POST(req: Request) {
           facial_hair: string | null;
           visual_elements: string | null;
           collection_id: string;
+          quote_text: string | null;
+          lettering_style: string | null;
         }>(
           `select brief, art_style, background_density, brand_mark,
                   ethnicity_line, season, page_type, hair, facial_hair,
-                  visual_elements, collection_id
+                  visual_elements, collection_id, quote_text, lettering_style
              from items where id = $1`,
           [body.itemId]
         )
@@ -232,7 +234,15 @@ export async function POST(req: Request) {
           JSON.stringify({ size, quality }),
         ]
       );
-      assets.push(asset);
+      // The card needs to know whether this page can be lettered, and with
+      // what. Carried from the item rather than re-queried per asset.
+      assets.push({
+        ...(asset as object),
+        page_type: item?.page_type ?? null,
+        quote_text: item?.quote_text ?? null,
+        lettering_style: item?.lettering_style ?? null,
+        is_lettering: false,
+      });
     }
 
     // 7. Close the job out with usage and cost (D9).
