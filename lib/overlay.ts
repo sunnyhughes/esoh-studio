@@ -68,7 +68,7 @@ export type OverlayOptions = {
 
 const cache = new Map<string, Font>();
 
-function load(file: string, weight: number): Font {
+export function loadFace(file: string, weight: number): Font {
   const key = `${file}@${weight}`;
   const hit = cache.get(key);
   if (hit) return hit;
@@ -300,7 +300,7 @@ function fit(
  * divide the stroke width back out to compensate. Absolute paths need neither
  * workaround, and both outputs draw identical geometry.
  */
-function lineToPath(
+export function lineToPath(
   font: Font,
   text: string,
   scale: number,
@@ -342,8 +342,8 @@ export type QuoteLayout = {
 export async function layoutQuote(opts: OverlayOptions): Promise<QuoteLayout> {
   const face = await getFace(opts.letteringStyle);
   const { files, paired } = facesFor(face);
-  const primary = load(files[0], face.weight);
-  const secondary = paired ? load(files[1], face.weight) : primary;
+  const primary = loadFace(files[0], face.weight);
+  const secondary = paired ? loadFace(files[1], face.weight) : primary;
 
   const e = ellipseOf(opts.area ?? DEFAULT_AREA, opts.width, opts.height);
 

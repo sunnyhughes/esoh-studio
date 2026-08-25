@@ -317,3 +317,58 @@ details.prompt pre {
   border-color: var(--accent);
 }
 .sheet-actions button.commit:disabled { opacity: 0.5; }
+
+/* Books ---------------------------------------------------------------- */
+
+.sheet-panel.books { width: min(880px, 100%); }
+.books-body {
+  display: grid; grid-template-columns: 290px 1fr;
+  gap: 18px; padding: 16px; overflow: auto;
+}
+@media (max-width: 760px) { .books-body { grid-template-columns: 1fr; } }
+
+.book-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; max-height: 56vh; }
+.book-list li { margin-bottom: 4px; }
+.book-list li.none { color: var(--muted); font-size: 13px; padding: 8px; }
+.book-list button {
+  width: 100%; text-align: left; padding: 8px 10px;
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px;
+}
+.book-list button.on { border-color: var(--accent); }
+.bk-name { font-size: 13px; display: flex; flex-direction: column; }
+.bk-name em {
+  font-style: normal; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.bk-count { font-size: 12px; color: var(--muted); align-self: center; }
+.bk-bar {
+  grid-column: 1 / -1; height: 3px; border-radius: 2px;
+  background: var(--border); overflow: hidden; margin-top: 4px;
+}
+.bk-bar i { display: block; height: 100%; background: var(--ok); }
+
+.book-detail { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.page-list {
+  list-style: none; margin: 0; padding: 0;
+  max-height: 40vh; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.page-list li {
+  display: grid; grid-template-columns: auto 1fr; gap: 1px 10px;
+  padding: 6px 10px; font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.page-list li:last-child { border-bottom: 0; }
+.page-list li.blocked { color: var(--muted); }
+.page-list li.ready .pg-ref { color: var(--ok); }
+.pg-ref { font-variant-numeric: tabular-nums; }
+.pg-type { color: var(--muted); }
+.pg-note { grid-column: 2; font-size: 11px; color: var(--muted); }
+
+.book-actions { display: flex; gap: 8px; margin-top: 4px; }
+.book-actions button { flex: 1; padding: 9px; font-size: 13px; }
+.book-actions button.commit {
+  background: var(--accent); color: var(--accent-text); border-color: var(--accent);
+}
+.book-actions button:disabled { opacity: 0.5; }
+header.top .spacer { flex: 1; }

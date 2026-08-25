@@ -1,4 +1,11 @@
-import { LineCapStyle, LineJoinStyle, PDFDocument, rgb, setLineJoin } from "pdf-lib";
+import {
+  LineCapStyle,
+  LineJoinStyle,
+  PDFDocument,
+  rgb,
+  setLineJoin,
+  type PDFPage,
+} from "pdf-lib";
 import sharp from "sharp";
 import {
   buildQuoteSvg,
@@ -211,33 +218,7 @@ export async function buildQuotePdf(
   opts: PrintOptions = {}
 ): Promise<PrintResult> {
   const { doc, page, sheet } = await startPdf(art, opts);
-
-  const { paths, stroke, color } = await layoutQuote({
-    ...quote,
-    width: sheet.art.width * PX_TO_PT,
-    height: sheet.art.height * PX_TO_PT,
-  });
-
-  // drawSvgPath translates to (x, y) and then flips the y axis, so `y` is the
-  // point on the page that the art's top edge sits at.
-  const originX = sheet.art.x * PX_TO_PT;
-  const originY = (sheet.height - sheet.art.y) * PX_TO_PT;
-
-  // drawSvgPath has no line-join option and a PDF defaults to mitre, which
-  // spikes at the sharp corners of a heavy outlined letter. Each call brackets
-  // itself in push/popGraphicsState, and push preserves what is already set.
-  page.pushOperators(setLineJoin(LineJoinStyle.Round));
-
-  for (const d of paths) {
-    page.drawSvgPath(d, {
-      x: originX,
-      y: originY,
-      borderColor: toRgb(color),
-      borderWidth: stroke,
-      borderLineCap: LineCapStyle.Round,
-    });
-  }
-
+  await drawQuoteOn(page, sheet, quote);
   return finishPdf(doc, sheet);
 }
 
@@ -283,10 +264,21 @@ export async function buildPagePng(
   return { bytes: png, width: sheet.width, height: sheet.height, sheet };
 }
 
-async function startPdf(art: Buffer, opts: PrintOptions) {
+/**
+ * Add one padded page to a document that already exists.
+ *
+ * Exported so a book is assembled by drawing into a single document rather
+ * than by building fifteen PDFs and merging them. Merging would mean encoding,
+ * parsing and re-encoding every page, and would leave two ways to make a
+ * printed page — the sheet geometry has one owner and this keeps it that way.
+ */
+export async function addPage(
+  doc: PDFDocument,
+  art: Buffer,
+  opts: PrintOptions = {}
+): Promise<{ page: PDFPage; sheet: Sheet }> {
   const { png, sheet } = await padToPrint(art, opts);
 
-  const doc = await PDFDocument.create();
   const widthPt = sheet.width * PX_TO_PT;
   const heightPt = sheet.height * PX_TO_PT;
 
@@ -298,10 +290,64 @@ async function startPdf(art: Buffer, opts: PrintOptions) {
     height: heightPt,
   });
 
+  return { page, sheet };
+}
+
+/**
+ * An empty sheet of the same size.
+ *
+ * A coloring book needs one behind every page of art: KDP prints both sides of
+ * every leaf, and markers bleed, so art backed by art loses the page behind it.
+ * Nothing is drawn — paper is already white.
+ */
+export function addBlank(doc: PDFDocument, opts: PrintOptions = {}): PDFPage {
+  const paper = opts.paper ?? LETTER;
+  return doc.addPage([
+    paper.widthIn * PT_PER_INCH,
+    paper.heightIn * PT_PER_INCH,
+  ]);
+}
+
+/** Set the quote over a page already drawn by `addPage`. */
+export async function drawQuoteOn(
+  page: PDFPage,
+  sheet: Sheet,
+  quote: Quote
+): Promise<void> {
+  const { paths, stroke, color } = await layoutQuote({
+    ...quote,
+    width: sheet.art.width * PX_TO_PT,
+    height: sheet.art.height * PX_TO_PT,
+  });
+
+  // drawSvgPath translates to (x, y) and then flips the y axis, so `y` is the
+  // point on the page that the art's top edge sits at.
+  const originX = sheet.art.x * PX_TO_PT;
+  const originY = (sheet.height - sheet.art.y) * PX_TO_PT;
+
+  // drawSvgPath has no line-join option and a PDF defaults to mitre, which
+  // spikes at the sharp corners of a heavy outlined letter. Each call brackets
+  // itself in push/popGraphicsState, and push preserves what is already set.
+  page.pushOperators(setLineJoin(LineJoinStyle.Round));
+
+  for (const d of paths) {
+    page.drawSvgPath(d, {
+      x: originX,
+      y: originY,
+      borderColor: toRgb(color),
+      borderWidth: stroke,
+      borderLineCap: LineCapStyle.Round,
+    });
+  }
+}
+
+async function startPdf(art: Buffer, opts: PrintOptions) {
+  const doc = await PDFDocument.create();
+  const { page, sheet } = await addPage(doc, art, opts);
   return { doc, page, sheet };
 }
 
-async function finishPdf(doc: PDFDocument, sheet: Sheet): Promise<PrintResult> {
+export async function finishPdf(doc: PDFDocument, sheet: Sheet): Promise<PrintResult> {
   doc.setProducer("Esoh Studio");
   doc.setCreator("Esoh Studio");
   return {

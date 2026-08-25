@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import PrintPanel from "./print-panel";
 import LetterPanel, { type Face } from "./letter-panel";
+import BooksPanel from "./books-panel";
 
 type Category = {
   id: string;
@@ -90,6 +91,7 @@ export default function NewJobPage() {
   const [printing, setPrinting] = useState<Asset | null>(null);
   const [lettering, setLettering] = useState<Asset | null>(null);
   const [faces, setFaces] = useState<Face[]>([]);
+  const [showBooks, setShowBooks] = useState(false);
   /** True once this session has generated, so recent pages give way to results. */
   const [generated, setGenerated] = useState(false);
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -268,7 +270,9 @@ export default function NewJobPage() {
     <div className="shell">
       <header className="top">
         <h1>Esoh Studio</h1>
-        <span className="tag">Stage A — New Job</span>
+        <span className="tag">New job</span>
+        <span className="spacer" />
+        <button onClick={() => setShowBooks(true)}>Books…</button>
       </header>
 
       {error && <div className="error">{error}</div>}
@@ -603,6 +607,8 @@ export default function NewJobPage() {
       {printing && (
         <PrintPanel asset={printing} onClose={() => setPrinting(null)} />
       )}
+
+      {showBooks && <BooksPanel onClose={() => setShowBooks(false)} />}
 
       {lettering && (
         <LetterPanel
