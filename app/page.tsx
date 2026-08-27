@@ -27,6 +27,8 @@ type Template = {
   name: string;
   slug: string;
   description: string | null;
+  category_id: string;
+  category_code: string;
   page_type: string | null;
   variables_json: Variable[];
   default_settings: { size?: string; quality?: string; n?: number };
@@ -71,6 +73,9 @@ export default function NewJobPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [artStyles, setArtStyles] = useState<string[]>([]);
+  const [artStylesByCategory, setArtStylesByCategory] = useState<
+    Record<string, string[]>
+  >({});
   const [densities, setDensities] = useState<string[]>([]);
 
   const [categoryId, setCategoryId] = useState("");
@@ -120,6 +125,7 @@ export default function NewJobPage() {
           templates,
           items,
           artStyles,
+          artStylesByCategory,
           densities,
           letteringStyles,
         } = d.data;
@@ -129,6 +135,7 @@ export default function NewJobPage() {
         setTemplates(templates);
         setItems(items ?? []);
         setArtStyles(artStyles ?? []);
+        setArtStylesByCategory(artStylesByCategory ?? {});
         setDensities(densities ?? []);
         if (categories[0]) setCategoryId(categories[0].id);
         if (templates[0]) setTemplateId(templates[0].id);
@@ -144,6 +151,15 @@ export default function NewJobPage() {
   const categoryCollections = useMemo(
     () => collections.filter((c) => c.category_id === categoryId),
     [collections, categoryId]
+  );
+
+  // A template belongs to one category, and so does every art style, because
+  // both are defined by the blocks behind them. Showing all of either was the
+  // reason picking VV-Styles used to offer a list of coloring-book choices
+  // that could only fail.
+  const categoryTemplates = useMemo(
+    () => templates.filter((t) => t.category_id === categoryId),
+    [templates, categoryId]
   );
 
   const item = useMemo(
@@ -167,9 +183,12 @@ export default function NewJobPage() {
   // Each stays editable — the row is a starting point, not a lock.
   useEffect(() => {
     if (!item) return;
-    const match = templates.find(
-      (t) => t.page_type && t.page_type === item.page_type
-    );
+    // Page type picks the template where there is one. Apparel items have no
+    // page type — one VV-Styles design is not a kind of page — so the item's
+    // own category settles it instead.
+    const match =
+      templates.find((t) => t.page_type && t.page_type === item.page_type) ??
+      templates.find((t) => t.category_id === item.category_id);
     if (match) setTemplateId(match.id);
     if (item.art_style) setArtStyle(item.art_style);
     if (item.background_density) setDensity(item.background_density);
@@ -195,6 +214,23 @@ export default function NewJobPage() {
   useEffect(() => {
     if (category) setSize(`${category.output_width}x${category.output_height}`);
   }, [category]);
+
+  const categoryArtStyles = useMemo(() => {
+    if (!category) return artStyles;
+    return artStylesByCategory[category.code] ?? [];
+  }, [artStylesByCategory, artStyles, category]);
+
+  // Keep template and art style valid whenever the category changes, the same
+  // way the collection already is.
+  useEffect(() => {
+    if (!categoryTemplates.some((t) => t.id === templateId)) {
+      setTemplateId(categoryTemplates[0]?.id ?? "");
+    }
+  }, [categoryTemplates, templateId]);
+
+  useEffect(() => {
+    if (artStyle && !categoryArtStyles.includes(artStyle)) setArtStyle("");
+  }, [categoryArtStyles, artStyle]);
 
   // Adopt the template's own defaults, and seed selects with their first option.
   useEffect(() => {
@@ -356,9 +392,14 @@ export default function NewJobPage() {
 
               {item.quote_text && (
                 <p className="hint">
-                  Quote: “{item.quote_text}” — overlaid as outlined type after
-                  generation, never drawn by the model (D23). The page reserves
-                  space for it.
+                  Quote: “{item.quote_text}” —{" "}
+                  {category?.code === "vv-styles"
+                    ? "lettered by the model as part of the artwork (D70). " +
+                      "Apparel type is filled and built into the design, not " +
+                      "laid over it."
+                    : "overlaid as outlined type after generation, never " +
+                      "drawn by the model (D23). The page reserves space for " +
+                      "it."}
                 </p>
               )}
             </div>
@@ -371,7 +412,7 @@ export default function NewJobPage() {
               value={templateId}
               onChange={(e) => setTemplateId(e.target.value)}
             >
-              {templates.map((t) => (
+              {categoryTemplates.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
                 </option>
@@ -388,7 +429,7 @@ export default function NewJobPage() {
                 onChange={(e) => setArtStyle(e.target.value)}
               >
                 <option value="">Choose…</option>
-                {artStyles.map((a) => (
+                {categoryArtStyles.map((a) => (
                   <option key={a} value={a}>
                     {a}
                   </option>

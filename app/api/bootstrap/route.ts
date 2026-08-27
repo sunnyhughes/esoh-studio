@@ -7,8 +7,15 @@ export const dynamic = "force-dynamic";
 /** Everything the New Job form needs to render itself. */
 export async function GET() {
   try {
-    const [categories, collections, templates, items, vocab, letteringStyles] =
-      await Promise.all([
+    const [
+      categories,
+      collections,
+      templates,
+      items,
+      vocab,
+      categoryVocab,
+      letteringStyles,
+    ] = await Promise.all([
         query(`select id, code, label, output_width, output_height, transparent
                  from categories where is_active order by label`),
         query(`select id, category_id, name, slug from collections
@@ -32,6 +39,19 @@ export async function GET() {
                      filter (where background_density is not null),
                    '{}') as densities
                  from prompt_blocks where is_active`),
+        // The same vocabulary again, but kept per category. The flat list
+        // above spans all four, and a coloring-book style has no block in the
+        // VV-Styles template — offering it would only produce "No base style
+        // block for art style ...". The form filters on this instead.
+        query(`select c.code,
+                      coalesce(
+                        array_agg(distinct b.art_style)
+                          filter (where b.art_style is not null), '{}')
+                        as art_styles
+                 from categories c
+                 left join prompt_blocks b
+                   on b.category_id = c.id and b.is_active
+                group by c.code`),
         query(`select lettering_style, family from lettering_faces
                  order by lettering_style`),
       ]);
@@ -43,6 +63,11 @@ export async function GET() {
         templates,
         items,
         artStyles: (vocab[0] as { art_styles: string[] })?.art_styles ?? [],
+        artStylesByCategory: Object.fromEntries(
+          (categoryVocab as { code: string; art_styles: string[] }[]).map(
+            (row) => [row.code, row.art_styles]
+          )
+        ),
         densities: (vocab[0] as { densities: string[] })?.densities ?? [],
         letteringStyles,
       },
