@@ -5,6 +5,7 @@ import { getProvider, DEFAULT_PROVIDER } from "@/lib/providers";
 import { OPENAI_DEFAULT_MODEL } from "@/lib/providers/openai";
 import { estimateCostUsd } from "@/lib/pricing";
 import { assetKey, save, read } from "@/lib/storage";
+import { inspectTransparency } from "@/lib/transparency";
 
 export const dynamic = "force-dynamic";
 // Image generation is slow; don't let the platform cut it off mid-flight.
@@ -29,6 +30,25 @@ type Body = {
   quality?: string;
   n?: number;
 };
+
+/**
+ * `product_placement` records a garment and a placement together — "Dark
+ * heather tee, front center". The prompt only wants the colour, because it is
+ * named so that light detail is not left invisible against the fabric.
+ * Returns null when nothing is left after the garment noun comes off, which
+ * keeps the block from being dropped for a blank slot it could have filled.
+ */
+const GARMENT_NOUNS =
+  /\b(tee|t-?shirt|shirt|sweatshirt|hoodie|crewneck|long ?sleeve|tank)s?\b/gi;
+
+function garmentColorFrom(placement: string): string | null {
+  const color = placement
+    .split(",")[0]
+    .replace(GARMENT_NOUNS, "")
+    .trim()
+    .toLowerCase();
+  return color || null;
+}
 
 export async function POST(req: Request) {
   let jobId: string | null = null;
@@ -61,10 +81,13 @@ export async function POST(req: Request) {
           collection_id: string;
           quote_text: string | null;
           lettering_style: string | null;
+          color_direction: string | null;
+          product_placement: string | null;
         }>(
           `select brief, art_style, background_density, brand_mark,
                   ethnicity_line, season, page_type, hair, facial_hair,
-                  visual_elements, collection_id, quote_text, lettering_style
+                  visual_elements, collection_id, quote_text, lettering_style,
+                  color_direction, product_placement
              from items where id = $1`,
           [body.itemId]
         )
@@ -72,13 +95,18 @@ export async function POST(req: Request) {
 
     // A page of pattern has no figure, so the ethnicity line would read as a
     // stray instruction about someone who is not there (D62).
-    const hasPeople =
-      (
-        await one<{ has_people: boolean }>(
-          `select has_people from prompt_templates where id = $1`,
-          [body.templateId]
-        )
-      )?.has_people ?? true;
+    const templateMeta = await one<{
+      has_people: boolean;
+      category_code: string;
+      transparent: boolean;
+    }>(
+      `select t.has_people, c.code as category_code, c.transparent
+         from prompt_templates t
+         join categories c on c.id = t.category_id
+        where t.id = $1`,
+      [body.templateId]
+    );
+    const hasPeople = templateMeta?.has_people ?? true;
 
     const inputs = { ...(body.inputs ?? {}) };
     if (item && !inputs.subject?.trim()) {
@@ -109,6 +137,34 @@ export async function POST(req: Request) {
     // the setting was left entirely to the model.
     if (item?.visual_elements && !inputs.environment?.trim()) {
       inputs.environment = item.visual_elements;
+    }
+
+    // An apparel design keeps its whole direction in its own columns — the
+    // five that D57 recorded as having nowhere to land until a VV-Styles
+    // template existed. One now does, so they land here.
+    //
+    // The phrase is among them. D57 keeps quote_text out of coloring-book
+    // prompts because D23 overlays it as outlined vector type on a page meant
+    // to be coloured. Apparel type is filled (D59) and drawn into the artwork
+    // — arched banners, offset caps, lettering sharing its contour with the
+    // image — so on a shirt the model letters it. Proposed as D70.
+    if (templateMeta?.category_code === "vv-styles") {
+      if (item?.visual_elements && !inputs.visual_elements?.trim()) {
+        inputs.visual_elements = item.visual_elements;
+      }
+      if (item?.quote_text && !inputs.quote?.trim()) {
+        inputs.quote = item.quote_text;
+      }
+      if (item?.lettering_style && !inputs.lettering?.trim()) {
+        inputs.lettering = item.lettering_style;
+      }
+      if (item?.color_direction && !inputs.palette?.trim()) {
+        inputs.palette = item.color_direction;
+      }
+      if (item?.product_placement && !inputs.garment?.trim()) {
+        const garment = garmentColorFrom(item.product_placement);
+        if (garment) inputs.garment = garment;
+      }
     }
 
     const artStyle = body.artStyle ?? item?.art_style ?? null;
@@ -212,6 +268,14 @@ export async function POST(req: Request) {
 
       const [w, h] = size.split("x").map((v) => parseInt(v, 10));
 
+      // A background box hidden by white fabric is invisible until the design
+      // is put on navy (D34/D38), so the knockout is measured, not eyeballed.
+      // A failing image is still saved — it has been paid for, and whether to
+      // rework or re-run is a judgment call.
+      const transparency = templateMeta?.transparent
+        ? await inspectTransparency(image.data)
+        : null;
+
       const asset = await one(
         `insert into generated_assets
            (generation_job_id, category_id, collection_id, item_id, asset_name,
@@ -231,13 +295,14 @@ export async function POST(req: Request) {
           Number.isFinite(h) ? h : null,
           bytes,
           image.index,
-          JSON.stringify({ size, quality }),
+          JSON.stringify({ size, quality, transparency }),
         ]
       );
       // The card needs to know whether this page can be lettered, and with
       // what. Carried from the item rather than re-queried per asset.
       assets.push({
         ...(asset as object),
+        transparency,
         page_type: item?.page_type ?? null,
         quote_text: item?.quote_text ?? null,
         lettering_style: item?.lettering_style ?? null,
