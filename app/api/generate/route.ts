@@ -251,12 +251,17 @@ export async function POST(req: Request) {
       references.map((r) => read(r.storage_path))
     );
 
+    // The category knows whether its output is transparent (D34), the
+    // provider knows how to ask for it, and until now nothing joined the two:
+    // the flag was never passed, so every apparel prompt was asking for a
+    // knockout in words while `background: "transparent"` went unset.
     const result = await getProvider()({
       prompt,
       size,
       quality,
       n,
       model,
+      transparent: templateMeta?.transparent ?? false,
       referenceImages: referenceImages.length ? referenceImages : undefined,
     });
 

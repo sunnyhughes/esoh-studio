@@ -20,12 +20,23 @@ import sharp from "sharp";
  *   3. Alpha present and used, but the design sits on an opaque panel, so the
  *      knockout is only around the outside of a rectangle. This is the one
  *      that hides best — `cleanserene` and `listenin` both carry a white box
- *      and both have clear space around it.
+ *      and both have clear space around it. The first VV-Styles generation
+ *      produced the same defect in a shape that defeats a border test: an
+ *      irregular cream blob with a soft feathered edge, floating clear of all
+ *      four sides.
  *
- * The panel is caught by measuring how full the design's own bounding box is.
- * Real cut-out artwork leaves gaps inside its box: the four accepted
- * references measure 60-72% opaque within their bounds. A design on a panel
- * measures essentially 100%, because the panel *is* the box.
+ * Two measurements catch the panel, because one alone did not.
+ *
+ * How full the design's own bounding box is. Real cut-out artwork leaves gaps
+ * between its elements: accepted references measure 60-72% opaque within
+ * their bounds. A panel welds everything together — a full-canvas one
+ * measures 100%, and the feathered blob measured 86%.
+ *
+ * How much of the alpha is neither clear nor opaque. A cut-out has hard
+ * edges, so its partial alpha is antialiasing and nothing more: 0.7-1.6% on
+ * the references. A feathered panel fades out over many pixels, and the blob
+ * measured 4.9% — three times the worst honest value. This is the sharper
+ * signal of the two.
  *
  * What this does NOT catch is a mockup — a photograph of the design already
  * on a shirt, knocked out around the garment. Its alpha is indistinguishable
@@ -46,6 +57,8 @@ export type TransparencyReport = {
   borderOpaqueFraction: number;
   /** How full the design's own bounding box is. ~1 means it is a solid panel. */
   boundsFillFraction: number;
+  /** Share of pixels that are neither clear nor opaque. High means a soft edge. */
+  softEdgeFraction: number;
   /** Empty when ok. Written for a person to read. */
   problems: string[];
 };
@@ -59,11 +72,16 @@ const MIN_TRANSPARENT = 0.05;
 /** Above this share of opaque edge, the design is sitting on a panel. */
 const MAX_BORDER_OPAQUE = 0.5;
 /**
- * Above this share of its own bounding box filled, the design has no gaps in
- * it and is a rectangle. Accepted references top out at 72%, so 92% leaves
- * room for a design that genuinely is dense without tripping.
+ * Above this share of its own bounding box filled, the design has no gaps
+ * between its elements. References top out at 72% and the panelled
+ * generation hit 86%, so the line sits between them.
  */
-const MAX_BOUNDS_FILL = 0.92;
+const MAX_BOUNDS_FILL = 0.8;
+/**
+ * Above this share of half-transparent pixels, the edge is fading rather than
+ * cutting. References run 0.7-1.6%; the panelled generation ran 4.9%.
+ */
+const MAX_SOFT_EDGE = 0.03;
 
 export async function inspectTransparency(
   image: Buffer
@@ -81,6 +99,7 @@ export async function inspectTransparency(
 
   const { width, height } = info;
   let clear = 0;
+  let soft = 0;
   let opaque = 0;
   let minX = width;
   let minY = height;
@@ -91,6 +110,7 @@ export async function inspectTransparency(
     for (let x = 0; x < width; x++) {
       const a = data[y * width + x];
       if (a <= CLEAR) clear++;
+      else if (a < OPAQUE) soft++;
       if (a >= OPAQUE) {
         opaque++;
         if (x < minX) minX = x;
@@ -103,6 +123,7 @@ export async function inspectTransparency(
 
   const boundsArea = maxX < 0 ? 0 : (maxX - minX + 1) * (maxY - minY + 1);
   const boundsFillFraction = boundsArea ? opaque / boundsArea : 0;
+  const softEdgeFraction = data.length ? soft / data.length : 0;
 
   // The outermost ring only. A cut-out design ends before the edge, so its
   // border is clear; a design on a panel fills the border with ink.
@@ -148,6 +169,14 @@ export async function inspectTransparency(
     );
   }
 
+  if (softEdgeFraction > MAX_SOFT_EDGE) {
+    problems.push(
+      `${(softEdgeFraction * 100).toFixed(1)}% of the image is only ` +
+        "half-transparent, which is a soft fading edge rather than a cut " +
+        "one. Print treats it as a haze around the design."
+    );
+  }
+
   if (borderOpaqueFraction > MAX_BORDER_OPAQUE) {
     problems.push(
       `${(borderOpaqueFraction * 100).toFixed(0)}% of the outer edge is ` +
@@ -162,6 +191,7 @@ export async function inspectTransparency(
     transparentFraction,
     borderOpaqueFraction,
     boundsFillFraction,
+    softEdgeFraction,
     problems,
   };
 }

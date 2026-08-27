@@ -361,13 +361,15 @@ Templates attach to a category and correspond to page types. The Style Library h
 | Social — feed | 1024×1024 | square |
 | Social — Pinterest | 1024×1536 | 2:3 is already ideal |
 | Social — stories/reels | 1024×1536 | pad to 9:16, compose inside a safe zone |
-| VV-Styles apparel | 1024×1024, transparent background | upscale to 4500×5400 (15×18" @ 300 DPI) |
+| VV-Styles apparel | 1024×1536, transparent background | pad into 3600×4800 (12×16" @ 300 DPI) |
 
 **Coloring pages pad, never crop.** 1024×1536 is 0.667; letter is 0.773. Cropping to letter cuts ~13% off top and bottom and loses art. Padding fits the art to 2200×3300 and leaves ~0.58" of white each side — which KDP requires anyway for margin and gutter. The margin does double duty.
 
 This closes the open question in §9.
 
-Apparel is raster, not vector. `gpt-image-1` supports transparent backgrounds, so 4500×5400 transparent PNG is genuinely print-ready for DTF. True vector would need a separate trace step — worth doing later, not a blocker.
+**Apparel pads too, and for the same reason.** The category was square while the delivery note asked for 4500×5400 — two different shapes, and neither is what a front print is. `gpt-image-1` tops out at 1536 on the long edge, so 1024×1536 is the closest portrait it makes; it is also what every accepted reference is. The art is padded into the 12×16" front-print area rather than cropped to it, and because the artwork is transparent the padding costs nothing — the design floats in the print area instead of being cut to fit (D71).
+
+Apparel is raster, not vector. `gpt-image-1` supports transparent backgrounds, so a transparent PNG is genuinely print-ready for DTF — but it is generated at 1024×1536 and has to be upscaled to reach 300 DPI at 12×16", which no amount of prompt work changes. Flat, hard-edged art is the most upscale-tolerant kind there is, which is lucky rather than planned. Only a test print settles whether it holds. True vector would need a separate trace step — worth doing later, not a blocker.
 
 ### What carries over from the Stage 1 build
 
@@ -549,6 +551,12 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D37 | **Every live product exists as a library row.** `Listenin' for the GOOD E.S.H.` is currently live but unrecorded. |
 | D38 | **Transparent artwork is the Stage C priority, ahead of new designs.** It unlocks the garment-colour range and multiplies the catalogue from existing art. |
 | D33 | The VV-Styles master list is **`VV-Styles Designs Library Original`**. The two ChatGPT-expanded exports added no quotes — only one boilerplate visual string per category and a single templated prompt — and are retired. `vv-styles-master.csv` is its restructured form. |
+| D70 | **Apparel puts the phrase in the prompt; coloring pages do not.** D57 keeps `quote_text` out of a coloring-book prompt because D23 overlays it as hollow outlined type on a page whose words are meant to be coloured in. That reasoning does not reach a shirt. Apparel type is filled (D59) and drawn *into* the artwork — arched banners, offset comic caps, lettering that shares its contour weight with the image — and overlaying flat vector on top of such a design would throw away the thing that makes it read as apparel. The risk is misspelling, and the first generation located it precisely: the headline phrase came back exact while a small in-scene sign read "FFEINE" for CAFFEINE. **The phrase is safe; secondary text inside the scene is not.** Keep incidental lettering out of `visual_elements` unless it is worth checking by eye. |
+| D71 | **Apparel generates at 1024×1536 and pads into a 12×16" front print.** Supersedes the 1024×1024 category setting and the 4500×5400 delivery note, which described two different shapes and neither of them a chest print. Padding not cropping, per D30 — and on transparent art the padding is free, since the design floats in the print area rather than being cut to fit it. |
+| D72 | **Nothing sits behind an apparel design, and the block layer must say so by name.** Two generations produced the D34 defect in shapes a border test cannot see: an irregular cream blob with a feathered edge, then a rounded-rectangle poster card, both floating clear of all four sides. The cause was this project's own wording — "composed as one self-contained unit" and "every element locks into that one shape" meant *not scattered* and were read as *one silhouette*, so the model supplied one. Grouping is now described as an arrangement, and panel, card, badge field and rounded rectangle are excluded by name. That naming is consistent with D46, not a breach of it: D46 governs rendering *technique*, and a panel is an object. |
+| D73 | **`background: "transparent"` is passed to the provider, not merely requested in prose.** The category carried the flag, the provider supported it, and nothing joined the two, so every apparel prompt asked for a knockout in words while the API parameter went unset. Setting it dropped the soft feathered edge from 4.9% of the image to 1.7%. It does not remove an enclosing panel — that is D72's job — so the two are needed together. |
+| D74 | **The knockout is measured, never eyeballed, and the measurements are these.** Four of eight live products only look clean because white fabric hides the box. Three checks in `lib/transparency.ts`: an alpha channel must exist and be used; the design must fill no more than 80% of its own bounding box, since real cut-out artwork leaves gaps between its elements and a panel welds them together; and no more than 3% of the image may be half-transparent, since a cut edge is hard and a feathered one is not. Accepted references measure 60–72% fill and 0.7–1.6% soft edge; the two failed generations measured 86–92% and 4.9%. A failing image is flagged, never discarded — it has been paid for, and whether to rework or re-run is not the tool's call. What this cannot catch is a mockup: a t-shirt silhouette fills about 65% of its own box, squarely inside the accepted range. |
+| D75 | **Naming the garment colour in the prompt ties the artwork to that garment.** It is what makes light detail survive on dark fabric, and it is why the coffee design reads on natural sand and nearly disappears on black. It also cuts against the arithmetic in §4.5 — 8 designs × 6 colours ≈ 48 products assumes one file works on every garment. Both can be true, but not for the same file: a design is either colour-directed for one garment or built with contrast that holds on any, and which one it is has to be decided per design rather than assumed. |
 
 ---
 
@@ -565,12 +573,12 @@ Stage F may need to move earlier if publishing deadlines demand it.
 
 **Blocked on a missing stage, not on wiring** (D57)
 - ~~**Quote pages cannot complete.**~~ **Done.** The prompt reserves the centre and forbids drawn letters (D23), but no overlay step exists. `POST /api/overlay` letters a generated page (D64, D65). `fontkit` replaced `opentype.js` — it instances variable fonts, which four of the eight faces need.
-- **VV-Styles has 130 items and no template.** `lettering_style`, `color_direction` and `product_placement` have nowhere to land until Stage C builds one.
+- ~~VV-Styles has 130 items and no template~~ → built 2026-08-27 (migration 020). One template, nine apparel art styles, and `quote_text`, `visual_elements`, `lettering_style`, `color_direction` and `product_placement` all feed it. Twelve designs are art-directed; the other 118 have empty direction columns and are not yet briefed.
 
 **Production**
 - Are the 12 books published separately, or bundled as one series?
 - The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.
-- Should the 19 VV-Styles categories consolidate to the proposed 9? Listed in `vv-styles-lists.csv`, not applied.
+- ~~Should the 19 VV-Styles categories consolidate to the proposed 9?~~ → yes, applied 2026-08-27 (migration 021). The portfolio capsule's six collection names turned out to *be* six of the proposed nine under better wording, so the capsule's naming was taken where it existed and the proposed list used for the rest. All 130 items are sorted; one row with no `Category` at all stays in Unsorted. Two judgment calls stand flagged: `Love` went to Family & Faith as the nearest relational grouping, and `Self-Awareness` to Truth & Accountability as honest self-assessment rather than self-regard.
 - 14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged `Brand / Legal Review`. Decide before printing.
 
 **Current state of VV-Styles**
