@@ -32,22 +32,38 @@ type Body = {
 };
 
 /**
- * `product_placement` records a garment and a placement together — "Dark
- * heather tee, front center". The prompt only wants the colour, because it is
- * named so that light detail is not left invisible against the fabric.
- * Returns null when nothing is left after the garment noun comes off, which
- * keeps the block from being dropped for a blank slot it could have filled.
+ * `product_placement` is meant to record a garment and a position together —
+ * "Dark heather tee, front center" — and the prompt wants only the colour,
+ * named so light detail is not left invisible against the fabric.
+ *
+ * In practice the column also collects production notes written for a
+ * prompt: 67 rows of the current library read "Create a centered front-print
+ * design only, isolated on a transparent background." Splitting those on the
+ * first comma yielded a garment of "create a centered front-print design
+ * only", and the prompt then asked for artwork printed onto that fabric.
+ *
+ * So a garment noun is now required. It is what distinguishes a garment from
+ * a sentence, the rules those sentences carry are already in the block layer,
+ * and a row that names no garment simply leaves the slot empty — which drops
+ * the block rather than filling it with prose.
  */
 const GARMENT_NOUNS =
-  /\b(tee|t-?shirt|shirt|sweatshirt|hoodie|crewneck|long ?sleeve|tank)s?\b/gi;
+  /\b(tee|t-?shirt|shirt|sweatshirt|hoodie|crewneck|long ?sleeve|tank|top)s?\b/i;
+
+/** Longer than this is a sentence, not a colour. */
+const MAX_GARMENT_LENGTH = 40;
 
 function garmentColorFrom(placement: string): string | null {
-  const color = placement
-    .split(",")[0]
-    .replace(GARMENT_NOUNS, "")
+  const first = placement.split(",")[0];
+  if (!GARMENT_NOUNS.test(first)) return null;
+
+  const color = first
+    .replace(new RegExp(GARMENT_NOUNS.source, "gi"), "")
     .trim()
     .toLowerCase();
-  return color || null;
+
+  if (!color || color.length > MAX_GARMENT_LENGTH) return null;
+  return color;
 }
 
 export async function POST(req: Request) {

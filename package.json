@@ -10,7 +10,8 @@
     "db:seed": "node --env-file=.env.local scripts/migrate.mjs seed",
     "typecheck": "tsc --noEmit",
     "db:import": "node --env-file=.env.local scripts/import-sheets.mjs",
-    "prompt:preview": "node --env-file=.env.local scripts/preview-prompt.mjs"
+    "prompt:preview": "node --env-file=.env.local scripts/preview-prompt.mjs",
+    "printify:areas": "node --env-file=.env.local scripts/printify-print-areas.mjs"
   },
   "dependencies": {
     "fontkit": "^2.0.4",
