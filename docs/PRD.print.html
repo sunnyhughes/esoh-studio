@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>PRD.md</title>
+<style>
+@page { size: letter; margin: 0.7in 1.9in 0.75in 0.9in; }
+* { box-sizing: border-box; }
+body {
+  font: 11pt/1.55 Georgia, "Times New Roman", serif;
+  color: #000; background: #fff; margin: 0 auto; padding: 0.7in 1.9in 0.75in 0.9in;
+  max-width: 8.5in; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1 { font-size: 20pt; line-height: 1.15; margin: 0 0 4pt; letter-spacing: -0.01em; }
+h2 {
+  font-size: 13pt; margin: 26pt 0 9pt; padding-bottom: 3pt;
+  border-bottom: 1.5pt solid #000; break-after: avoid; break-before: page;
+}
+h2:first-of-type { break-before: auto; }
+h3 { font-size: 11.5pt; margin: 16pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 8pt; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+hr { border: none; border-top: 0.5pt solid #999; margin: 14pt 0; }
+code { font: 9.5pt "SFMono-Regular", Consolas, "Courier New", monospace; word-break: break-word; }
+pre {
+  font: 9pt/1.4 "SFMono-Regular", Consolas, "Courier New", monospace;
+  background: #f2f2f2; border-left: 2pt solid #999; padding: 7pt 9pt;
+  white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt;
+}
+del { color: #666; }
+.url { font-size: 8.5pt; color: #555; word-break: break-all; }
+
+.decision {
+  display: grid; grid-template-columns: 38pt 1fr; gap: 10pt;
+  break-inside: avoid; padding: 7pt 0; border-bottom: 0.5pt solid #ccc;
+}
+.dnum { font-weight: bold; font-size: 10pt; letter-spacing: 0.02em; }
+.dbody { margin: 0; }
+
+.tablewrap { break-inside: avoid; margin: 0 0 12pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+
+.masthead { border-bottom: 2.5pt solid #000; padding-bottom: 10pt; margin-bottom: 16pt; }
+.meta { font-size: 9pt; color: #444; margin: 6pt 0 0; }
+.notes { font-size: 9pt; color: #444; font-style: italic; margin-top: 4pt; }
+.toc { break-after: page; }
+.toc h2 { break-before: auto; }
+.toc ol { list-style: none; padding: 0; font-size: 10pt; }
+.toc li { margin-bottom: 5pt; border-bottom: 0.4pt dotted #bbb; padding-bottom: 3pt; }
+@media screen {
+  body { box-shadow: 0 0 0 1px #ddd; margin: 24px auto; }
+}
+</style>
+</head><body>
+<div class="masthead">
+  <h1>PRD.md</h1>
+  <p class="meta">Esoh Studio &middot; printed 2026-09-01</p>
+  <p class="notes">Wide right margin left blank for notes.</p>
+</div>
+<nav class="toc"><h2>Contents</h2><ol>
+<li>Product Requirements Document</li>
+<li>Project</li>
+<li>Status</li>
+<li>Owner</li>
+<li>Background</li>
+<li>Problem Statement</li>
+<li>Product Vision</li>
+<li>Goal for Version 1</li>
+<li>Target Users</li>
+<li>Core Use Cases</li>
+<li>In Scope for V1</li>
+<li>Out of Scope for V1</li>
+<li>Success Metrics</li>
+<li>User Stories</li>
+<li>Functional Requirements</li>
+<li>Non-functional Requirements</li>
+<li>Assumptions</li>
+<li>Constraints</li>
+<li>Screens in V1</li>
+<li>Acceptance Criteria</li>
+<li>Future Considerations</li>
+<li>Open Questions</li>
+</ol></nav>
+<h1 id="s0">Product Requirements Document</h1>
+<h2 id="s1">Project</h2>
+<p>Esoh Creations AI Image Studio</p>
+<h2 id="s2">Status</h2>
+<p>Draft v1</p>
+<h2 id="s3">Owner</h2>
+<p>Esoh Creations LLC</p>
+<h2 id="s4">Background</h2>
+<p>Esoh Creations LLC operates multiple ventures and creative product lines, including apparel, digital products, and app-based ventures under one umbrella business structure. [cite:19]</p>
+<p>The business needs a centralized internal tool to generate, organize, review, and export business-ready images for multiple use cases such as coloring book pages, VV-Styles visuals, print-ready graphics, and social media content. Current workflows spread this work across multiple tools, which increases friction, rework, and inconsistency. Creative operations guidance emphasizes that value comes from connecting asset creation, review, organization, and approval rather than treating generation as a one-off action. [cite:20][web:71][web:74][web:77]</p>
+<h2 id="s5">Problem Statement</h2>
+<p>The current image-creation workflow requires switching between multiple outside tools for prompt writing, generation, selection, cleanup, organization, and export. This creates unnecessary time loss, inconsistent naming and storage, limited reuse of prior work, and more mental strain than a centralized workflow should require. DAM and creative-ops sources consistently describe scattered workflows as a bottleneck that is best solved by centralized assets, metadata, and approvals. [web:63][web:68][web:74]</p>
+<h2 id="s6">Product Vision</h2>
+<p>Build an internal creative operations app for Esoh Creations that helps the team generate images faster, keep assets organized by venture and project, standardize reusable prompt templates, and move approved outputs into business-ready formats.</p>
+<h2 id="s7">Goal for Version 1</h2>
+<p>Version 1 should let an internal user:</p>
+<ol>
+<li>Choose a venture or brand.</li>
+<li>Start a new image generation job from a structured template.</li>
+<li>Generate image options.</li>
+<li>Save selected outputs to a project.</li>
+<li>Mark assets by status such as draft, favorite, or approved.</li>
+<li>Search and export saved assets later.</li>
+</ol>
+<p>This follows MVP guidance to focus on a small number of essential user outcomes rather than overbuilding the first release. [web:101][web:102][web:104]</p>
+<h2 id="s8">Target Users</h2>
+<h3>Primary user</h3>
+<p>Internal Esoh Creations operator creating assets for multiple ventures and product lines. The product should support structured workflows and clear separation across business units, matching Esoh Creations’ umbrella-company model. [cite:19][cite:20]</p>
+<h3>Secondary users</h3>
+<p>Future internal collaborators, contractors, or approved business partners who may need to review, organize, or export assets.</p>
+<h2 id="s9">Core Use Cases</h2>
+<ul>
+<li>Create printable coloring book page concepts.</li>
+<li>Create VV-Styles campaign and fashion visuals.</li>
+<li>Create print-ready graphics for products or packaging.</li>
+<li>Create social media post graphics in standard aspect ratios.</li>
+<li>Reuse prior prompts, templates, and approved assets for faster production.</li>
+</ul>
+<h2 id="s10">In Scope for V1</h2>
+<ul>
+<li>Venture/brand selection.</li>
+<li>Project creation and project-level asset organization.</li>
+<li>Job type selection, such as coloring page, social graphic, print design, or branded concept image.</li>
+<li>Structured prompt form using templates and settings.</li>
+<li>Image generation through one provider to start.</li>
+<li>Results review screen showing multiple outputs.</li>
+<li>Save selected outputs to asset library.</li>
+<li>Asset statuses: draft, favorite, approved.</li>
+<li>Search/filter asset library by venture, project, job type, and status.</li>
+<li>Download/export selected assets.</li>
+</ul>
+<h2 id="s11">Out of Scope for V1</h2>
+<ul>
+<li>Public/client-facing portal.</li>
+<li>Stripe billing or credit system.</li>
+<li>Advanced team permissions.</li>
+<li>Full collaborative commenting.</li>
+<li>Batch generation pipelines.</li>
+<li>Integrated advanced editing suite.</li>
+<li>Multi-provider model routing.</li>
+<li>Automated social scheduling.</li>
+</ul>
+<p>Documenting non-goals is recommended in MVP PRDs so scope stays protected during early development. [web:98][web:101][web:107]</p>
+<h2 id="s12">Success Metrics</h2>
+<ul>
+<li>A user can complete a new image job from prompt to saved output in one workflow.</li>
+<li>Approved assets can be found later by venture and project without manual digging.</li>
+<li>Prompt reuse reduces repeated setup work across recurring image tasks.</li>
+<li>The tool reduces switching between multiple external apps for common image-production tasks.</li>
+</ul>
+<p>Success metrics should measure outcomes, not just whether the app shipped. [web:101][web:103][web:109]</p>
+<h2 id="s13">User Stories</h2>
+<ol>
+<li>As an internal Esoh Creations user, I want to choose a venture before I generate images so assets stay separated by business unit. This aligns with the business’s multi-venture structure and need for clear operational separation. [cite:19][cite:20]</li>
+</ol>
+<ol>
+<li>As a user, I want to start from a saved template such as coloring page, social post, or print design so I do not have to rebuild prompts from scratch every time. Template reuse supports creative standardization and repeatable workflow. [web:74][web:77]</li>
+</ol>
+<ol>
+<li>As a user, I want to review multiple generated outputs in one place so I can quickly compare, favorite, and save the best option. Centralized review is part of effective creative operations and approval handling. [web:68][web:71]</li>
+</ol>
+<ol>
+<li>As a user, I want to save outputs into a project so all related work stays together and is easier to find later.</li>
+</ol>
+<ol>
+<li>As a user, I want to mark an asset as approved so I can clearly separate candidate images from final-use images. Approval states are a standard part of asset governance and digital asset workflows. [web:63][web:73]</li>
+</ol>
+<ol>
+<li>As a user, I want to search saved assets by venture, project, type, and status so I can reuse existing work instead of recreating it. DAM guidance repeatedly emphasizes organization, metadata, and retrieval as core value. [web:71][web:74][web:76]</li>
+</ol>
+<h2 id="s14">Functional Requirements</h2>
+<h3>FR1 Venture selection</h3>
+<p>The system must allow the user to choose a venture or brand before creating a job.</p>
+<h3>FR2 Project organization</h3>
+<p>The system must allow the user to create or select a project when starting a new job.</p>
+<h3>FR3 Job type selection</h3>
+<p>The system must support predefined job types for at least:</p>
+<ul>
+<li>Coloring page</li>
+<li>Social post</li>
+<li>Print design</li>
+<li>Branded concept image</li>
+</ul>
+<h3>FR4 Prompt templates</h3>
+<p>The system must allow the user to select a reusable prompt template and edit the prompt fields before submission.</p>
+<h3>FR5 Image generation</h3>
+<p>The system must submit the job to an image-generation provider and return multiple image results for review.</p>
+<h3>FR6 Results review</h3>
+<p>The system must display generated results in a gallery/grid view and allow the user to:</p>
+<ul>
+<li>Favorite an output</li>
+<li>Save an output</li>
+<li>Regenerate from the same job</li>
+</ul>
+<h3>FR7 Asset library</h3>
+<p>The system must store saved outputs with metadata and allow users to filter/search by:</p>
+<ul>
+<li>Venture</li>
+<li>Project</li>
+<li>Job type</li>
+<li>Status</li>
+</ul>
+<h3>FR8 Approval status</h3>
+<p>The system must support at least three statuses:</p>
+<ul>
+<li>Draft</li>
+<li>Favorite</li>
+<li>Approved</li>
+</ul>
+<h3>FR9 Export</h3>
+<p>The system must allow the user to download/export a selected approved or saved asset.</p>
+<h2 id="s15">Non-functional Requirements</h2>
+<ul>
+<li>The app should feel organized and simple enough for repeated daily use.</li>
+<li>The app should support clear data separation across ventures and projects.</li>
+<li>The app should support future growth into approvals, billing, and expanded team workflows.</li>
+<li>The app should align with a structured internal documentation and development process.</li>
+</ul>
+<h2 id="s16">Assumptions</h2>
+<ul>
+<li>The app will begin as an internal tool, not a public SaaS product.</li>
+<li>One image-generation provider is sufficient for V1.</li>
+<li>Users already understand the business context of the ventures they are working in.</li>
+<li>Storage and metadata are as important as image generation itself in the workflow. Creative-ops and DAM guidance strongly support this assumption. [web:63][web:71][web:74]</li>
+</ul>
+<h2 id="s17">Constraints</h2>
+<ul>
+<li>The first release must remain narrow enough to build and test quickly.</li>
+<li>The product should fit the team’s preferred code-based workflow in VS Code and GitHub. [cite:18]</li>
+<li>The architecture should remain compatible with Netlify-style frontend deployment and Railway/PostgreSQL-backed app infrastructure where needed. [cite:21][cite:16]</li>
+</ul>
+<h2 id="s18">Screens in V1</h2>
+<ol>
+<li>Dashboard</li>
+<li>New Job</li>
+<li>Results Review</li>
+<li>Project Workspace</li>
+<li>Asset Library</li>
+<li>Template Manager</li>
+<li>Settings</li>
+</ol>
+<h2 id="s19">Acceptance Criteria</h2>
+<h3>AC1 New job creation</h3>
+<p>A user can select a venture, select or create a project, choose a job type, enter prompt data, and submit a new generation job. Acceptance criteria should be specific and testable so completion is clear. [web:69][web:72]</p>
+<h3>AC2 Results review</h3>
+<p>After submission, the system shows generated image results in one review view and allows the user to favorite or save at least one result. [web:72]</p>
+<h3>AC3 Asset saving</h3>
+<p>A saved result appears inside the relevant project and in the asset library with venture, project, type, and status metadata.</p>
+<h3>AC4 Asset search</h3>
+<p>A user can filter the asset library by venture and status and open a matching saved asset. DAM systems depend on structured retrieval and workflow states. [web:63][web:74]</p>
+<h3>AC5 Approval status</h3>
+<p>A user can change an asset status from draft to approved and the updated status remains stored on refresh.</p>
+<h3>AC6 Export</h3>
+<p>A user can download a selected saved asset from the interface.</p>
+<h2 id="s20">Future Considerations</h2>
+<ul>
+<li>Approval board with richer workflow lanes.</li>
+<li>Team roles and permissions.</li>
+<li>Batch generation.</li>
+<li>Stripe-based paid credits or internal usage tracking.</li>
+<li>Client request portal.</li>
+<li>Multi-provider model routing.</li>
+<li>Advanced print packaging/export sets.</li>
+</ul>
+<h2 id="s21">Open Questions</h2>
+<p>All five are answered. See docs/direction.md for the authoritative record.</p>
+<ul>
+<li><del>What should the internal product name be?</del> <strong>Esoh Studio.</strong></li>
+<li><del>Which image provider should V1 use first?</del> <strong>OpenAI <code>gpt-image-1</code></strong> (D12).</li>
+<li><del>Should "VV-Styles" and "Coloring Books" be separate ventures or job types?</del></li>
+</ul>
+<p>  <strong>Neither — one <code>categories</code> table</strong> (D3). Esoh Studio serves every venture   under Esoh Creations LLC, so there is no brand dimension. Note the levels   differ: VV-Styles is a category; Healing Seasons is a <em>series</em> inside the   coloring-books category (D40).</p>
+<ul>
+<li><del>What file naming convention should exports follow?</del> **Spelled out in full,</li>
+</ul>
+<p>  including page type and art style** (D42):   <code>coloring-books/healing-seasons/african-american-fall/african-american-fall-09-quote-page-zentangle-pattern-v2.png</code></p>
+<ul>
+<li><del>Should print dimensions be template-based or manually configurable?</del></li>
+</ul>
+<p>  <strong>Template-based, resolved per product.</strong> Generation sizes are fixed per   category (§5.1, D29). Delivery size is not: a tee, a hoodie and a tote have   different print areas. <code>categories.deliver_*</code> currently holds one size per   category, which is known to be too coarse — a <code>products</code> lookup populated from   the real Printify blueprints lands at Stage C rather than being guessed now.</p>
+</body></html>

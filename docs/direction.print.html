@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>direction.md</title>
+<style>
+@page { size: letter; margin: 0.7in 1.9in 0.75in 0.9in; }
+* { box-sizing: border-box; }
+body {
+  font: 11pt/1.55 Georgia, "Times New Roman", serif;
+  color: #000; background: #fff; margin: 0 auto; padding: 0.7in 1.9in 0.75in 0.9in;
+  max-width: 8.5in; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1 { font-size: 20pt; line-height: 1.15; margin: 0 0 4pt; letter-spacing: -0.01em; }
+h2 {
+  font-size: 13pt; margin: 26pt 0 9pt; padding-bottom: 3pt;
+  border-bottom: 1.5pt solid #000; break-after: avoid; break-before: page;
+}
+h2:first-of-type { break-before: auto; }
+h3 { font-size: 11.5pt; margin: 16pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 8pt; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+hr { border: none; border-top: 0.5pt solid #999; margin: 14pt 0; }
+code { font: 9.5pt "SFMono-Regular", Consolas, "Courier New", monospace; word-break: break-word; }
+pre {
+  font: 9pt/1.4 "SFMono-Regular", Consolas, "Courier New", monospace;
+  background: #f2f2f2; border-left: 2pt solid #999; padding: 7pt 9pt;
+  white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt;
+}
+del { color: #666; }
+.url { font-size: 8.5pt; color: #555; word-break: break-all; }
+
+.decision {
+  display: grid; grid-template-columns: 38pt 1fr; gap: 10pt;
+  break-inside: avoid; padding: 7pt 0; border-bottom: 0.5pt solid #ccc;
+}
+.dnum { font-weight: bold; font-size: 10pt; letter-spacing: 0.02em; }
+.dbody { margin: 0; }
+
+.tablewrap { break-inside: avoid; margin: 0 0 12pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+
+.masthead { border-bottom: 2.5pt solid #000; padding-bottom: 10pt; margin-bottom: 16pt; }
+.meta { font-size: 9pt; color: #444; margin: 6pt 0 0; }
+.notes { font-size: 9pt; color: #444; font-style: italic; margin-top: 4pt; }
+.toc { break-after: page; }
+.toc h2 { break-before: auto; }
+.toc ol { list-style: none; padding: 0; font-size: 10pt; }
+.toc li { margin-bottom: 5pt; border-bottom: 0.4pt dotted #bbb; padding-bottom: 3pt; }
+@media screen {
+  body { box-shadow: 0 0 0 1px #ddd; margin: 24px auto; }
+}
+</style>
+</head><body>
+<div class="masthead">
+  <h1>direction.md</h1>
+  <p class="meta">Esoh Studio &middot; printed 2026-09-01</p>
+  <p class="notes">Wide right margin left blank for notes.</p>
+</div>
+<nav class="toc"><h2>Contents</h2><ol>
+<li>Direction</li>
+<li>Project</li>
+<li>Status</li>
+<li>Purpose</li>
+<li>1. What this is</li>
+<li>2. Corrections to earlier documents</li>
+<li>3. What the reference images establish</li>
+<li>4. The real data model</li>
+<li>5. Revised structure</li>
+<li>6. Style consistency is the core technical problem</li>
+<li>7. Revised build order</li>
+<li>8. Decisions</li>
+<li>9. Open questions</li>
+</ol></nav>
+<h1 id="s0">Direction</h1>
+<h2 id="s1">Project</h2>
+<p>Esoh Studio</p>
+<h2 id="s2">Status</h2>
+<p>Draft v2 — supersedes conflicting guidance in PRD.md, design-plan.md, build-plan.md, schema-notes.md, api-route-map.md and review-and-recommendations.md.</p>
+<h2 id="s3">Purpose</h2>
+<p>One document that consolidates the Perplexity document set, the ChatGPT architecture conversation, the working Stage 1 build, the reference images, and the two production spreadsheets into a single agreed direction.</p>
+<p>Where this document conflicts with an earlier one, this document wins. Where it is silent, the earlier documents still apply.</p>
+<hr>
+<h2 id="s4">1. What this is</h2>
+<p>An internal tool for producing images for Esoh Creations. Not a product, not a venture, not for sale.</p>
+<h3>The actual problem</h3>
+<p>ChatGPT and Gemini cap image generation at roughly 3 per 24 hours. The Healing Seasons production plan is <strong>180 pages</strong>. At 3 a day that is two months of waiting, and the waiting is the bottleneck — not the generating.</p>
+<p>The tool exists to remove that ceiling and to make 180 pages come out looking like one coherent book.</p>
+<p>Two goals, in order:</p>
+<ol>
+<li><strong>Generate on demand, at volume, without waiting.</strong></li>
+<li><strong>Keep everything, organized, so it can be found and reused later.</strong></li>
+</ol>
+<p>Export is a minor convenience. The library is the point.</p>
+<hr>
+<h2 id="s5">2. Corrections to earlier documents</h2>
+<h3>2.1 "Ventures" are output categories</h3>
+<p>Every earlier document treats <code>ventures</code> as business units and <code>job_types</code> as formats — two separate dimensions. That is wrong.</p>
+<p><code>vv-styles</code>, <code>coloring-books</code>, <code>print-designs</code>, <code>social-content</code> are <strong>one dimension</strong>: the kind of output being made, and therefore which presets, dimensions and templates apply.</p>
+<ul>
+<li>Choose <strong>VV-Styles</strong> → apparel dimensions and print options</li>
+<li>Choose <strong>Coloring Book</strong> → page dimensions, line-art templates</li>
+<li>Choose <strong>Social Content</strong> → platform aspect ratios</li>
+</ul>
+<p>Decision: collapse <code>ventures</code> and <code>job_types</code> into a single table, <strong><code>categories</code></strong>.</p>
+<p>This also retires the <code>brands</code> rename from the previous review. There is no brand dimension. There is one dimension, and it answers "what am I making?"</p>
+<h3>2.2 The Style Library must come from Esoh, not from me</h3>
+<p>Stage 1 seeded prompt blocks written from scratch. The results were generic because the prompts were generic. Three tuning rounds did not fix it, because the problem was authorship, not wording.</p>
+<p>The Style Library is seeded from the spreadsheets and reference images. Nothing invented.</p>
+<h3>2.3 Asset Library moves up</h3>
+<p>The earlier plan put the library at Stage 3, behind style tuning. Storage and retrieval is the stated primary value, so it moves ahead of style refinement.</p>
+<h3>2.4 Batch generation is central, not deferred</h3>
+<p>Both earlier plans list batch as out of scope for V1. With a 180-page backlog and no rate limit, batch is a primary feature. It moves into the core.</p>
+<h3>2.5 Long negative prompt lists are counterproductive</h3>
+<p>Observed directly: a block reading "no decorative borders or page frames" produced a border. Removing the phrase entirely still produced one — because the reference style <em>has</em> borders and the model has learned that association.</p>
+<p>Rule: state what is wanted. Keep restrictions short and specific. Do not enumerate fears.</p>
+<p><strong>Observed a third time at Stage B.</strong> A texture block ending "No hatching, stippling or grey fill" produced a page stippled on every surface — skin, sky, wall and tabletop. Removing the sentence and stating positively where pattern belongs ("fabric shows its stitch, wood its grain... skin and sky stay clean and unmarked") fixed it in one pass. Refined after two further occurrences at Stage B. Negatives about <strong>content</strong> hold — "No people" and "No border or frame" were obeyed in every generation. Negatives about <strong>rendering technique</strong> backfire: "no stippling" produced a stippled page, and "never as shading" produced a hatched face.</p>
+<p><strong>Law: technique is stated positively, never negatively. Content may be excluded by name.</strong></p>
+<hr>
+<h2 id="s6">3. What the reference images establish</h2>
+<p>Eight reference images and four scanned pages define the target style. Measured against them, nearly every rule written in Stage 1 was inverted:</p>
+<div class="tablewrap"><table><thead><tr><th>Stage 1 rule</th><th>Reference reality</th></tr></thead><tbody><tr><td>uniform line weight</td><td>bold on figures, fine on background — deliberate variation</td></tr><tr><td>no solid black areas</td><td><strong>Stage 1 was right.</strong> A coloring page has no filled areas at all — see §3.4</td></tr><tr><td>no text or lettering</td><td>"Healing Seasons" lettered on a mug — an occasional name-drop, see §3.3</td></tr><tr><td>no borders or frames</td><td>every page has a black border; it is part of the style</td></tr><tr><td>centred subject, generous white space</td><td><strong>Stage 1 was closer.</strong> See §3.5 — the density premise was wrong</td></tr><tr><td>simple interior detail only</td><td>cable-knit stitches, rug patterns, book spines, wood grain</td></tr></tbody></table></div>
+<p>Confirmed style attributes — <strong>how</strong> a page is drawn:</p>
+<ul>
+<li>Dense, editorial line illustration with full environmental context</li>
+<li>Form described by <strong>outline</strong>, never by shading, hatching or texture fill (§3.5)</li>
+<li>Line weight varies deliberately: bold on figures, fine on background</li>
+<li>Ethnicity rendered specifically and respectfully, never generically</li>
+</ul>
+<h3>3.5 Correction: the density premise was wrong</h3>
+<p>The single largest error in this document, and the root of most of the others.</p>
+<p>§3 recorded "dense environmental storytelling, edge to edge" and "texture rendered as pattern" as confirmed style attributes. Pages built on them read as <strong>seek-and-find puzzles</strong> — every surface carrying marks, nowhere for the eye to rest, no open area large enough to colour comfortably. The book exists to give someone a calm hour with a pencil. Busy defeats it.</p>
+<p>Measured against the two pages Esoh identified as closest to target (<code>storage/exemplars/journaling-under-tree.png</code> and <code>walking-with-mug.png</code>):</p>
+<div class="tablewrap"><table><thead><tr><th></th><th>Actual style</th></tr></thead><tbody><tr><td>Subject</td><td><strong>Open.</strong> Clothing and skin are large white areas described by outline alone — a seam, a cuff, a fold. The hoodie and sweatpants carry almost no interior line.</td></tr><tr><td>Background</td><td><strong>Countable shapes, not pattern.</strong> Individual outlined leaves with white between them, each one colourable.</td></tr><tr><td>Page</td><td><strong>Breathing room.</strong> Open sky, open ground, subject reads instantly.</td></tr></tbody></table></div>
+<p>The distinction that was missing: <em>detail</em> and <em>fill</em> are not the same thing. A page can carry a great many drawn elements and stay calm, as long as each is a separate closed shape with white around it. What made the generated pages busy was continuous surface texture — which is also, not coincidentally, the one kind of mark that cannot be coloured.</p>
+<p>Governing principle, replacing "texture as pattern": <strong>form is described by outline.</strong> Nothing is filled, shaded, hatched or textured.</p>
+<p>Density now describes how much of the page carries subject matter, not how filled its surfaces are.</p>
+<h3>3.4 Correction: nothing on the page is filled in</h3>
+<p>An earlier draft listed "no solid black areas" as a Stage 1 rule that the references had disproved, on the grounds that hair in them "reads near-black".</p>
+<p>That inverted the product. <strong>A coloring page has no filled, shaded or darkened areas anywhere</strong> — not hair, not background, not texture used as tone. Every enclosed area is open white or there is nothing for the reader to colour. The Stage 1 rule was correct and should not have been overturned.</p>
+<p>Related, and more serious: the figure block carried "hair is rendered as dense drawn curl", generalised from the same observation. Written as a style rule it gives all 180 pages the same hair and forecloses locs, braids, twists, fades, bantu knots, headwraps and everything else the subject might wear — a stereotype encoded in the prompt engine, and a variety failure on top.</p>
+<p><strong>Hair is content, not style.</strong> It belongs in the item brief, which already specifies it where it matters. Style blocks say only how hair is <em>drawn</em>: outlined sections, left open inside. With the rule removed, three consecutive generations produced an afro, braids and a short fade without being asked.</p>
+<h3>3.3 Correction: the motifs are not motifs</h3>
+<p>An earlier draft listed "recurring motifs: the Healing Seasons mug, seasonal foliage, candles, chunky knits, windows, books, lanterns" as a confirmed style attribute, and called the lettered mug a brand signature. <strong>Both are wrong</strong>, and wrong in the way that matters most.</p>
+<p>Those objects were the content of <em>those particular reference images</em>. A woman happened to be wrapped in a knit blanket holding a mug by a window. That is what that page is about — not a rule every Fall page inherits.</p>
+<p>Promoted into a style block, the list would put candles, knits and a window into all 180 pages. That is precisely the repetitiveness Stage 1 produced, arriving by a new route: not from generic prompts this time, but from over-generalising six specific images into a house style.</p>
+<p><strong>The dividing line, and the core principle for Stage B:</strong></p>
+<div class="tablewrap"><table><thead><tr><th>Layer</th><th>Answers</th><th>Source</th><th>Varies</th></tr></thead><tbody><tr><td>Style block</td><td><em>How</em> is it drawn?</td><td>the reference images</td><td>per art style</td></tr><tr><td>Item brief</td><td><em>What</em> is drawn?</td><td>the tracker's <code>prompt notes</code></td><td>per page</td></tr></tbody></table></div>
+<p>Every one of the 180 rows already carries its own subject — "Woman journaling by a rainy window with plants", "Man walking at sunrise in a neighborhood park". The motifs come from there, per page, written by Esoh. They must never be hoisted into a style block.</p>
+<p>The lettered mug is the same case: a name-drop wanted on a few pages, not a signature. It is now <code>items.brand_mark</code>, null by default, and may carry 'Healing Seasons' or 'Esoh Creations'. Per item, opt-in, never in a style block.</p>
+<h3>3.1 Correction: the references are not all page-shaped</h3>
+<p>An earlier draft stated "the references are 1024×1536 — exactly <code>gpt-image-1</code> output." Only four of the eight are.</p>
+<div class="tablewrap"><table><thead><tr><th>Count</th><th>Size</th><th>Ratio</th><th>Note</th></tr></thead><tbody><tr><td>4</td><td>1024×1536</td><td>0.667</td><td>page-shaped, thin black border present</td></tr><tr><td>3</td><td>1408×768</td><td>1.833</td><td><strong>landscape</strong> — not page-shaped; one is a two-panel A/B variant sheet, not a finished page</td></tr><tr><td>1</td><td>896×1200</td><td>0.747</td><td>near letter</td></tr></tbody></table></div>
+<p>This matters. Some of the strongest style evidence — the couch scene, the journaling page — came from landscape banner-ratio images that could never be a book page. Style notes drawn from them describe a composition the format cannot hold.</p>
+<p>The border claim splits the same way: the portrait references have one, the landscape ones do not.</p>
+<p>The model is still demonstrably capable of the style. The gap was the prompt. But the shape evidence was mixed, and only the scanned pages below are in true letter proportion.</p>
+<h3>3.2 Four scanned pages — quote, symbol and decorative</h3>
+<p><code>more design references.pdf</code>, four pages at 0.73–0.77 — the first references in real letter proportion. They fill the gap named in §9: there were no references for Quote, Symbol or Decorative pages.</p>
+<div class="tablewrap"><table><thead><tr><th>Page</th><th>Type</th><th>Treatment</th></tr></thead><tbody><tr><td>p1</td><td>Quote</td><td>Bubble caps mixed with script, abstract geometric wedge background, border</td></tr><tr><td>p2</td><td>Quote</td><td>Lettering interlocked with an edge-to-edge mandala/zentangle field, border</td></tr><tr><td>p3</td><td>Quote</td><td>Huge outline caps in dotted rule-bands, mostly empty page, border</td></tr><tr><td>p4</td><td>Symbol / Decorative</td><td>Zentangle cat on a sunburst, no text, no border, bleeds off the edge</td></tr></tbody></table></div>
+<p><strong>The key finding is p2 against p3.</strong> Same page type, same category, opposite density — one wall-to-wall pattern, one nearly empty. Density is therefore a per-item setting, not a house rule. An earlier draft canonized "dense environmental storytelling, edge to edge" as <em>the</em> style; that is one option among three, and applying it globally would have produced 36 identical dense quote pages.</p>
+<p>The lettering on all three quote pages is <strong>hollow outline art meant to be colored in</strong> — on p2 physically interlocked with the pattern behind it. This refines D23 rather than reversing it: see the decision table.</p>
+<p>Three of the four carry a <code>creativecolorlab.com</code> watermark and p4 shows colored-pencil marks. They are scans of another publisher's book. Fine as style study for authoring templates — see D31 for the limit.</p>
+<hr>
+<h2 id="s7">4. The real data model</h2>
+<p>The two spreadsheets reveal a structure no earlier document captured.</p>
+<p>Both live in <code>docs/references/</code> as CSV exports. <strong>Both are living documents</strong> — incomplete and still being added to. Import must be re-runnable, never a one-time load.</p>
+<h3>Spreadsheet A — book listing metadata</h3>
+<p><code>keyword_listing_plan_african_american...csv</code> — <strong>16 rows</strong> <code>ethnicity line | season | product id | title | keywords | description</code></p>
+<p>Commercial data for store listings. <strong>African American only so far</strong>; Hispanic and Multiracial still to come.</p>
+<h3>Spreadsheet B — page production plan</h3>
+<p><code>recovery_coloring_book_tracker...csv</code> — 180 rows <code>title | ethnicity line | season | page type | prompt notes | quote text | commercial priority</code></p>
+<p><strong>Header names use spaces, not underscores.</strong> An earlier draft transcribed them with underscores; import code written from that would fail on every row. The spreadsheet is correct as it stands — nothing to fix on the sheet.</p>
+<p>The production queue. 3 lines × 4 seasons × 15 pages = <strong>180 pages</strong>, verified.</p>
+<p>Page type distribution:</p>
+<div class="tablewrap"><table><thead><tr><th>Page type</th><th>Count</th><th>Has figures</th></tr></thead><tbody><tr><td>Solo portrait</td><td>48</td><td>yes</td></tr><tr><td>Community scene</td><td>48</td><td>yes</td></tr><tr><td>Quote page</td><td>36</td><td>no — decorative frame around open centre</td></tr><tr><td>Environment page</td><td>24</td><td>no</td></tr><tr><td>Symbol page</td><td>12</td><td>no</td></tr><tr><td>Decorative page</td><td>12</td><td>no</td></tr></tbody></table></div>
+<p>Priority: <strong>103 High, 77 Medium, none blank.</strong> (An earlier draft said 101/51 with a remainder — verified wrong against the file.)</p>
+<p>All 180 rows carry prompt notes, and exactly 36 carry quote text — matching the 36 Quote pages precisely. The data is clean.</p>
+<p><strong>Import note:</strong> quoted fields contain commas ("Braids, flowers, hearts, doves, and healing motifs"). Use a real CSV parser.</p>
+<p><strong>Ethnicity lines:</strong> African American, Hispanic, <strong>Multiracial</strong> (the correct term — "Multicultural" appeared once in discussion and is not used) <strong>Seasons:</strong> Spring, Summer, Fall, Winter <strong>Page types:</strong> Solo portrait, Community scene, Quote page, Symbol page, Decorative page, Environment page <strong>Priority:</strong> High / Medium</p>
+<h3>4.1 Page type is the template unit</h3>
+<p>This is the key insight. "Coloring page" is not a template — it is a category. The six <strong>page types</strong> are the templates, and each needs a different prompt structure:</p>
+<div class="tablewrap"><table><thead><tr><th>Page type</th><th>Needs</th></tr></thead><tbody><tr><td>Solo portrait</td><td>one figure, environmental context, emotional tone</td></tr><tr><td>Community scene</td><td>multiple figures, interaction, shared space</td></tr><tr><td>Quote page</td><td><strong>rendered lettering</strong> plus decorative border</td></tr><tr><td>Symbol page</td><td>motif cluster, no figures, no scene</td></tr><tr><td>Decorative page</td><td>pattern and object arrangement, no figures</td></tr><tr><td>Environment page</td><td>place as subject, no figures</td></tr></tbody></table></div>
+<p>Half of these have <strong>no human figure at all</strong>. Stage 1 assumed every page had a person.</p>
+<h3>4.2 Quote pages require text rendering — in two languages</h3>
+<p>The Hispanic line carries Spanish quotes: <em>"Un día a la vez"</em>, <em>"Estoy creciendo con esperanza"</em>, <em>"Poco a poco"</em>.</p>
+<p>Rendering accurate lettering is one of the harder things to ask of an image model, and accented Spanish is harder still. This deserves its own template treatment and probably its own quality check.</p>
+<p>The Stage 1 blanket "no text" rule would have made every quote page fail.</p>
+<h3>4.3 Ethnicity is a data field, not a style setting</h3>
+<p>It varies per row and drives the subject. It belongs in the production data — never baked into a style block, and never applied as a global default.</p>
+<hr>
+<h3>4.4 The missing dimension: Art Style</h3>
+<p>Nothing in any spreadsheet or any earlier document recorded <strong>visual aesthetic</strong>.</p>
+<p>The VV-Styles sheet has <code>Category</code> (what the message is about) and <code>Style</code> (bold, sassy, supportive — the <strong>tone of voice</strong>). Neither says what the design <em>looks like</em>. "Sassy" does not distinguish 70s groovy from graffiti from retro comic — three completely different shirts carrying the same attitude. The two columns also overlap on six values (Sassy, Truth, Confident, Motivational, Boundaries, Accountability).</p>
+<p>This is the root cause of generic output, and it applies to coloring pages as much as apparel — p1, p2 and p3 are three art styles of one page type.</p>
+<p><strong>Decision: three new dimensions, orthogonal to category, tone and page type.</strong></p>
+<p><strong>Art Style</strong> — twelve values:</p>
+<div class="tablewrap"><table><thead><tr><th>Art Style</th><th>Look</th><th>Coloring</th><th>Apparel</th><th>Social</th></tr></thead><tbody><tr><td>Editorial Scene</td><td>Full environment, figures in context, texture as pattern — the current house style</td><td>✅</td><td></td><td></td></tr><tr><td>Zentangle Pattern</td><td>Dense abstract pattern-fill, no scene</td><td>✅</td><td>✅</td><td></td></tr><tr><td>Botanical Line</td><td>Flowers, foliage, vines — medium density</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Geometric Abstract</td><td>Rays, facets, wedges, arcs as structure</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Bold Minimal</td><td>One idea, huge scale, generous empty space</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Vintage Badge</td><td>Emblem, banner ribbon, clean-date slot</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Streetwear Graffiti</td><td>Spray and marker letterforms, drips, tags</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Retro Groovy</td><td>70s bubble type, wavy baselines, sun rays</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Tattoo Linework</td><td>Heavy outline, flames, roses, daggers, banners</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Retro Comic</td><td>Halftone, burst panels, speech bubbles</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Editorial Typographic</td><td>The type is the design — restrained, magazine-like</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Celestial</td><td>Moon phases, stars, dawn</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Photoreal Composite</td><td>Photographic subject with rendered type over it</td><td></td><td>✅</td><td>✅</td></tr><tr><td>Hand-Drawn Doodle</td><td>Marker lettering and simple drawn motifs, primary colors, playful</td><td>✅</td><td>✅</td><td>✅</td></tr></tbody></table></div>
+<p><strong>Photoreal Composite</strong> is included because it is in the live line (the phoenix shirt), not because it is recommended. Two cautions: photoreal art prints muddier on DTF than it appears on screen, and metallic gradients flatten. Reviewable.</p>
+<p><strong>Lettering Style</strong> — for any item carrying words: Bubble Caps · Brush Script · Block Outline · Serif Editorial · Hand-Marker · Mixed Caps + Script.</p>
+<p><strong>Background Density</strong> — Open · Medium · Dense. Derived from p3 / p1 / p2.</p>
+<p>Twelve is deliberate. Enough that 129 designs need not repeat; few enough to choose from in seconds.</p>
+<hr>
+<h2 id="s8">5. Revised structure</h2>
+<pre>categories          coloring-books, vv-styles, social-content, print-designs
+   └── collections  a book, an apparel drop, a campaign
+        └── items   one planned unit of work — a spreadsheet row
+             └── generation_jobs
+                  └── generated_assets</pre>
+<ul>
+<li><strong>category</strong> — what kind of output; carries dimension and format presets</li>
+<li><strong>collection</strong> — a named body of work (e.g. "African American — Fall")</li>
+<li><strong>item</strong> — one planned page/design, with its brief, priority and status</li>
+<li><strong>job</strong> — one attempt at an item</li>
+<li><strong>asset</strong> — one image returned</li>
+</ul>
+<p>An item may have many jobs; a job many assets. That is how a page gets reworked without losing history.</p>
+<p>Templates attach to a category and correspond to page types. The Style Library holds their blocks.</p>
+<h3>5.1 Output sizes</h3>
+<p><code>gpt-image-1</code> offers exactly three shapes: 1024×1024, 1024×1536, 1536×1024. <strong>Landscape (1536×1024) is never used</strong> — it does not fit any planned product.</p>
+<div class="tablewrap"><table><thead><tr><th>Category</th><th>Generate</th><th>Deliver</th></tr></thead><tbody><tr><td>Coloring books</td><td>1024×1536</td><td>pad to 2550×3300 (8.5×11 @ 300 DPI)</td></tr><tr><td>Social — feed</td><td>1024×1024</td><td>square</td></tr><tr><td>Social — Pinterest</td><td>1024×1536</td><td>2:3 is already ideal</td></tr><tr><td>Social — stories/reels</td><td>1024×1536</td><td>pad to 9:16, compose inside a safe zone</td></tr><tr><td>VV-Styles apparel</td><td>1024×1536, transparent background</td><td>pad into 3600×4800 (12×16" @ 300 DPI)</td></tr></tbody></table></div>
+<p><strong>Coloring pages pad, never crop.</strong> 1024×1536 is 0.667; letter is 0.773. Cropping to letter cuts ~13% off top and bottom and loses art. Padding fits the art to 2200×3300 and leaves ~0.58" of white each side — which KDP requires anyway for margin and gutter. The margin does double duty.</p>
+<p>This closes the open question in §9.</p>
+<p><strong>Apparel pads too, and for the same reason.</strong> The category was square while the delivery note asked for 4500×5400 — two different shapes, and neither is what a front print is. <code>gpt-image-1</code> tops out at 1536 on the long edge, so 1024×1536 is the closest portrait it makes; it is also what every accepted reference is. The art is padded into the 12×16" front-print area rather than cropped to it, and because the artwork is transparent the padding costs nothing — the design floats in the print area instead of being cut to fit (D71).</p>
+<p>Apparel is raster, not vector. <code>gpt-image-1</code> supports transparent backgrounds, so a transparent PNG is genuinely print-ready for DTF — but it is generated at 1024×1536 and has to be upscaled to reach 300 DPI at 12×16", which no amount of prompt work changes. Flat, hard-edged art is the most upscale-tolerant kind there is, which is lucky rather than planned. Only a test print settles whether it holds. True vector would need a separate trace step — worth doing later, not a blocker.</p>
+<h3>What carries over from the Stage 1 build</h3>
+<p>Working and correct — kept as-is:</p>
+<ul>
+<li>generation pipeline, job-before-call recording, error capture</li>
+<li>provider abstraction, cost and usage tracking</li>
+<li>prompt-block composition with <code>{{slot}}</code> substitution and empty-block dropping</li>
+<li>local storage behind an opaque key, ready for R2</li>
+<li>migration runner and re-appliable seed</li>
+</ul>
+<p>Needs migration:</p>
+<ul>
+<li><code>brands</code> + <code>job_types</code> → <code>categories</code></li>
+<li>add <code>collections</code>, <code>items</code></li>
+<li>add <code>reference_images</code></li>
+<li>templates keyed to page types</li>
+</ul>
+<p>Adopted from <code>api-route-map.md</code>:</p>
+<ul>
+<li><code>{data, meta, error}</code> response envelope</li>
+<li><code>/api/v1</code> base path</li>
+<li>resource-oriented route naming</li>
+</ul>
+<hr>
+<h3>4.5 What the live VV-Styles products show</h3>
+<p>Eight product images in <code>docs/references/</code> are the only finished VV-Styles designs in existence. Seven are <code>.png</code>; <code>feeldealheal.jpg</code> is the eighth.</p>
+<div class="tablewrap"><table><thead><tr><th>File</th><th>Garment</th><th>Design</th><th>Art Style</th><th>Background</th></tr></thead><tbody><tr><td><code>stillhere</code></td><td>white</td><td>"Still here… Still CLEAN" — sun over water</td><td>Retro Groovy</td><td>box hidden by white fabric</td></tr><tr><td><code>recoveringoutloud</code></td><td>white</td><td>"RECOVERING OUT LOUD / EST. 1995" — arched collegiate</td><td>Vintage Badge</td><td>box hidden by white fabric</td></tr><tr><td><code>worstidea</code></td><td>white</td><td>"I SURVIVED MY OWN WORST IDEA" — stencil type, lightbulb</td><td>Bold Minimal</td><td>box hidden by white fabric</td></tr><tr><td><code>recoveringest</code></td><td>pink</td><td>"RECOVERING / est. 2006" — arched lettering, dice, flame</td><td>Vintage Badge</td><td><strong>knocked out correctly</strong></td></tr><tr><td><code>cleanserene</code></td><td>gray</td><td>"CLEAN &amp; SERENE SINCE 1953" — Victorian filigree</td><td>Editorial Typographic</td><td>white square visible</td></tr><tr><td><code>proud</code></td><td>dark heather</td><td>"PROUD to be RECOVERING" — photoreal phoenix</td><td>Photoreal Composite</td><td>orange rectangle visible</td></tr><tr><td><code>listenin</code></td><td>red</td><td>"Listenin' for the GOOD E.S.H." — thin pink type</td><td>Editorial Typographic</td><td>white square, very visible</td></tr><tr><td><code>feeldealheal</code></td><td>white</td><td>"Feel / DEAL / Heal" — marker lettering, sine wave, daisies</td><td>Hand-Drawn Doodle</td><td>indeterminate on white fabric</td></tr></tbody></table></div>
+<p><strong>The defect, stated correctly.</strong> Only one of eight is verifiably knocked out. Four more <em>appear</em> clean solely because the garment is white and hides the box — on white fabric a white background and a transparent one are indistinguishable, so their true state is unknown until they are placed on a colored garment. The artwork is sound throughout — the enclosing background is not.</p>
+<p>This is not primarily a cosmetic problem. <strong>It locks the line to white and near-white garments.</strong> An existing design cannot be offered in navy, forest, maroon or heather without the box appearing. Transparent artwork multiplies the catalogue without any new design work: 8 designs × 6 garment colors ≈ 48 products from art already owned. Given that the store needs product before launch, this is the highest-leverage single fix in the project, and it is what Stage C must deliver first.</p>
+<p>The cause is designing inside the Printify editor, which could not produce a knocked-out background despite repeated attempts. <code>gpt-image-1</code> returns transparent PNGs directly (§5.1).</p>
+<p><strong>Clean date is a template variable.</strong> Three of the seven carry one — <code>est. 2006</code>, <code>SINCE 1953</code>, <code>EST. 1995</code> — and the library row reads "Clean &amp; Serene since 1953 (or clean date)". It is a personalization slot, not decoration, and belongs in the prompt engine as <code>{{clean_date}}</code>.</p>
+<p><strong>Print-quality notes.</strong></p>
+<ul>
+<li><code>listenin</code> uses thin, light-weight pink type at low contrast — the two things DTF reproduces worst. Rework rather than reprint.</li>
+<li><code>feeldealheal</code> has white daisy petals that vanish on white fabric. It needs a colored garment to read at all — a concrete instance of why the colour range matters.</li>
+</ul>
+<p><strong>Vocabulary grew from real work, twice.</strong> The live line required two lettering values the original list lacked (<code>Sans Display</code>, <code>Stencil</code>) and a fourteenth art style (<code>Hand-Drawn Doodle</code>). This is the §2.2 principle working as intended: the vocabulary is seeded by what Esoh actually makes, not by what was imagined in advance. Expect it to keep growing; validation rules warn rather than reject for this reason.</p>
+<p><strong>Library gap.</strong> Six of the seven exist as rows in the 129-quote library. <code>Listenin' for the GOOD E.S.H.</code> does not, and carries fellowship language (<code>E.S.H.</code>) that belongs with the other flagged rows. Every live product must exist as a row or the library is not the source of truth.</p>
+<hr>
+<h2 id="s9">6. Style consistency is the core technical problem</h2>
+<p>180 pages must look like one book. Text prompts alone will not hold a style across 180 generations — Stage 1 demonstrated drift within <em>three</em>.</p>
+<p>Planned approach, strongest first:</p>
+<ol>
+<li><strong>Reference images as input.</strong> <code>gpt-image-1</code> accepts image input. Feeding approved pages as style exemplars is far more reliable than describing the style in words. Two qualifications learned at Stage B, both the hard way:</li>
+</ol>
+<ul>
+<li><strong>An exemplar transfers its faults along with its virtues.</strong> <code>hoodie-on-sofa</code> is the right target for rendering and contemporary dress, and it also has near-black filled hair and leaves on every surface. Sent as image input it reproduced both — the two things Esoh had explicitly rejected. An exemplar has to be a page that would be accepted whole, not a page that is mostly right.</li>
+<li><strong>Mixed exemplars average out.</strong> Three were active at once: two sparse, one rich. The model split the difference and produced pages that were never open enough nor full enough. Exemplars must agree with each other.</li>
+</ul>
+<p>   The consequence: <strong>D20 cannot carry a style until one fully approved page exists.</strong> Until then the Style Library is running on words alone, which is where the drift comes from.</p>
+<ol>
+<li><strong>Style locked in blocks, subject varying per item.</strong> Style blocks never mention ethnicity, subject or season.</li>
+<li><strong>Approved pages become references.</strong> Every approved page can be promoted to an exemplar, so the style tightens as the book progresses.</li>
+</ol>
+<hr>
+<h2 id="s10">7. Revised build order</h2>
+<p>Stage numbering restarts here.</p>
+<h3>Stage A — Restructure</h3>
+<p>Migrate to categories/collections/items. Import both spreadsheets. 180 items land in the database with briefs, page types, quotes and priorities. <strong>Done when:</strong> the production plan is queryable — "show me every High priority Fall quote page."</p>
+<h3>Stage B — Style Library from real material</h3>
+<p>Six page-type templates. Blocks derived from the reference images and prompt notes. Reference-image input wired in. <strong>Done when:</strong> a generated Solo portrait is judged close enough to the references to use.</p>
+<h3>Stage C — VV-Styles apparel</h3>
+<p>The first real test of the engine on a whole category. Square transparent output, the twelve art styles, 129 items already written. No page-type templates, no 180-item queue, no bilingual lettering — the simplest path from prompt to sellable product. <strong>Done when:</strong> a design goes from library row to print-ready transparent PNG without touching Printify's editor.</p>
+<h3>Stage D — Library and retrieval</h3>
+<p>Asset library with filters across category, collection, item, page type, status, priority. Items show their attempts. <strong>Done when:</strong> any page from any book is findable in seconds.</p>
+<h3>Stage E — Batch</h3>
+<p>Generate a whole collection unattended. Review queue for the results. <strong>Done when:</strong> "generate every High priority Fall page" is one action.</p>
+<h3>Stage F — Print pipeline</h3>
+<p>Upscale to 300 DPI, page proportions, bleed and margins, print-ready PDF export. <strong>Done when:</strong> an approved page can go straight to KDP.</p>
+<h3>Stage G — Remaining categories</h3>
+<p>Social content and print designs, with their own presets and templates.</p>
+<p>Stage F may need to move earlier if publishing deadlines demand it.</p>
+<hr>
+<h2 id="s11">8. Decisions</h2>
+<div class="decision"><div class="dnum">D1</div><div class="dbody">Internal tool only. No billing, portal, permissions or multi-tenancy.</div></div>
+<div class="decision"><div class="dnum">D2</div><div class="dbody">Prompts compose from ordered blocks, not flat strings.</div></div>
+<div class="decision"><div class="dnum">D3</div><div class="dbody"><strong>Superseded.</strong> Ventures and job types collapse into one <code>categories</code> table.</div></div>
+<div class="decision"><div class="dnum">D4</div><div class="dbody">Asset Library is a primary feature, ahead of style refinement.</div></div>
+<div class="decision"><div class="dnum">D5</div><div class="dbody">No n8n until external integrations exist.</div></div>
+<div class="decision"><div class="dnum">D6</div><div class="dbody">Single Next.js app. No monorepo.</div></div>
+<div class="decision"><div class="dnum">D7</div><div class="dbody">Localhost first.</div></div>
+<div class="decision"><div class="dnum">D8</div><div class="dbody">No auth, no <code>users</code> table.</div></div>
+<div class="decision"><div class="dnum">D9</div><div class="dbody">Every job records resolved prompt, model, params, usage and cost.</div></div>
+<div class="decision"><div class="dnum">D10</div><div class="dbody">Print pipeline planned from the start, built at Stage E.</div></div>
+<div class="decision"><div class="dnum">D11</div><div class="dbody"><strong>Superseded by D3.</strong></div></div>
+<div class="decision"><div class="dnum">D12</div><div class="dbody">OpenAI <code>gpt-image-1</code> is the provider.</div></div>
+<div class="decision"><div class="dnum">D13</div><div class="dbody">PostgreSQL runs locally.</div></div>
+<div class="decision"><div class="dnum">D14</div><div class="dbody">Code lives at <code>~/esoh-studio</code>.</div></div>
+<div class="decision"><div class="dnum">D15</div><div class="dbody">Git remote set up early; container files are not backed up.</div></div>
+<div class="decision"><div class="dnum">D16</div><div class="dbody">Batch generation is a core feature, not deferred.</div></div>
+<div class="decision"><div class="dnum">D17</div><div class="dbody">Page type is the template unit. Six templates for coloring books.</div></div>
+<div class="decision"><div class="dnum">D18</div><div class="dbody">Ethnicity is production data, never a style setting or global default.</div></div>
+<div class="decision"><div class="dnum">D19</div><div class="dbody">Quote pages render lettering, including accented Spanish.</div></div>
+<div class="decision"><div class="dnum">D20</div><div class="dbody">Style consistency is driven by reference images, not longer prompts.</div></div>
+<div class="decision"><div class="dnum">D21</div><div class="dbody">Adopt <code>{data, meta, error}</code> envelope and <code>/api/v1</code> paths.</div></div>
+<div class="decision"><div class="dnum">D22</div><div class="dbody">Approved pages can be promoted to style references.</div></div>
+<div class="decision"><div class="dnum">D23</div><div class="dbody"><strong>Refined.</strong> Quote text is overlaid after generation as <strong>outlined vector type</strong> — a real font, stroked and unfilled — never drawn by the model. The scanned quote pages show lettering as hollow outline art meant to be colored in; flat filled type would sit on the page like a sticker and could not be colored. Outlined vector keeps the letters colorable <em>and</em> guarantees correct spelling and accented Spanish, and still allows restyling or translation without regenerating. Quote-page prompts must <strong>reserve clear space</strong> for the type to land in.</div></div>
+<div class="decision"><div class="dnum">D24</div><div class="dbody"><strong>The model never draws a border.</strong> Seven of eight page-shaped references have one, so it is a genre convention rather than an accident — but a drawn border bakes in, varies page to page, and was the one Stage 1 instruction the model reliably ignored. Prompts generate borderless with a safe margin. The print pipeline <em>may</em> add a border as a vector rule at export: exact, identical on every page, removable. Default off. Same principle as D23 — generate the art, add the precise parts afterward.</div></div>
+<div class="decision"><div class="dnum">D25</div><div class="dbody">The series is <strong>3 lines × 4 seasons = 12 books, 180 pages.</strong> Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books.</div></div>
+<div class="decision"><div class="dnum">D26</div><div class="dbody"><strong>Art Style is a first-class dimension</strong>, separate from category and tone. Twelve values (§4.4). This is the mechanism for variety; without it the tool has no axis to vary.</div></div>
+<div class="decision"><div class="dnum">D27</div><div class="dbody"><strong>Background Density</strong> (Open / Medium / Dense) is a per-item setting on any template with a background. Never a global rule.</div></div>
+<div class="decision"><div class="dnum">D28</div><div class="dbody"><strong>Lettering Style</strong> applies to any item carrying words, coloring page or apparel.</div></div>
+<div class="decision"><div class="dnum">D29</div><div class="dbody">Output sizes are fixed per category (§5.1). <strong>Landscape 1536×1024 is never used.</strong></div></div>
+<div class="decision"><div class="dnum">D30</div><div class="dbody">Coloring pages <strong>pad, never crop</strong>, from 1024×1536 to 8.5×11. The padding becomes the KDP margin.</div></div>
+<div class="decision"><div class="dnum">D31</div><div class="dbody">Third-party reference scans (the watermarked pages) inform how templates are <em>written</em>, but are <strong>never sent to the model as image input</strong>. D20 style exemplars come only from our own approved pages, per D22.</div></div>
+<div class="decision"><div class="dnum">D32</div><div class="dbody"><strong>VV-Styles moves to Stage C</strong>, ahead of library, batch and print. It is the simplest complete path through the engine and the store needs product before launch.</div></div>
+<div class="decision"><div class="dnum">D34</div><div class="dbody"><strong>Apparel artwork is generated with a transparent background and no enclosing shape.</strong> Three of four live designs print a visible rectangle on the garment; this is the defect Stage C exists to remove.</div></div>
+<div class="decision"><div class="dnum">D35</div><div class="dbody"><strong>Clean date is a prompt slot</strong> (<code>{{clean_date}}</code>), not baked into the design. Supports per-buyer personalization.</div></div>
+<div class="decision"><div class="dnum">D36</div><div class="dbody"><strong>Photoreal Composite</strong> is a thirteenth art style, recorded because it is in the live line. Flagged for review on print quality, not endorsed.</div></div>
+<div class="decision"><div class="dnum">D49</div><div class="dbody"><strong>Nothing in the Style Library described the people or places as contemporary</strong>, so the model produced dated figures in vague settings. The line is meant to mirror present-day life; that has to be stated.</div></div>
+<div class="decision"><div class="dnum">D50</div><div class="dbody"><strong>An exemplar must be a page acceptable in full.</strong> Image input copies faults as faithfully as virtues, and mixed exemplars average into mush.</div></div>
+<div class="decision"><div class="dnum">D51</div><div class="dbody"><strong>Text cannot override a fault the exemplar demonstrates.</strong> With <code>hoodie-on-sofa-v2</code> as the sole exemplar and the figure block rewritten to demand outlined, open hair, the page came back with hair filled solid anyway — the exemplar shows filled hair and the image wins. Corollary to D50: a residual fault is not something a stronger block can cover; the exemplar has to be corrected.</div></div>
+<div class="decision"><div class="dnum">D52</div><div class="dbody"><strong>Hair and facial hair are selectable per item</strong> — <code>items.hair</code>, <code>items.facial_hair</code>, and a <code>combo</code> form field that offers current styles (braids, locs, fades, twist-outs, waves) but accepts anything typed. D45 said hair is item data; nothing implemented it, so <code>hs-figure-rendering</code> said hair follows "whatever style the person wears" — which names nothing, leaving the exemplar to decide. <strong>A vague field is what an exemplar overrides.</strong> The style block now carries only the rendering rule: outlined sections, never filled, colourable like any other area.</div></div>
+<div class="decision"><div class="dnum">D53</div><div class="dbody"><strong>Fullness is a density decision, never an art style.</strong> <code>hs-style-editorial-scene</code> asserted "an uncluttered setting, with open sky and ground" — a content judgment buried in an art style where no form control could reach it. It contradicted <code>hs-density-dense</code> and <code>hs-furnishing</code> in the same prompt and, coming first, won: choosing <strong>Dense</strong> produced a bare room. "Open" means the figure is not crowded by their surroundings; it has never meant the room is scarce.</div></div>
+<div class="decision"><div class="dnum">D54</div><div class="dbody"><strong><code>items.visual_elements</code> feeds the <code>{{environment}}</code> slot.</strong> Nothing supplied it, so the one block that says what is in the room was silently dropped from every item-driven generation — an empty slot drops its block by design. Generic rooms were not the model guessing badly; they were the item never being asked.</div></div>
+<div class="decision"><div class="dnum">D55</div><div class="dbody"><strong>The form generates from a queue item.</strong> It posted no <code>itemId</code>, no art style, no density and no exemplar flag — so <code>brief</code>, <code>hair</code>, <code>visual_elements</code>, <code>season</code> and <code>ethnicity_line</code> were unreachable from the app and every page came out of the blank-form path. Wiring the columns was never the missing piece; <strong>nothing in the UI could select a row to wire them from.</strong> Choosing an item now settles its template, art style and density, each still editable — the row is a starting point, not a lock.</div></div>
+<div class="decision"><div class="dnum">D56</div><div class="dbody"><strong>A page-type mismatch is refused, not drawn.</strong> Generating a Quote page item against the Solo Portrait template produced a silently wrong page. With 180 items across six page types this had to fail loudly.</div></div>
+<div class="decision"><div class="dnum">D57</div><div class="dbody"><strong><code>quote_text</code>, <code>quote_lang</code> and <code>lettering_style</code> are deliberately not prompt inputs.</strong> D23 puts quote text on the page as overlaid outlined vector type; sending it to the model would produce misspelt, uncolourable lettering and break the reserved space the composition block creates. They are export-stage data, and the export stage does not exist yet. <code>color_direction</code> and <code>product_placement</code> are VV-Styles fields with no VV-Styles template (D32, Stage C). <strong>Five of the six unused columns are unused correctly</strong> — only <code>visual_elements</code> was a genuine defect.</div></div>
+<div class="decision"><div class="dnum">D58</div><div class="dbody"><strong>One default typeface per lettering style</strong>, recorded in <code>lettering_faces</code>: Baloo 2 ExtraBold · Caveat Brush · Archivo Black · Libre Baskerville Bold · Permanent Marker · Montserrat ExtraBold · Big Shoulders Stencil Text Bold · Archivo Black + Caveat Brush. All verified against the font binaries for the full Spanish set; all OFL except Permanent Marker (Apache 2.0). An item may override its own.</div></div>
+<div class="decision"><div class="dnum">D59</div><div class="dbody"><strong>Hollow outline is a coloring-page rule, not a lettering rule.</strong> D23 makes quote type hollow so it can be <em>coloured</em>. Apparel has nothing to colour, so VV-Styles type is filled or knocked out (D34) and the outline criteria — heavy weight, low contrast, open counters — do not govern it. Playfair Display, rejected for coloring pages because its hairlines collide when outlined, is perfectly usable on a shirt. <strong>The two products need different type judgments and must not share one test.</strong></div></div>
+<div class="decision"><div class="dnum">D60</div><div class="dbody"><strong>The lettering default is per category.</strong> The 36 Healing Seasons Quote pages default to Serif Editorial — it reads as a book rather than a poster, and Block Outline sets recovery affirmations like advertising. The 130 VV-Styles items are deliberately left null: no template exists for that category yet (D32), and defaulting them now would be 130 rows to correct after Stage C designs them.</div></div>
+<div class="decision"><div class="dnum">D61</div><div class="dbody"><strong>The overlay is kept as vector and never flattened.</strong> Each quote page stores the type as SVG beside the raster art. Flattening bakes the letters to 300 DPI permanently; keeping them as paths makes the KDP PDF a composition of two files that already exist, and lets a quote be restyled or translated without regenerating the page. This is the decision that is expensive to reverse later, which is why it is made before the code is written.</div></div>
+<div class="decision"><div class="dnum">D62</div><div class="dbody"><strong>A page type records whether it has people</strong> (<code>prompt_templates.has_people</code>). The Quote, Symbol and Decorative templates each carried <code>hs-environment</code>, <code>hs-furnishing</code>, <code>hs-seasonal-restraint</code> and all three density blocks, so a composition opening with <em>"No people"</em> was followed by <em>"the setting is complete and lived-in, built from real furniture, with the described subject as the clear focus."</em> The room won and the reserved centre never appeared. Those blocks are detached; the Environment page keeps them, because it has no people but does have a setting — two separate facts, which is why the flag is recorded rather than inferred. The ethnicity line is also gated on it: on a page of pattern it describes someone who is not there.</div></div>
+<div class="decision"><div class="dnum">D63</div><div class="dbody"><strong>A reserved area is specified in both dimensions, and the paper is stated in its own right.</strong> "Roughly half the page height" said nothing about width, so the model chose its own and the type crossed into the pattern. And "pure black line work on white" was read as a description of the ink — the first Quote page came back on aged, speckled parchment. A tint costs ink on every page of the run and dirties every colour laid over it.</div></div>
+<div class="decision"><div class="dnum">D64</div><div class="dbody"><strong>The overlay renders through <code>fontkit</code>, not a font at render time.</strong> Glyphs become geometry before anything is drawn, so no font needs to be installed anywhere downstream and accented Spanish is guaranteed rather than hoped for. Four of the eight faces are variable fonts whose axis default is wrong — Montserrat's is Thin — so the weight instance is cut explicitly. Font binaries and their licences are vendored in <code>assets/fonts/</code>.</div></div>
+<div class="decision"><div class="dnum">D66</div><div class="dbody"><strong>The reserved area is measured off each page, not assumed.</strong> The prompt asks for an oval; the model draws a different one every time, so any fixed area is a guess wrong by a different amount on every page. The recorded box was half again as wide as the real oval at its widest point and centred lower, which is why the first real quote broke. <code>detectReservedArea()</code> reads the blank centre off the art — the longest contiguous run of rows whose white span through the centreline is wide enough to be the reserved area — and falls back to a measured default when a page has no clean centre to find.</div></div>
+<div class="decision"><div class="dnum">D67</div><div class="dbody"><strong>Type is fitted to the ellipse, line by line, at its widest point.</strong> One width for the whole block is what put a descender in the pattern: the block is widest where the oval is narrowest. Each line's width now comes from the ellipse at whichever of its edges — ascender top or descender bottom — sits furthest from the centre, and the wrap settles by iteration because how wide a line may be depends on where it sits, which depends on how many lines there are. The size search uses a <em>relative</em> tolerance, so the SVG laid out in pixels and the PDF laid out in points converge on the same size rather than one a pixel apart.</div></div>
+<div class="decision"><div class="dnum">D68</div><div class="dbody"><strong>Every lettering gets its own storage key.</strong> D65 protects the art from being replaced but said nothing about the letterings, and the key was derived from the source page — so each re-letter overwrote the previous one's PNG and SVG while its asset row survived, pointing at a file that now held different words. Since the SVG is what goes to print (D61), such a row would print the wrong quote.</div></div>
+<div class="decision"><div class="dnum">D69</div><div class="dbody"><strong>D56 applies to lettering, not only to generation.</strong> Quote page is the only page type that reserves space for words; lettering any other lays type across the middle of a drawing, which a Solo portrait proved by coming back with "Rest is not a reward." over the figure's face. A mismatch is refused. An asset with no item behind it is ad hoc and allowed through — there is no page type to contradict.</div></div>
+<div class="decision"><div class="dnum">D65</div><div class="dbody"><strong>Lettering a page creates a new asset; it never replaces the original.</strong> The unlettered art stays the artwork, so a quote can be reset, restyled or translated against it any number of times. The SVG is written beside the PNG and is what goes to print.</div></div>
+<div class="decision"><div class="dnum">D47</div><div class="dbody"><strong>Form is described by outline; nothing is filled, shaded, hatched or textured.</strong> Replaces "texture rendered as pattern", which produced seek-and-find pages (§3.5). Detail and fill are different: many separate outlined shapes with white between them stay calm and remain colourable.</div></div>
+<div class="decision"><div class="dnum">D48</div><div class="dbody"><strong><code>journaling-under-tree</code> and <code>walking-with-mug</code> are the canonical Solo portrait exemplars</strong>, registered with <code>usable_as_input = true</code>. Both are Esoh's own work, so D31 does not apply.</div></div>
+<div class="decision"><div class="dnum">D44</div><div class="dbody"><strong>Nothing on a coloring page is filled in.</strong> Every enclosed area is open white. Hair included.</div></div>
+<div class="decision"><div class="dnum">D45</div><div class="dbody"><strong>Hair is item data, never a style block.</strong> Encoding one texture as a rule stereotypes and removes variety.</div></div>
+<div class="decision"><div class="dnum">D46</div><div class="dbody"><strong>Technique is stated positively; only content is excluded by name.</strong> Four occurrences of the §2.5 trap, all of them technique negatives.</div></div>
+<div class="decision"><div class="dnum">D43</div><div class="dbody"><strong>Density means the composition reaches every edge, not that every surface carries marks.</strong> "Leaving no empty ground" left the model nowhere to stop and it textured skin and sky. A coloring page needs clean enclosed areas to put colour into.</div></div>
+<div class="decision"><div class="dnum">D39</div><div class="dbody"><strong>Style blocks describe how a page is drawn; item briefs describe what is in it.</strong> Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 180 pages repeat (§3.3).</div></div>
+<div class="decision"><div class="dnum">D40</div><div class="dbody"><strong><code>Healing Seasons</code> is a series</strong>, recorded on <code>collections.series</code>, sitting between category and collection so a second series never collides with the first.</div></div>
+<div class="decision"><div class="dnum">D41</div><div class="dbody"><strong>The in-scene name-drop is per-item and opt-in</strong> — <code>items.brand_mark</code>, null by default, either 'Healing Seasons' or 'Esoh Creations'. An occasional touch, never a signature.</div></div>
+<div class="decision"><div class="dnum">D42</div><div class="dbody"><strong>Export filenames are spelled out in full</strong>, including page type and art style: <code>african-american-fall-09-quote-page-zentangle-pattern-v2.png</code>. Internal storage keys stay opaque; the descriptive name is generated at export, because an exported file leaves the database behind and has to describe itself.</div></div>
+<div class="decision"><div class="dnum">D37</div><div class="dbody"><strong>Every live product exists as a library row.</strong> <code>Listenin' for the GOOD E.S.H.</code> is currently live but unrecorded.</div></div>
+<div class="decision"><div class="dnum">D38</div><div class="dbody"><strong>Transparent artwork is the Stage C priority, ahead of new designs.</strong> It unlocks the garment-colour range and multiplies the catalogue from existing art.</div></div>
+<div class="decision"><div class="dnum">D33</div><div class="dbody">The VV-Styles master list is <strong><code>VV-Styles Designs Library Original</code></strong>. The two ChatGPT-expanded exports added no quotes — only one boilerplate visual string per category and a single templated prompt — and are retired. <code>vv-styles-master.csv</code> is its restructured form.</div></div>
+<div class="decision"><div class="dnum">D70</div><div class="dbody"><strong>Apparel puts the phrase in the prompt; coloring pages do not.</strong> D57 keeps <code>quote_text</code> out of a coloring-book prompt because D23 overlays it as hollow outlined type on a page whose words are meant to be coloured in. That reasoning does not reach a shirt. Apparel type is filled (D59) and drawn <em>into</em> the artwork — arched banners, offset comic caps, lettering that shares its contour weight with the image — and overlaying flat vector on top of such a design would throw away the thing that makes it read as apparel. The risk is misspelling, and the first generation located it precisely: the headline phrase came back exact while a small in-scene sign read "FFEINE" for CAFFEINE. <strong>The phrase is safe; secondary text inside the scene is not.</strong> Keep incidental lettering out of <code>visual_elements</code> unless it is worth checking by eye.</div></div>
+<div class="decision"><div class="dnum">D71</div><div class="dbody"><strong>Apparel generates at 1024×1536 and pads into a 12×16" front print.</strong> Supersedes the 1024×1024 category setting and the 4500×5400 delivery note, which described two different shapes and neither of them a chest print. Padding not cropping, per D30 — and on transparent art the padding is free, since the design floats in the print area rather than being cut to fit it.</div></div>
+<div class="decision"><div class="dnum">D72</div><div class="dbody"><strong>Nothing sits behind an apparel design, and the block layer must say so by name.</strong> Two generations produced the D34 defect in shapes a border test cannot see: an irregular cream blob with a feathered edge, then a rounded-rectangle poster card, both floating clear of all four sides. The cause was this project's own wording — "composed as one self-contained unit" and "every element locks into that one shape" meant <em>not scattered</em> and were read as <em>one silhouette</em>, so the model supplied one. Grouping is now described as an arrangement, and panel, card, badge field and rounded rectangle are excluded by name. That naming is consistent with D46, not a breach of it: D46 governs rendering <em>technique</em>, and a panel is an object.</div></div>
+<div class="decision"><div class="dnum">D73</div><div class="dbody"><strong><code>background: "transparent"</code> is passed to the provider, not merely requested in prose.</strong> The category carried the flag, the provider supported it, and nothing joined the two, so every apparel prompt asked for a knockout in words while the API parameter went unset. Setting it dropped the soft feathered edge from 4.9% of the image to 1.7%. It does not remove an enclosing panel — that is D72's job — so the two are needed together.</div></div>
+<div class="decision"><div class="dnum">D74</div><div class="dbody"><strong>The knockout is measured, never eyeballed, and the measurements are these.</strong> Four of eight live products only look clean because white fabric hides the box. Three checks in <code>lib/transparency.ts</code>: an alpha channel must exist and be used; the design must fill no more than 80% of its own bounding box, since real cut-out artwork leaves gaps between its elements and a panel welds them together; and no more than 3% of the image may be half-transparent, since a cut edge is hard and a feathered one is not. Accepted references measure 60–72% fill and 0.7–1.6% soft edge; the two failed generations measured 86–92% and 4.9%. A failing image is flagged, never discarded — it has been paid for, and whether to rework or re-run is not the tool's call. What this cannot catch is a mockup: a t-shirt silhouette fills about 65% of its own box, squarely inside the accepted range.</div></div>
+<div class="decision"><div class="dnum">D75</div><div class="dbody"><strong>Naming the garment colour in the prompt ties the artwork to that garment.</strong> It is what makes light detail survive on dark fabric, and it is why the coffee design reads on natural sand and nearly disappears on black. It also cuts against the arithmetic in §4.5 — 8 designs × 6 colours ≈ 48 products assumes one file works on every garment. Both can be true, but not for the same file: a design is either colour-directed for one garment or built with contrast that holds on any, and which one it is has to be decided per design rather than assumed.</div></div>
+<hr>
+<h2 id="s12">9. Open questions</h2>
+<p><strong>Answered since the last draft</strong></p>
+<ul>
+<li><del>VV-Styles phrases are not recorded anywhere</del> → 129 quotes exist; see D33.</li>
+<li><del>No references for Symbol, Decorative or Quote pages</del> → four scanned pages, §3.2.</li>
+<li><del>Crop, pad or outpaint?</del> → pad, D30.</li>
+<li><del>Do VV-Styles and social need collections and items?</del> → yes. One VV-Styles item is one design; the 129 rows map onto category → collection → item with no model change. They need separate categories because the output ratios differ.</li>
+</ul>
+<p><strong><del>Known limitation in the quote overlay</del> — Resolved.</strong></p>
+<ul>
+<li><del>The type box is a rectangle; the reserved area the model draws is an oval.</del> It broke on the first real quote: the descender of "grow" ran out of the oval and across the pattern. Fixed per D66–D67 — the area is measured off each page and the type is fitted to the ellipse line by line.</li>
+</ul>
+<p><strong>Blocked on a missing stage, not on wiring</strong> (D57)</p>
+<ul>
+<li><del><strong>Quote pages cannot complete.</strong></del> <strong>Done.</strong> The prompt reserves the centre and forbids drawn letters (D23), but no overlay step exists. <code>POST /api/overlay</code> letters a generated page (D64, D65). <code>fontkit</code> replaced <code>opentype.js</code> — it instances variable fonts, which four of the eight faces need.</li>
+<li><del>VV-Styles has 130 items and no template</del> → built 2026-08-27 (migration 020). One template, nine apparel art styles, and <code>quote_text</code>, <code>visual_elements</code>, <code>lettering_style</code>, <code>color_direction</code> and <code>product_placement</code> all feed it. Twelve designs are art-directed; the other 118 have empty direction columns and are not yet briefed.</li>
+</ul>
+<p><strong>Production</strong></p>
+<ul>
+<li>Are the 12 books published separately, or bundled as one series?</li>
+<li>The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.</li>
+<li><del>Should the 19 VV-Styles categories consolidate to the proposed 9?</del> → yes, applied 2026-08-27 (migration 021). The portfolio capsule's six collection names turned out to <em>be</em> six of the proposed nine under better wording, so the capsule's naming was taken where it existed and the proposed list used for the rest. All 130 items are sorted; one row with no <code>Category</code> at all stays in Unsorted. Two judgment calls stand flagged: <code>Love</code> went to Family &amp; Faith as the nearest relational grouping, and <code>Self-Awareness</code> to Truth &amp; Accountability as honest self-assessment rather than self-regard.</li>
+<li>14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged <code>Brand / Legal Review</code>. Decide before printing.</li>
+</ul>
+<p><strong>Current state of VV-Styles</strong></p>
+<ul>
+<li>Store is built but <strong>not public</strong>. 8 shirt styles live, one tester shirt ordered and approved. Designs are currently made by hand in the Printify web editor — slow, and the reason this tool exists.</li>
+</ul>
+<p><strong>Style</strong></p>
+<ul>
+<li>All seven existing shirts are catalogued in §4.5.</li>
+<li>Photoreal Composite is <strong>kept</strong> (D36). Open: does the phoenix keep its poster rectangle, or get knocked out to phoenix-and-type only? One test print decides it.</li>
+<li>No approved in-house exemplars exist yet for Quote, Symbol or Decorative pages. Stage B must produce the first ones.</li>
+</ul>
+<p><strong>Structure</strong></p>
+<ul>
+<li>Should the tool write back to the spreadsheets, or replace them?</li>
+</ul>
+<p><strong>Technical</strong></p>
+<ul>
+<li>Verify the estimated rates in <code>lib/pricing.ts</code>.</li>
+<li>Vector trace step for apparel — later, not blocking.</li>
+</ul>
+</body></html>

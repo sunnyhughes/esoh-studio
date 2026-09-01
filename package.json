@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "db:import": "node --env-file=.env.local scripts/import-sheets.mjs",
     "prompt:preview": "node --env-file=.env.local scripts/preview-prompt.mjs",
-    "printify:areas": "node --env-file=.env.local scripts/printify-print-areas.mjs"
+    "printify:areas": "node --env-file=.env.local scripts/printify-print-areas.mjs",
+    "doc:print": "node scripts/print-doc.mjs"
   },
   "dependencies": {
     "fontkit": "^2.0.4",
