@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>design-plan.md</title>
+<style>
+@page { size: letter; margin: 0.7in 1.9in 0.75in 0.9in; }
+* { box-sizing: border-box; }
+body {
+  font: 11pt/1.55 Georgia, "Times New Roman", serif;
+  color: #000; background: #fff; margin: 0 auto; padding: 0.7in 1.9in 0.75in 0.9in;
+  max-width: 8.5in; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1 { font-size: 20pt; line-height: 1.15; margin: 0 0 4pt; letter-spacing: -0.01em; }
+h2 {
+  font-size: 13pt; margin: 26pt 0 9pt; padding-bottom: 3pt;
+  border-bottom: 1.5pt solid #000; break-after: avoid; break-before: page;
+}
+h2:first-of-type { break-before: auto; }
+h3 { font-size: 11.5pt; margin: 16pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 8pt; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+hr { border: none; border-top: 0.5pt solid #999; margin: 14pt 0; }
+code { font: 9.5pt "SFMono-Regular", Consolas, "Courier New", monospace; word-break: break-word; }
+pre {
+  font: 9pt/1.4 "SFMono-Regular", Consolas, "Courier New", monospace;
+  background: #f2f2f2; border-left: 2pt solid #999; padding: 7pt 9pt;
+  white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt;
+}
+del { color: #666; }
+.url { font-size: 8.5pt; color: #555; word-break: break-all; }
+
+.decision {
+  display: grid; grid-template-columns: 38pt 1fr; gap: 10pt;
+  break-inside: avoid; padding: 7pt 0; border-bottom: 0.5pt solid #ccc;
+}
+.dnum { font-weight: bold; font-size: 10pt; letter-spacing: 0.02em; }
+.dbody { margin: 0; }
+
+.tablewrap { break-inside: avoid; margin: 0 0 12pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+
+.masthead { border-bottom: 2.5pt solid #000; padding-bottom: 10pt; margin-bottom: 16pt; }
+.meta { font-size: 9pt; color: #444; margin: 6pt 0 0; }
+.notes { font-size: 9pt; color: #444; font-style: italic; margin-top: 4pt; }
+.toc { break-after: page; }
+.toc h2 { break-before: auto; }
+.toc ol { list-style: none; padding: 0; font-size: 10pt; }
+.toc li { margin-bottom: 5pt; border-bottom: 0.4pt dotted #bbb; padding-bottom: 3pt; }
+@media screen {
+  body { box-shadow: 0 0 0 1px #ddd; margin: 24px auto; }
+}
+</style>
+</head><body>
+<div class="masthead">
+  <h1>design-plan.md</h1>
+  <p class="meta">Esoh Studio &middot; printed 2026-09-01</p>
+  <p class="notes">Wide right margin left blank for notes.</p>
+</div>
+<nav class="toc"><h2>Contents</h2><ol>
+<li>Design Plan</li>
+<li>Project</li>
+<li>Status</li>
+<li>Purpose</li>
+<li>Design Principles</li>
+<li>Primary User</li>
+<li>Product Structure</li>
+<li>Information Architecture</li>
+<li>Core User Flows</li>
+<li>Screen Definitions</li>
+<li>Navigation Model</li>
+<li>Layout Behavior</li>
+<li>Interaction Rules</li>
+<li>Design System Direction</li>
+<li>V1 Wireframe Notes</li>
+<li>Design Risks</li>
+<li>Open Design Questions</li>
+<li>Deliverables from this document</li>
+</ol></nav>
+<h1 id="s0">Design Plan</h1>
+<h2 id="s1">Project</h2>
+<p>Esoh Creations AI Image Studio</p>
+<h2 id="s2">Status</h2>
+<p>Draft v1</p>
+<h2 id="s3">Purpose</h2>
+<p>This document translates the PRD into product structure, navigation, user flows, screen responsibilities, and UI behavior for Version 1.</p>
+<p>The design goal is to create a clean internal creative workflow app that reduces friction across image generation, review, organization, and export. Information architecture should keep content easy to understand and locate, while user flows should make the main tasks short and predictable. [web:110][web:114][web:117][web:120]</p>
+<h2 id="s4">Design Principles</h2>
+<ol>
+<li>Reduce tool-switching friction.</li>
+<li>Keep the primary workflow short and obvious.</li>
+<li>Make venture and project context visible at all times.</li>
+<li>Favor reusable templates over repeated manual setup.</li>
+<li>Make saved work easy to find and reuse.</li>
+<li>Keep the interface calm, structured, and operational rather than decorative.</li>
+</ol>
+<p>These principles follow MVP UX guidance that emphasizes removing unnecessary steps, organizing essential functionality clearly, and building around key tasks first. [web:111][web:115][web:118][web:124]</p>
+<h2 id="s5">Primary User</h2>
+<p>Internal Esoh Creations operator creating images for multiple ventures and use cases.</p>
+<p>User characteristics:</p>
+<ul>
+<li>Works across multiple business ventures and creative outputs.</li>
+<li>Needs organization and clarity across projects and assets.</li>
+<li>Benefits from step-by-step, structured workflow paths.</li>
+<li>Needs repeatable results more than exploratory design complexity.</li>
+</ul>
+<h2 id="s6">Product Structure</h2>
+<p>The product structure should prioritize wayfinding and repeatability. Information architecture organizes the content hierarchy and navigation system so users know where work begins, where it is stored, and how to return to it later. [web:110][web:114][web:117]</p>
+<h3>Top-level navigation</h3>
+<ul>
+<li>Dashboard</li>
+<li>New Job</li>
+<li>Projects</li>
+<li>Asset Library</li>
+<li>Templates</li>
+<li>Settings</li>
+</ul>
+<h3>Supporting navigation</h3>
+<ul>
+<li>Venture switcher</li>
+<li>Current project breadcrumb</li>
+<li>Filters/search in library views</li>
+<li>Quick actions: New Job, Save, Approve, Export</li>
+</ul>
+<h2 id="s7">Information Architecture</h2>
+<h3>Main objects in the product</h3>
+<ul>
+<li>Venture</li>
+<li>Project</li>
+<li>Job Type</li>
+<li>Prompt Template</li>
+<li>Generation Job</li>
+<li>Generated Asset</li>
+<li>Asset Status</li>
+<li>Export</li>
+</ul>
+<h3>Hierarchy</h3>
+<ol>
+<li>Venture</li>
+<li>Project</li>
+<li>Generation Job</li>
+<li>Generated Asset</li>
+<li>Approval/Export state</li>
+</ol>
+<p>This hierarchy should stay visible in screen labels and breadcrumbs because IA works best when the content structure mirrors the user’s mental model. [web:110][web:117][web:120]</p>
+<h2 id="s8">Core User Flows</h2>
+<p>User flows should focus on the shortest path to the main outcomes. UX guidance recommends starting with primary tasks and mapping the actions and decisions required to complete them. [web:111][web:115][web:123][web:124]</p>
+<h3>Flow 1: Create a new image job</h3>
+<p>Entry point:</p>
+<ul>
+<li>Dashboard quick action</li>
+<li>New Job nav item</li>
+<li>Project detail quick action</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>Choose venture.</li>
+<li>Choose existing project or create new project.</li>
+<li>Choose job type.</li>
+<li>Choose template.</li>
+<li>Fill prompt fields and settings.</li>
+<li>Submit generation job.</li>
+<li>Wait for result state.</li>
+<li>Review outputs.</li>
+</ol>
+<p>Success state:</p>
+<ul>
+<li>User reaches Results Review with generated outputs visible.</li>
+</ul>
+<h3>Flow 2: Save and approve an output</h3>
+<p>Entry point:</p>
+<ul>
+<li>Results Review screen</li>
+<li>Project Workspace screen</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>Open results.</li>
+<li>Compare outputs.</li>
+<li>Favorite one or more.</li>
+<li>Save selected output.</li>
+<li>Change asset status to approved if ready.</li>
+<li>Return to project or export.</li>
+</ol>
+<p>Success state:</p>
+<ul>
+<li>Selected output is stored in the project and asset library with correct metadata and status.</li>
+</ul>
+<h3>Flow 3: Find an existing asset</h3>
+<p>Entry point:</p>
+<ul>
+<li>Asset Library</li>
+<li>Project Workspace</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>Open asset search/filter view.</li>
+<li>Filter by venture, project, type, or status.</li>
+<li>Open matching asset record.</li>
+<li>Download/export or reuse prompt context.</li>
+</ol>
+<p>Success state:</p>
+<ul>
+<li>User locates a previously saved asset without leaving the app.</li>
+</ul>
+<h3>Flow 4: Reuse a prompt template</h3>
+<p>Entry point:</p>
+<ul>
+<li>New Job</li>
+<li>Templates</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>Open template list.</li>
+<li>Select a template by job type or venture.</li>
+<li>Edit fields if needed.</li>
+<li>Submit a new generation job.</li>
+</ol>
+<p>Success state:</p>
+<ul>
+<li>User starts a job faster than building prompt settings from scratch.</li>
+</ul>
+<h2 id="s9">Screen Definitions</h2>
+<h3>1. Dashboard</h3>
+<p>Purpose:</p>
+<ul>
+<li>Provide a snapshot of recent work and fast entry to main actions.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Recent projects</li>
+<li>Recent approved assets</li>
+<li>Jobs in progress</li>
+<li>Quick start buttons</li>
+<li>Venture summary cards</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>New Job</li>
+<li>Open Project</li>
+<li>View Library</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Prioritize actionable content over analytics in V1.</li>
+<li>Keep the layout simple and scannable.</li>
+</ul>
+<h3>2. New Job</h3>
+<p>Purpose:</p>
+<ul>
+<li>Create a structured image generation request.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Venture selector</li>
+<li>Project selector/create new project</li>
+<li>Job type selector</li>
+<li>Template selector</li>
+<li>Prompt form fields</li>
+<li>Settings panel</li>
+<li>Submit button</li>
+</ul>
+<p>Primary action:</p>
+<ul>
+<li>Generate Images</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Use progressive disclosure where useful, but keep required fields visible.</li>
+<li>Avoid overwhelming the user with all possible options at once.</li>
+<li>Group fields by meaning: context, style, output, generation settings.</li>
+</ul>
+<h3>3. Results Review</h3>
+<p>Purpose:</p>
+<ul>
+<li>Review, compare, save, and approve generated outputs.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Grid of generated outputs</li>
+<li>Favorite button</li>
+<li>Save button</li>
+<li>Regenerate action</li>
+<li>Status indicators</li>
+<li>Quick metadata summary</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>Save Asset</li>
+<li>Approve Asset</li>
+<li>Regenerate</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>This screen is decision-focused.</li>
+<li>Make comparison easy and actions unmistakable.</li>
+<li>Keep image cards visually consistent.</li>
+</ul>
+<h3>4. Project Workspace</h3>
+<p>Purpose:</p>
+<ul>
+<li>Central home for all work related to one project.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Project metadata</li>
+<li>Related jobs</li>
+<li>Saved assets</li>
+<li>Approval statuses</li>
+<li>Export history</li>
+<li>Notes</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>Start New Job</li>
+<li>Open Asset</li>
+<li>Export</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Use tabs or clearly separated sections.</li>
+<li>Keep the project context visible at the top.</li>
+</ul>
+<h3>5. Asset Library</h3>
+<p>Purpose:</p>
+<ul>
+<li>Search, browse, and retrieve saved assets.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Filter bar</li>
+<li>Search input</li>
+<li>Asset cards/list</li>
+<li>Venture/project/status labels</li>
+<li>Sort controls</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>Open Asset</li>
+<li>Export Asset</li>
+<li>Filter Results</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Retrieval speed matters more than visual novelty.</li>
+<li>Metadata should be visible enough to support quick scanning.</li>
+</ul>
+<h3>6. Template Manager</h3>
+<p>Purpose:</p>
+<ul>
+<li>Create, edit, and reuse prompt templates.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Template list</li>
+<li>Template categories</li>
+<li>Template editor</li>
+<li>Venture association</li>
+<li>Job type association</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>Create Template</li>
+<li>Save Template</li>
+<li>Use Template</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Favor standardization.</li>
+<li>Templates should feel operational, not buried.</li>
+</ul>
+<h3>7. Settings</h3>
+<p>Purpose:</p>
+<ul>
+<li>Hold system preferences and future configuration options.</li>
+</ul>
+<p>Key content:</p>
+<ul>
+<li>Naming rules</li>
+<li>Export defaults</li>
+<li>Venture defaults</li>
+<li>Provider/config placeholders</li>
+<li>User preferences</li>
+</ul>
+<p>Primary actions:</p>
+<ul>
+<li>Save Settings</li>
+</ul>
+<p>Design notes:</p>
+<ul>
+<li>Keep this minimal in V1.</li>
+</ul>
+<h2 id="s10">Navigation Model</h2>
+<p>Use a persistent left sidebar for primary navigation on desktop:</p>
+<ul>
+<li>Dashboard</li>
+<li>New Job</li>
+<li>Projects</li>
+<li>Asset Library</li>
+<li>Templates</li>
+<li>Settings</li>
+</ul>
+<p>Use top-bar context for:</p>
+<ul>
+<li>Active venture</li>
+<li>Search</li>
+<li>User menu</li>
+<li>Current page title</li>
+</ul>
+<p>For mobile or narrow layouts:</p>
+<ul>
+<li>Collapse primary nav into a menu or bottom-access pattern while keeping New Job easy to reach.</li>
+</ul>
+<p>Information architecture guidance emphasizes clear labeling, hierarchy, and wayfinding, while user-flow guidance stresses that navigation should support task completion rather than distract from it. [web:110][web:114][web:120]</p>
+<h2 id="s11">Layout Behavior</h2>
+<h3>Overall layout</h3>
+<ul>
+<li>App shell with sidebar, top bar, and main content region.</li>
+<li>One clear primary action per major screen.</li>
+<li>Use cards, lists, and panels for organization.</li>
+<li>Keep spacing consistent and functional.</li>
+</ul>
+<h3>Content density</h3>
+<ul>
+<li>Moderate density.</li>
+<li>Enough metadata for business use, but not cluttered.</li>
+<li>Prioritize readable labels and scannable states.</li>
+</ul>
+<h3>Empty states</h3>
+<p>Every empty state should explain:</p>
+<ul>
+<li>What belongs here.</li>
+<li>Why it matters.</li>
+<li>What action to take next.</li>
+</ul>
+<p>Example: “No assets saved yet. Generate or save an image from a project to build your library.”</p>
+<h2 id="s12">Interaction Rules</h2>
+<h3>Primary actions</h3>
+<p>Each major screen should have one clearly dominant action:</p>
+<ul>
+<li>Dashboard → New Job</li>
+<li>New Job → Generate Images</li>
+<li>Results Review → Save Asset</li>
+<li>Asset Library → Open Asset / Export</li>
+</ul>
+<h3>Status behavior</h3>
+<p>Assets should display simple status states:</p>
+<ul>
+<li>Draft</li>
+<li>Favorite</li>
+<li>Approved</li>
+</ul>
+<p>Status should be visible in:</p>
+<ul>
+<li>Asset cards</li>
+<li>Project Workspace</li>
+<li>Library results</li>
+<li>Asset detail view</li>
+</ul>
+<h3>Confirmation behavior</h3>
+<p>Use confirmation only for destructive actions such as delete. Do not overuse modal interruptions for standard save/approve flows.</p>
+<h3>Feedback behavior</h3>
+<p>The user should always know:</p>
+<ul>
+<li>When a job is processing.</li>
+<li>When generation succeeded.</li>
+<li>When an asset was saved.</li>
+<li>When a status changed.</li>
+<li>When an export completed.</li>
+</ul>
+<p>MVP UX best practices recommend clear, lightweight feedback and logical paths that reduce uncertainty. [web:115][web:118][web:124]</p>
+<h2 id="s13">Design System Direction</h2>
+<p>Version 1 should use a clean internal-app design system focused on consistency rather than high brand theatrics. Design-system guidance describes a system as a reusable set of components, patterns, and rules that create consistency and reduce duplicated decision-making. [web:112][web:116][web:122]</p>
+<h3>Visual direction</h3>
+<ul>
+<li>Calm, structured, professional.</li>
+<li>Neutral surfaces with one controlled accent color.</li>
+<li>High readability.</li>
+<li>Minimal visual noise.</li>
+</ul>
+<h3>Component priorities</h3>
+<ul>
+<li>Buttons</li>
+<li>Inputs</li>
+<li>Select menus</li>
+<li>Cards</li>
+<li>Status badges</li>
+<li>Tabs</li>
+<li>Search/filter bar</li>
+<li>Modal/drawer</li>
+<li>Toast/inline feedback</li>
+</ul>
+<h3>Typography</h3>
+<ul>
+<li>Clean, legible sans-serif for UI.</li>
+<li>Clear hierarchy between page title, section title, body, and metadata.</li>
+</ul>
+<h3>Accessibility</h3>
+<ul>
+<li>Strong contrast.</li>
+<li>Keyboard-friendly navigation.</li>
+<li>Clear focus states.</li>
+<li>Descriptive labels for controls.</li>
+<li>Alt text or asset labeling where relevant.</li>
+</ul>
+<h2 id="s14">V1 Wireframe Notes</h2>
+<p>This phase does not require high-fidelity visual exploration first. Start with low-fidelity wireframes for:</p>
+<ol>
+<li>Dashboard</li>
+<li>New Job</li>
+<li>Results Review</li>
+<li>Project Workspace</li>
+<li>Asset Library</li>
+</ol>
+<p>Low-fidelity flows are often the fastest way to validate MVP UX because they keep attention on user tasks and structure before visual polish. [web:111][web:123][web:124]</p>
+<h2 id="s15">Design Risks</h2>
+<ul>
+<li>Too many options on New Job could overwhelm the user.</li>
+<li>Weak project/venture labeling could cause asset confusion.</li>
+<li>Poor metadata display could reduce library usefulness.</li>
+<li>Overdesigned image cards could distract from decision-making.</li>
+<li>Navigation drift could make repeat tasks feel slower instead of faster.</li>
+</ul>
+<h2 id="s16">Open Design Questions</h2>
+<ul>
+<li>Should Projects and Asset Library be separate top-level items or should Library live inside Projects in V1?</li>
+<li>Does Results Review need side-by-side compare in V1, or is selection/favorite enough?</li>
+<li>Should templates be global, venture-specific, or both?</li>
+<li>What metadata must always be visible on an asset card?</li>
+<li>Should export happen from results, project view, library view, or all three?</li>
+</ul>
+<h2 id="s17">Deliverables from this document</h2>
+<ul>
+<li>Low-fidelity wireframes</li>
+<li>Navigation map</li>
+<li>User flow diagrams</li>
+<li>Initial component list</li>
+<li>UI implementation priorities</li>
+</ul>
+</body></html>

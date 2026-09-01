@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>direction.md — Open questions</title>
+<style>
+@page { size: letter; margin: 0.7in 1.9in 0.75in 0.9in; }
+* { box-sizing: border-box; }
+body {
+  font: 11pt/1.55 Georgia, "Times New Roman", serif;
+  color: #000; background: #fff; margin: 0 auto; padding: 0.7in 1.9in 0.75in 0.9in;
+  max-width: 8.5in; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1 { font-size: 20pt; line-height: 1.15; margin: 0 0 4pt; letter-spacing: -0.01em; }
+h2 {
+  font-size: 13pt; margin: 26pt 0 9pt; padding-bottom: 3pt;
+  border-bottom: 1.5pt solid #000; break-after: avoid; break-before: page;
+}
+h2:first-of-type { break-before: auto; }
+h3 { font-size: 11.5pt; margin: 16pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 8pt; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+hr { border: none; border-top: 0.5pt solid #999; margin: 14pt 0; }
+code { font: 9.5pt "SFMono-Regular", Consolas, "Courier New", monospace; word-break: break-word; }
+pre {
+  font: 9pt/1.4 "SFMono-Regular", Consolas, "Courier New", monospace;
+  background: #f2f2f2; border-left: 2pt solid #999; padding: 7pt 9pt;
+  white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt;
+}
+del { color: #666; }
+.url { font-size: 8.5pt; color: #555; word-break: break-all; }
+
+.decision {
+  display: grid; grid-template-columns: 38pt 1fr; gap: 10pt;
+  break-inside: avoid; padding: 7pt 0; border-bottom: 0.5pt solid #ccc;
+}
+.dnum { font-weight: bold; font-size: 10pt; letter-spacing: 0.02em; }
+.dbody { margin: 0; }
+
+.tablewrap { break-inside: avoid; margin: 0 0 12pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+
+.masthead { border-bottom: 2.5pt solid #000; padding-bottom: 10pt; margin-bottom: 16pt; }
+.meta { font-size: 9pt; color: #444; margin: 6pt 0 0; }
+.notes { font-size: 9pt; color: #444; font-style: italic; margin-top: 4pt; }
+.toc { break-after: page; }
+.toc h2 { break-before: auto; }
+.toc ol { list-style: none; padding: 0; font-size: 10pt; }
+.toc li { margin-bottom: 5pt; border-bottom: 0.4pt dotted #bbb; padding-bottom: 3pt; }
+@media screen {
+  body { box-shadow: 0 0 0 1px #ddd; margin: 24px auto; }
+}
+</style>
+</head><body>
+<div class="masthead">
+  <h1>direction.md — Open questions</h1>
+  <p class="meta">Esoh Studio &middot; printed 2026-09-01</p>
+  <p class="notes">Wide right margin left blank for notes.</p>
+</div>
+
+<h2 id="s0">9. Open questions</h2>
+<p><strong>Answered since the last draft</strong></p>
+<ul>
+<li><del>VV-Styles phrases are not recorded anywhere</del> → 129 quotes exist; see D33.</li>
+<li><del>No references for Symbol, Decorative or Quote pages</del> → four scanned pages, §3.2.</li>
+<li><del>Crop, pad or outpaint?</del> → pad, D30.</li>
+<li><del>Do VV-Styles and social need collections and items?</del> → yes. One VV-Styles item is one design; the 129 rows map onto category → collection → item with no model change. They need separate categories because the output ratios differ.</li>
+</ul>
+<p><strong><del>Known limitation in the quote overlay</del> — Resolved.</strong></p>
+<ul>
+<li><del>The type box is a rectangle; the reserved area the model draws is an oval.</del> It broke on the first real quote: the descender of "grow" ran out of the oval and across the pattern. Fixed per D66–D67 — the area is measured off each page and the type is fitted to the ellipse line by line.</li>
+</ul>
+<p><strong>Blocked on a missing stage, not on wiring</strong> (D57)</p>
+<ul>
+<li><del><strong>Quote pages cannot complete.</strong></del> <strong>Done.</strong> The prompt reserves the centre and forbids drawn letters (D23), but no overlay step exists. <code>POST /api/overlay</code> letters a generated page (D64, D65). <code>fontkit</code> replaced <code>opentype.js</code> — it instances variable fonts, which four of the eight faces need.</li>
+<li><del>VV-Styles has 130 items and no template</del> → built 2026-08-27 (migration 020). One template, nine apparel art styles, and <code>quote_text</code>, <code>visual_elements</code>, <code>lettering_style</code>, <code>color_direction</code> and <code>product_placement</code> all feed it. Twelve designs are art-directed; the other 118 have empty direction columns and are not yet briefed.</li>
+</ul>
+<p><strong>Production</strong></p>
+<ul>
+<li>Are the 12 books published separately, or bundled as one series?</li>
+<li>The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.</li>
+<li><del>Should the 19 VV-Styles categories consolidate to the proposed 9?</del> → yes, applied 2026-08-27 (migration 021). The portfolio capsule's six collection names turned out to <em>be</em> six of the proposed nine under better wording, so the capsule's naming was taken where it existed and the proposed list used for the rest. All 130 items are sorted; one row with no <code>Category</code> at all stays in Unsorted. Two judgment calls stand flagged: <code>Love</code> went to Family &amp; Faith as the nearest relational grouping, and <code>Self-Awareness</code> to Truth &amp; Accountability as honest self-assessment rather than self-regard.</li>
+<li>14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged <code>Brand / Legal Review</code>. Decide before printing.</li>
+</ul>
+<p><strong>Current state of VV-Styles</strong></p>
+<ul>
+<li>Store is built but <strong>not public</strong>. 8 shirt styles live, one tester shirt ordered and approved. Designs are currently made by hand in the Printify web editor — slow, and the reason this tool exists.</li>
+</ul>
+<p><strong>Style</strong></p>
+<ul>
+<li>All seven existing shirts are catalogued in §4.5.</li>
+<li>Photoreal Composite is <strong>kept</strong> (D36). Open: does the phoenix keep its poster rectangle, or get knocked out to phoenix-and-type only? One test print decides it.</li>
+<li>No approved in-house exemplars exist yet for Quote, Symbol or Decorative pages. Stage B must produce the first ones.</li>
+</ul>
+<p><strong>Structure</strong></p>
+<ul>
+<li>Should the tool write back to the spreadsheets, or replace them?</li>
+</ul>
+<p><strong>Technical</strong></p>
+<ul>
+<li>Verify the estimated rates in <code>lib/pricing.ts</code>.</li>
+<li>Vector trace step for apparel — later, not blocking.</li>
+</ul>
+</body></html>

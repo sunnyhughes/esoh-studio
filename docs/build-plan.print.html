@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>build-plan.md</title>
+<style>
+@page { size: letter; margin: 0.7in 1.9in 0.75in 0.9in; }
+* { box-sizing: border-box; }
+body {
+  font: 11pt/1.55 Georgia, "Times New Roman", serif;
+  color: #000; background: #fff; margin: 0 auto; padding: 0.7in 1.9in 0.75in 0.9in;
+  max-width: 8.5in; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+h1 { font-size: 20pt; line-height: 1.15; margin: 0 0 4pt; letter-spacing: -0.01em; }
+h2 {
+  font-size: 13pt; margin: 26pt 0 9pt; padding-bottom: 3pt;
+  border-bottom: 1.5pt solid #000; break-after: avoid; break-before: page;
+}
+h2:first-of-type { break-before: auto; }
+h3 { font-size: 11.5pt; margin: 16pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 8pt; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+hr { border: none; border-top: 0.5pt solid #999; margin: 14pt 0; }
+code { font: 9.5pt "SFMono-Regular", Consolas, "Courier New", monospace; word-break: break-word; }
+pre {
+  font: 9pt/1.4 "SFMono-Regular", Consolas, "Courier New", monospace;
+  background: #f2f2f2; border-left: 2pt solid #999; padding: 7pt 9pt;
+  white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt;
+}
+del { color: #666; }
+.url { font-size: 8.5pt; color: #555; word-break: break-all; }
+
+.decision {
+  display: grid; grid-template-columns: 38pt 1fr; gap: 10pt;
+  break-inside: avoid; padding: 7pt 0; border-bottom: 0.5pt solid #ccc;
+}
+.dnum { font-weight: bold; font-size: 10pt; letter-spacing: 0.02em; }
+.dbody { margin: 0; }
+
+.tablewrap { break-inside: avoid; margin: 0 0 12pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+
+.masthead { border-bottom: 2.5pt solid #000; padding-bottom: 10pt; margin-bottom: 16pt; }
+.meta { font-size: 9pt; color: #444; margin: 6pt 0 0; }
+.notes { font-size: 9pt; color: #444; font-style: italic; margin-top: 4pt; }
+.toc { break-after: page; }
+.toc h2 { break-before: auto; }
+.toc ol { list-style: none; padding: 0; font-size: 10pt; }
+.toc li { margin-bottom: 5pt; border-bottom: 0.4pt dotted #bbb; padding-bottom: 3pt; }
+@media screen {
+  body { box-shadow: 0 0 0 1px #ddd; margin: 24px auto; }
+}
+</style>
+</head><body>
+<div class="masthead">
+  <h1>build-plan.md</h1>
+  <p class="meta">Esoh Studio &middot; printed 2026-09-01</p>
+  <p class="notes">Wide right margin left blank for notes.</p>
+</div>
+<nav class="toc"><h2>Contents</h2><ol>
+<li>Build Plan</li>
+<li>Project</li>
+<li>Status</li>
+<li>Purpose</li>
+<li>Product Goal</li>
+<li>Implementation Strategy</li>
+<li>Stack Alignment</li>
+<li>Repo Structure</li>
+<li>Implementation Phases</li>
+<li>Milestones</li>
+<li>Dependency Chain</li>
+<li>Technical Modules</li>
+<li>Risks and Mitigations</li>
+<li>Testing Plan</li>
+<li>Deployment Plan</li>
+<li>Environment Variables</li>
+<li>Out of Scope for V1</li>
+<li>Immediate Next Actions</li>
+<li>Open Build Questions</li>
+</ol></nav>
+<h1 id="s0">Build Plan</h1>
+<h2 id="s1">Project</h2>
+<p>Esoh Creations AI Image Studio</p>
+<h2 id="s2">Status</h2>
+<p>Draft v1</p>
+<h2 id="s3">Purpose</h2>
+<p>This document defines the implementation approach for Version 1 of Esoh Creations AI Image Studio. It translates the PRD, Design Plan, API Route Map, and Schema Notes into phases, milestones, dependencies, technical modules, and delivery order.</p>
+<p>Software implementation guidance consistently emphasizes planning, requirements, design, coding, testing, deployment, and maintenance as distinct phases, with milestones and dependency tracking used to reduce risk and keep scope under control. [web:129][web:130][web:131][web:139]</p>
+<h2 id="s4">Product Goal</h2>
+<p>Build an internal MVP that allows Esoh Creations to:</p>
+<ol>
+<li>Choose a venture and project</li>
+<li>Generate image jobs from templates or custom prompts</li>
+<li>Review generated outputs</li>
+<li>Save and approve selected assets</li>
+<li>Search assets later</li>
+<li>Export finalized assets</li>
+</ol>
+<p>MVP guidance emphasizes focusing on the smallest product that solves the core problem and supports real-world testing rather than building every possible feature up front. [web:193][web:206]</p>
+<h2 id="s5">Implementation Strategy</h2>
+<p>Use a phased hybrid development plan:</p>
+<ul>
+<li>lock scope first</li>
+<li>scaffold the app shell early</li>
+<li>establish the database and route contract</li>
+<li>build the core workflow before secondary modules</li>
+<li>launch internally as soon as the main value loop is functional</li>
+</ul>
+<p>This approach aligns with milestone-based MVP planning that prioritizes fast learning and reduced scope risk. [web:193][web:200][web:206]</p>
+<h2 id="s6">Stack Alignment</h2>
+<p>The build plan assumes the team’s preferred custom-coded workflow:</p>
+<ul>
+<li>Visual Studio Code for development. [cite:18]</li>
+<li>GitHub for version control. [cite:18]</li>
+<li>Netlify for frontend-oriented deployment patterns already used by the team. [cite:21]</li>
+<li>Railway for backend/app infrastructure and PostgreSQL hosting patterns already familiar through Meeting Now. [cite:16]</li>
+<li>PostgreSQL as the system of record. [cite:16]</li>
+</ul>
+<h2 id="s7">Repo Structure</h2>
+<p>Recommended starting structure:</p>
+<pre>esoh-ai-image-studio/
+  apps/
+    web/
+    api/
+  packages/
+    db/
+    ui/
+    types/
+  docs/
+    PRD.md
+    design-plan.md
+    api-route-map.md
+    build-plan.md
+    schema-notes.md
+  .env.example
+  package.json
+  README.md</pre>
+<p>This structure keeps planning documents near the implementation and supports a clean separation between frontend, backend, and shared code. A visible structure also supports the user’s preference for organized, step-by-step execution. [cite:17][cite:18]</p>
+<h2 id="s8">Implementation Phases</h2>
+<h3>Phase 0: Scope lock and repo setup</h3>
+<p>Objective: Freeze the V1 direction and create the development foundation.</p>
+<p>Tasks:</p>
+<ul>
+<li>Finalize PRD</li>
+<li>Finalize Design Plan</li>
+<li>Finalize API Route Map</li>
+<li>Finalize Schema Notes</li>
+<li>Create GitHub repository</li>
+<li>Add repo folders</li>
+<li>Add <code>.env.example</code></li>
+<li>Choose frontend framework</li>
+<li>Choose API structure</li>
+<li>Add README and docs</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>working repository scaffold</li>
+<li>committed docs set</li>
+<li>initial project scripts</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>repo runs locally</li>
+<li>docs are complete enough to build from</li>
+<li>folder structure is stable</li>
+</ul>
+<h3>Phase 1: Database foundation</h3>
+<p>Objective: Create the database layer and verify the core data model.</p>
+<p>Tasks:</p>
+<ul>
+<li>create <code>packages/db/schema.sql</code></li>
+<li>create migration strategy</li>
+<li>run schema locally</li>
+<li>verify tables and indexes</li>
+<li>add starter seed approach for reference data only</li>
+<li>create DB connection module</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>working schema</li>
+<li>working DB connection</li>
+<li>starter reference data plan</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>database builds successfully</li>
+<li>ventures and job types exist</li>
+<li>application can connect locally</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 0 complete</li>
+</ul>
+<h3>Phase 2: App shell and routing</h3>
+<p>Objective: Build the visible frame of the app before deep business logic.</p>
+<p>Tasks:</p>
+<ul>
+<li>app shell layout</li>
+<li>sidebar nav</li>
+<li>top bar</li>
+<li>route structure</li>
+<li>placeholder screens:</li>
+<li>Dashboard</li>
+<li>New Job</li>
+<li>Projects</li>
+<li>Asset Library</li>
+<li>Templates</li>
+<li>Settings</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>navigable UI shell</li>
+<li>stable route layout</li>
+<li>shared layout components</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>user can move through core screens</li>
+<li>screen hierarchy matches design plan</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 0 complete</li>
+</ul>
+<h3>Phase 3: Core reference endpoints</h3>
+<p>Objective: Expose the basic lookup data needed by the app.</p>
+<p>Tasks:</p>
+<ul>
+<li><code>GET /ventures</code></li>
+<li><code>GET /projects</code></li>
+<li><code>POST /projects</code></li>
+<li><code>GET /job-types</code></li>
+<li><code>GET /prompt-templates</code></li>
+<li>create response formatting and error handling pattern</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>first working API endpoints</li>
+<li>connected selectors in UI</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>New Job screen can load ventures, job types, and templates</li>
+<li>project creation works</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 1 database</li>
+<li>Phase 2 app shell</li>
+</ul>
+<h3>Phase 4: Generation job workflow</h3>
+<p>Objective: Implement the primary job-creation loop.</p>
+<p>Tasks:</p>
+<ul>
+<li>build New Job form</li>
+<li>validate request input</li>
+<li>implement <code>POST /generation-jobs</code></li>
+<li>implement <code>GET /generation-jobs/:jobId</code></li>
+<li>integrate one image-generation provider</li>
+<li>handle queued, processing, success, and failed states</li>
+<li>store generation job records</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>working job submission flow</li>
+<li>provider integration</li>
+<li>job status retrieval</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>user can submit a job and see job status</li>
+<li>job record persists in database</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 3 core reference endpoints</li>
+</ul>
+<h3>Phase 5: Results Review and asset persistence</h3>
+<p>Objective: Turn generated outputs into saved assets.</p>
+<p>Tasks:</p>
+<ul>
+<li>implement <code>GET /generation-jobs/:jobId/assets</code></li>
+<li>create Results Review UI</li>
+<li>create <code>generated_assets</code> records from provider results</li>
+<li>implement <code>GET /assets/:assetId</code></li>
+<li>implement <code>PATCH /assets/:assetId</code></li>
+<li>support favorite and approved states</li>
+<li>optionally write status history automatically</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>results grid</li>
+<li>asset detail retrieval</li>
+<li>asset update flow</li>
+<li>status persistence</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>user can review outputs and save/approve an asset</li>
+<li>saved asset appears in DB and UI</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 4 generation workflow</li>
+</ul>
+<h3>Phase 6: Asset Library and Project Workspace</h3>
+<p>Objective: Enable reuse, search, and project-level organization.</p>
+<p>Tasks:</p>
+<ul>
+<li>implement <code>GET /assets</code></li>
+<li>add filters for venture, project, status, favorite, and tags later</li>
+<li>implement <code>GET /projects/:projectId</code></li>
+<li>implement <code>GET /projects/:projectId/jobs</code></li>
+<li>implement <code>GET /projects/:projectId/assets</code></li>
+<li>build Asset Library UI</li>
+<li>build Project Workspace UI</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>searchable asset listing</li>
+<li>project detail view</li>
+<li>related jobs/assets view</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>user can find assets later by project and status</li>
+<li>project workspace reflects related records</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 5 asset persistence</li>
+</ul>
+<h3>Phase 7: Exports and templates management</h3>
+<p>Objective: Support repeatable workflows and useful outputs.</p>
+<p>Tasks:</p>
+<ul>
+<li>implement <code>POST /assets/:assetId/exports</code></li>
+<li>optionally implement <code>GET /assets/:assetId/exports</code></li>
+<li>build export actions in UI</li>
+<li>build Template Manager UI</li>
+<li>implement create/update template endpoints if needed in V1</li>
+<li>connect templates to New Job flow</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>export action</li>
+<li>reusable templates flow</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>user can export selected assets</li>
+<li>user can reuse template-driven setup</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phase 6 asset and project flows</li>
+</ul>
+<h3>Phase 8: QA, polish, and internal launch</h3>
+<p>Objective: Stabilize the MVP for real internal use.</p>
+<p>Tasks:</p>
+<ul>
+<li>test all must-have user stories</li>
+<li>review empty states</li>
+<li>review validation and error messages</li>
+<li>verify search behavior</li>
+<li>verify export flow</li>
+<li>verify responsive behavior</li>
+<li>deploy internal MVP</li>
+<li>create launch checklist</li>
+<li>log known issues and Phase 2 backlog</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>deployable internal MVP</li>
+<li>QA pass notes</li>
+<li>backlog for next iteration</li>
+</ul>
+<p>Exit criteria:</p>
+<ul>
+<li>core flow works end to end</li>
+<li>app is usable for real internal image workflow</li>
+</ul>
+<p>Dependencies:</p>
+<ul>
+<li>Phases 1 through 7 sufficiently complete</li>
+</ul>
+<h2 id="s9">Milestones</h2>
+<ol>
+<li>Docs locked</li>
+<li>Repo scaffold created</li>
+<li>Schema runs successfully</li>
+<li>App shell navigable</li>
+<li>Core lookup endpoints live</li>
+<li>First generation job succeeds</li>
+<li>First asset saved and approved</li>
+<li>Asset Library searchable</li>
+<li>First export completes</li>
+<li>Internal MVP launch</li>
+</ol>
+<p>Milestones create review checkpoints and reduce hidden drift during development. [web:131][web:134][web:200]</p>
+<h2 id="s10">Dependency Chain</h2>
+<ul>
+<li>PRD → Design Plan → API Route Map → Schema/DB</li>
+<li>Schema → core endpoints</li>
+<li>core endpoints → New Job UI</li>
+<li>New Job UI → generation workflow</li>
+<li>generation workflow → Results Review</li>
+<li>Results Review → saved assets</li>
+<li>saved assets → Asset Library and exports</li>
+</ul>
+<p>Dependency visibility is a core part of a workable implementation plan because it reveals blockers before they cause rework. [web:130][web:131][web:139]</p>
+<h2 id="s11">Technical Modules</h2>
+<h3>Frontend modules</h3>
+<ul>
+<li>app shell</li>
+<li>sidebar/top bar</li>
+<li>dashboard</li>
+<li>new job form</li>
+<li>results review</li>
+<li>project workspace</li>
+<li>asset library</li>
+<li>template manager</li>
+<li>settings</li>
+</ul>
+<h3>Backend modules</h3>
+<ul>
+<li>DB connection</li>
+<li>ventures controller/service</li>
+<li>projects controller/service</li>
+<li>job types controller/service</li>
+<li>templates controller/service</li>
+<li>generation jobs controller/service</li>
+<li>assets controller/service</li>
+<li>exports controller/service</li>
+<li>provider integration service</li>
+<li>error handling middleware</li>
+</ul>
+<h3>Database modules</h3>
+<ul>
+<li>schema</li>
+<li>migrations</li>
+<li>seed/reference data</li>
+<li>query helpers</li>
+<li>future reporting queries</li>
+</ul>
+<h2 id="s12">Risks and Mitigations</h2>
+<h3>Risk 1: Scope creep</h3>
+<p>Risk: Secondary features get added before the main workflow works.</p>
+<p>Mitigation: Build only the must-have endpoints and screens first. MVP guidance repeatedly warns against overbuilding too soon. [web:193][web:206]</p>
+<h3>Risk 2: Provider instability</h3>
+<p>Risk: Image provider behavior or pricing changes unexpectedly.</p>
+<p>Mitigation: Put provider logic behind one service layer so you can swap providers later.</p>
+<h3>Risk 3: Weak metadata discipline</h3>
+<p>Risk: Assets become hard to retrieve later.</p>
+<p>Mitigation: Require core metadata fields from the start and keep asset filters simple but consistent. DAM-style workflows depend on structured metadata and approvals. [web:194][web:204]</p>
+<h3>Risk 4: Frontend-backend mismatch</h3>
+<p>Risk: Screens ask for data the API does not cleanly provide.</p>
+<p>Mitigation: Use the API route map as the contract before implementing screens fully. API-first design recommends sketching the contract before deep implementation. [web:198][web:201]</p>
+<h3>Risk 5: Planning fatigue</h3>
+<p>Risk: Too much time is spent documenting and not enough time shipping.</p>
+<p>Mitigation: Move from docs into the app shell and first endpoints immediately after locking the route map and schema.</p>
+<h2 id="s13">Testing Plan</h2>
+<p>Test in the order of the real user flow:</p>
+<ol>
+<li>Load ventures, projects, job types, and templates</li>
+<li>Create project</li>
+<li>Create generation job</li>
+<li>Retrieve job status</li>
+<li>Retrieve generated assets</li>
+<li>Save/approve asset</li>
+<li>Find asset in library</li>
+<li>Export asset</li>
+</ol>
+<p>Testing and QA are distinct stages in the development lifecycle and should happen before deployment, not after it. [web:129][web:200]</p>
+<h3>Test types</h3>
+<ul>
+<li>manual smoke tests</li>
+<li>route-level API tests</li>
+<li>basic form validation tests</li>
+<li>DB integrity checks</li>
+<li>end-to-end workflow test for the main job flow</li>
+</ul>
+<h2 id="s14">Deployment Plan</h2>
+<h3>Local</h3>
+<ul>
+<li>run database locally</li>
+<li>run API locally</li>
+<li>run frontend locally</li>
+</ul>
+<h3>Staging/internal preview</h3>
+<ul>
+<li>deploy frontend preview</li>
+<li>deploy API preview</li>
+<li>connect preview database</li>
+</ul>
+<h3>Internal production</h3>
+<ul>
+<li>frontend on the chosen web deployment path already familiar to the team. [cite:21]</li>
+<li>backend and PostgreSQL on Railway-style infrastructure already familiar from Meeting Now. [cite:16]</li>
+</ul>
+<h2 id="s15">Environment Variables</h2>
+<p>Likely examples:</p>
+<ul>
+<li><code>DATABASE_URL</code></li>
+<li><code>PORT</code></li>
+<li><code>APP_BASE_URL</code></li>
+<li><code>IMAGE_PROVIDER_API_KEY</code></li>
+<li><code>IMAGE_PROVIDER_NAME</code></li>
+<li><code>STORAGE_BUCKET</code></li>
+<li><code>STORAGE_REGION</code></li>
+<li><code>STORAGE_ACCESS_KEY</code></li>
+<li><code>STORAGE_SECRET_KEY</code></li>
+</ul>
+<p>Use <code>.env.example</code> to document required values, matching the team’s existing code-based workflow habits. [cite:93][cite:176]</p>
+<h2 id="s16">Out of Scope for V1</h2>
+<ul>
+<li>public portal</li>
+<li>advanced auth/permissions</li>
+<li>Stripe billing</li>
+<li>batch generation</li>
+<li>multi-provider routing</li>
+<li>collaborative approvals board</li>
+<li>comments system</li>
+<li>analytics dashboards</li>
+</ul>
+<h2 id="s17">Immediate Next Actions</h2>
+<ol>
+<li>Save this build plan.</li>
+<li>Save the API Route Map.</li>
+<li>Create <code>packages/db/schema.sql</code> and run it locally.</li>
+<li>Scaffold the repo/app shell.</li>
+<li>Implement the core reference routes first:</li>
+</ol>
+<ul>
+<li><code>GET /ventures</code></li>
+<li><code>GET /projects</code></li>
+<li><code>POST /projects</code></li>
+<li><code>GET /job-types</code></li>
+<li><code>GET /prompt-templates</code></li>
+</ul>
+<ol>
+<li>Then implement the generation job flow.</li>
+</ol>
+<h2 id="s18">Open Build Questions</h2>
+<ul>
+<li>Will the frontend start in React or Next.js?</li>
+<li>Will the API live as a separate app or inside the web framework initially?</li>
+<li>Which image provider should V1 target first?</li>
+<li>Should exports be immediate downloads or queued actions in V1?</li>
+<li>How much auth should be included before internal testing begins?</li>
+</ul>
+</body></html>
