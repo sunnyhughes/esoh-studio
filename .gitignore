@@ -41,5 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 # Esoh Studio
+# Generated output is regenerable and large, so it stays out of git — with one
+# exception. The exemplars are what the Style Library was tuned against (D89);
+# losing them means re-deriving the house style, not re-running a generation.
 /storage
+!/storage/exemplars
+!/storage/exemplars/**
 .env.local
+
+# Database dumps — copies, not backups, until they leave this machine.
+/backups
