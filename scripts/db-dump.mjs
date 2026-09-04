@@ -3,6 +3,15 @@
 //   npm run db:dump            → backups/esoh-studio-YYYY-MM-DD-HHMM.sql
 //   npm run db:dump -- /path   → somewhere else, ideally off this machine
 //
+// This runs in a Crostini container on a Chromebook, so "off this machine"
+// starts one level out. The ChromeOS side is shared in at:
+//
+//   npm run db:dump -- "/mnt/chromeos/MyFiles/Esoh Backups/Esoh-studio backups"
+//
+// That survives the Linux container being reset, which is the likely failure
+// and the one /backups does not cover. Dragging that folder into Google Drive
+// from the Files app is what makes it survive the Chromebook.
+//
 // The schema is already in git as migrations and the seed data with it, so
 // this is not for rebuilding the tool. It is for the judgments: which assets
 // are approved, which are rejected, what each one cost, and what was derived
