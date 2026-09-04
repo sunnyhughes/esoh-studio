@@ -21,7 +21,10 @@ export async function GET(req: Request) {
     const assets = await query(
       `select a.id, a.asset_name, a.storage_path, a.status, a.is_favorite,
               i.page_type, i.quote_text, i.lettering_style,
-              (a.metadata_json -> 'overlay') is not null as is_lettering
+              (a.metadata_json -> 'overlay') is not null as is_lettering,
+              -- D101: a failed knockout has to survive a page reload, not just
+              -- appear on the card that generated it.
+              a.metadata_json -> 'transparency' as transparency
          from generated_assets a
     left join items i on i.id = a.item_id
         order by a.created_at desc

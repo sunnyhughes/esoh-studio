@@ -8,6 +8,9 @@
   --accent-text: #ffffff;
   --danger: #9b3a2f;
   --ok: #3d6b4a;
+  --warn: #c2610a;
+  --warn-bg: #fce3bf;
+  --warn-ink: #5a2f04;
   --radius: 6px;
 }
 
@@ -22,6 +25,9 @@
     --accent-text: #17171a;
     --danger: #d97a6c;
     --ok: #7fb894;
+    --warn: #d99a4e;
+    --warn-bg: #2a2118;
+    --warn-ink: #e8c9a5;
   }
 }
 
@@ -372,3 +378,20 @@ details.prompt pre {
 }
 .book-actions button:disabled { opacity: 0.5; }
 header.top .spacer { flex: 1; }
+
+/* A knockout failure is not an error — the image generated fine and was paid
+   for (D74). It is a measurement the eye cannot make on white fabric, said at
+   the one moment the picture is in front of you. */
+.card .knockout-warning {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--warn-ink);
+  background: var(--warn-bg);
+  /* A pale tint on a near-white card is not a warning, it is a suggestion.
+     The left bar carries the signal so the band reads at a glance without
+     the fill having to shout. */
+  border-top: 1px solid var(--warn);
+  border-left: 5px solid var(--warn);
+}

@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "db:import": "node --env-file=.env.local scripts/import-sheets.mjs",
     "db:dump": "node --env-file=.env.local scripts/db-dump.mjs",
+    "storage:purge": "tsx --env-file=.env.local scripts/storage-purge.mts",
     "prompt:preview": "tsx --env-file=.env.local scripts/preview-prompt.mts",
     "printify:areas": "node --env-file=.env.local scripts/printify-print-areas.mjs",
     "doc:print": "node scripts/print-doc.mjs"

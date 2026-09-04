@@ -65,6 +65,8 @@ type Asset = {
   quote_text?: string | null;
   lettering_style?: string | null;
   is_lettering?: boolean;
+  /** D74's knockout measurement, present only on transparent categories. */
+  transparency?: { ok: boolean; problems?: string[] } | null;
 };
 
 export default function NewJobPage() {
@@ -606,6 +608,18 @@ export default function NewJobPage() {
                       src={`/api/files/${a.storage_path}`}
                       alt={a.asset_name}
                     />
+                    {a.transparency && !a.transparency.ok && (
+                      /* D74 measures the knockout and D101 puts the result
+                         where the image is. A panel hidden by white fabric is
+                         invisible until the design is put on navy, so the one
+                         moment this is worth saying is while the picture is
+                         on screen. */
+                      <p className="knockout-warning">
+                        <strong>Knockout failed.</strong>{" "}
+                        {a.transparency.problems?.join(" ") ??
+                          "This does not measure as cut-out artwork."}
+                      </p>
+                    )}
                     <div className="actions">
                       <button
                         onClick={() => mark(a.id, "approved")}
