@@ -3,7 +3,7 @@ import { one, query } from "@/lib/db";
 import { buildPrompt } from "@/lib/prompt-engine";
 import { getProvider, DEFAULT_PROVIDER } from "@/lib/providers";
 import { OPENAI_DEFAULT_MODEL } from "@/lib/providers/openai";
-import { estimateCostUsd } from "@/lib/pricing";
+import { costFromUsage, estimateCostUsd } from "@/lib/pricing";
 import { assetKey, save, read } from "@/lib/storage";
 import { inspectTransparency } from "@/lib/transparency";
 
@@ -343,7 +343,8 @@ export async function POST(req: Request) {
       [
         jobId,
         result.usage ? JSON.stringify(result.usage) : null,
-        estimateCostUsd(result.model, size, quality, result.images.length),
+        costFromUsage(result.model, result.usage) ??
+          estimateCostUsd(result.model, size, quality, result.images.length),
         result.model,
       ]
     );
