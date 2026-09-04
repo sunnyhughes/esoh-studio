@@ -10,7 +10,7 @@
     "db:seed": "node --env-file=.env.local scripts/migrate.mjs seed",
     "typecheck": "tsc --noEmit",
     "db:import": "node --env-file=.env.local scripts/import-sheets.mjs",
-    "prompt:preview": "node --env-file=.env.local scripts/preview-prompt.mjs",
+    "prompt:preview": "tsx --env-file=.env.local scripts/preview-prompt.mts",
     "printify:areas": "node --env-file=.env.local scripts/printify-print-areas.mjs",
     "doc:print": "node scripts/print-doc.mjs"
   },
@@ -30,6 +30,7 @@
     "@types/pg": "^8.21.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
