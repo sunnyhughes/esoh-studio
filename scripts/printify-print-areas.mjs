@@ -76,7 +76,7 @@ async function allProducts(shopId) {
     const body = await get(`/shops/${shopId}/products.json?limit=${PAGE_SIZE}&page=${page}`);
     const data = body.data ?? [];
     out.push(...data);
-    if (data.length < 100) break;
+    if (data.length < PAGE_SIZE) break;
   }
   return out;
 }
@@ -85,12 +85,36 @@ const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 await client.connect();
 
 try {
-  const shops = await get("/shops.json");
-  if (!shops.length) {
+  const allShops = await get("/shops.json");
+  if (!allShops.length) {
     console.error("No shops on this account.");
     process.exit(1);
   }
-  console.log(`shops: ${shops.map((s) => `${s.title} (${s.id})`).join(", ")}\n`);
+
+  // Printify keeps a disconnected shop in the API with its products intact, so
+  // a store that was unhooked months ago still answers and still reports print
+  // areas. Walking it would file dimensions from a dead catalogue alongside the
+  // live one, and nothing downstream could tell them apart.
+  const shops = allShops.filter((s) => s.sales_channel !== "disconnected");
+  const skipped = allShops.filter((s) => s.sales_channel === "disconnected");
+
+  if (!shops.length) {
+    console.error(
+      `Every shop on this account is disconnected: ` +
+        `${allShops.map((s) => s.title).join(", ")}.`
+    );
+    process.exit(1);
+  }
+
+  console.log(`shops: ${shops.map((s) => `${s.title} (${s.id})`).join(", ")}`);
+  if (skipped.length) {
+    console.log(
+      `skipped (disconnected): ${skipped
+        .map((s) => `${s.title} (${s.id})`)
+        .join(", ")}`
+    );
+  }
+  console.log();
 
   // Which blueprint/provider pairs are actually in use.
   const pairs = new Map();
