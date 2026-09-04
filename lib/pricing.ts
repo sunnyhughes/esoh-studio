@@ -98,7 +98,8 @@ const GPT_IMAGE_1: Rates = {
   // size          low      medium    high
   "1024x1024": { low: 0.011, medium: 0.042, high: 0.167 },
   "1024x1536": { low: 0.016, medium: 0.063, high: 0.25 },
-  "1536x1024": { low: 0.016, medium: 0.063, high: 0.25 },
+  // No landscape row. D29 bars 1536x1024 and the categories CHECK constraint
+  // makes it unconfigurable, so a rate for it is a shape that cannot occur.
 };
 
 export function estimateCostUsd(
