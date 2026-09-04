@@ -19,9 +19,9 @@ An internal tool for producing images for Esoh Creations. Not a product, not a v
 
 ### The actual problem
 
-ChatGPT and Gemini cap image generation at roughly 3 per 24 hours. The Healing Seasons production plan is **180 pages**. At 3 a day that is two months of waiting, and the waiting is the bottleneck — not the generating.
+ChatGPT and Gemini cap image generation at roughly 3 per 24 hours. The Healing Seasons production plan is **240 pages** (D80). At 3 a day that is over two months of waiting, and the waiting is the bottleneck — not the generating.
 
-The tool exists to remove that ceiling and to make 180 pages come out looking like one coherent book.
+The tool exists to remove that ceiling and to make 240 pages come out looking like one coherent book.
 
 Two goals, in order:
 
@@ -60,7 +60,7 @@ The earlier plan put the library at Stage 3, behind style tuning. Storage and re
 
 ### 2.4 Batch generation is central, not deferred
 
-Both earlier plans list batch as out of scope for V1. With a 180-page backlog and no rate limit, batch is a primary feature. It moves into the core.
+Both earlier plans list batch as out of scope for V1. With a 240-page backlog and no rate limit, batch is a primary feature. It moves into the core.
 
 ### 2.5 Long negative prompt lists are counterproductive
 
@@ -145,7 +145,7 @@ Stage 1 rule was correct and should not have been overturned.
 
 Related, and more serious: the figure block carried "hair is rendered as dense
 drawn curl", generalised from the same observation. Written as a style rule it
-gives all 180 pages the same hair and forecloses locs, braids, twists, fades,
+gives all 240 pages the same hair and forecloses locs, braids, twists, fades,
 bantu knots, headwraps and everything else the subject might wear — a
 stereotype encoded in the prompt engine, and a variety failure on top.
 
@@ -166,7 +166,7 @@ happened to be wrapped in a knit blanket holding a mug by a window. That is what
 that page is about — not a rule every Fall page inherits.
 
 Promoted into a style block, the list would put candles, knits and a window into
-all 180 pages. That is precisely the repetitiveness Stage 1 produced, arriving by
+all 240 pages. That is precisely the repetitiveness Stage 1 produced, arriving by
 a new route: not from generic prompts this time, but from over-generalising six
 specific images into a house style.
 
@@ -239,7 +239,7 @@ Commercial data for store listings. **African American only so far**; Hispanic a
 
 **Header names use spaces, not underscores.** An earlier draft transcribed them with underscores; import code written from that would fail on every row. The spreadsheet is correct as it stands — nothing to fix on the sheet.
 
-The production queue. 3 lines × 4 seasons × 15 pages = **180 pages**, verified.
+The production queue. 3 lines × 4 seasons × 15 pages = **180 pages**, verified — the sheet as it stands. D80 raises this to 20 pages per book, so 60 rows are still to be added and the counts below describe the original 180.
 
 Page type distribution:
 
@@ -428,7 +428,7 @@ The cause is designing inside the Printify editor, which could not produce a kno
 
 ## 6. Style consistency is the core technical problem
 
-180 pages must look like one book. Text prompts alone will not hold a style across 180 generations — Stage 1 demonstrated drift within *three*.
+240 pages must look like one book. Text prompts alone will not hold a style across 240 generations — Stage 1 demonstrated drift within *three*.
 
 Planned approach, strongest first:
 
@@ -448,7 +448,7 @@ Planned approach, strongest first:
 Stage numbering restarts here.
 
 ### Stage A — Restructure
-Migrate to categories/collections/items. Import both spreadsheets. 180 items land in the database with briefs, page types, quotes and priorities.
+Migrate to categories/collections/items. Import both spreadsheets. The 180 tracker rows land in the database with briefs, page types, quotes and priorities.
 **Done when:** the production plan is queryable — "show me every High priority Fall quote page."
 
 ### Stage B — Style Library from real material
@@ -456,7 +456,7 @@ Six page-type templates. Blocks derived from the reference images and prompt not
 **Done when:** a generated Solo portrait is judged close enough to the references to use.
 
 ### Stage C — VV-Styles apparel
-The first real test of the engine on a whole category. Square transparent output, the twelve art styles, 129 items already written. No page-type templates, no 180-item queue, no bilingual lettering — the simplest path from prompt to sellable product.
+The first real test of the engine on a whole category. Square transparent output, the twelve art styles, 129 items already written. No page-type templates, no 240-item queue, no bilingual lettering — the simplest path from prompt to sellable product.
 **Done when:** a design goes from library row to print-ready transparent PNG without touching Printify's editor.
 
 ### Stage D — Library and retrieval
@@ -506,7 +506,7 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D22 | Approved pages can be promoted to style references. |
 | D23 | **Refined.** Quote text is overlaid after generation as **outlined vector type** — a real font, stroked and unfilled — never drawn by the model. The scanned quote pages show lettering as hollow outline art meant to be colored in; flat filled type would sit on the page like a sticker and could not be colored. Outlined vector keeps the letters colorable *and* guarantees correct spelling and accented Spanish, and still allows restyling or translation without regenerating. Quote-page prompts must **reserve clear space** for the type to land in. |
 | D24 | **The model never draws a border.** Seven of eight page-shaped references have one, so it is a genre convention rather than an accident — but a drawn border bakes in, varies page to page, and was the one Stage 1 instruction the model reliably ignored. Prompts generate borderless with a safe margin. The print pipeline *may* add a border as a vector rule at export: exact, identical on every page, removable. Default off. Same principle as D23 — generate the art, add the precise parts afterward. |
-| D25 | The series is **3 lines × 4 seasons = 12 books, 180 pages.** Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books. |
+| D25 | The series is **3 lines × 4 seasons = 12 books.** ~~180 pages~~ → 240, D80. Spreadsheet A is book-level listing metadata (title, keywords, description); its "flagship 1–4" rows are candidate listing copy, not separate books. |
 | D26 | **Art Style is a first-class dimension**, separate from category and tone. Twelve values (§4.4). This is the mechanism for variety; without it the tool has no axis to vary. |
 | D27 | **Background Density** (Open / Medium / Dense) is a per-item setting on any template with a background. Never a global rule. |
 | D28 | **Lettering Style** applies to any item carrying words, coloring page or apparel. |
@@ -524,7 +524,7 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D53 | **Fullness is a density decision, never an art style.** `hs-style-editorial-scene` asserted "an uncluttered setting, with open sky and ground" — a content judgment buried in an art style where no form control could reach it. It contradicted `hs-density-dense` and `hs-furnishing` in the same prompt and, coming first, won: choosing **Dense** produced a bare room. "Open" means the figure is not crowded by their surroundings; it has never meant the room is scarce. |
 | D54 | **`items.visual_elements` feeds the `{{environment}}` slot.** Nothing supplied it, so the one block that says what is in the room was silently dropped from every item-driven generation — an empty slot drops its block by design. Generic rooms were not the model guessing badly; they were the item never being asked. |
 | D55 | **The form generates from a queue item.** It posted no `itemId`, no art style, no density and no exemplar flag — so `brief`, `hair`, `visual_elements`, `season` and `ethnicity_line` were unreachable from the app and every page came out of the blank-form path. Wiring the columns was never the missing piece; **nothing in the UI could select a row to wire them from.** Choosing an item now settles its template, art style and density, each still editable — the row is a starting point, not a lock. |
-| D56 | **A page-type mismatch is refused, not drawn.** Generating a Quote page item against the Solo Portrait template produced a silently wrong page. With 180 items across six page types this had to fail loudly. |
+| D56 | **A page-type mismatch is refused, not drawn.** Generating a Quote page item against the Solo Portrait template produced a silently wrong page. With 240 items across six page types this had to fail loudly. |
 | D57 | **`quote_text`, `quote_lang` and `lettering_style` are deliberately not prompt inputs.** D23 puts quote text on the page as overlaid outlined vector type; sending it to the model would produce misspelt, uncolourable lettering and break the reserved space the composition block creates. They are export-stage data, and the export stage does not exist yet. `color_direction` and `product_placement` are VV-Styles fields with no VV-Styles template (D32, Stage C). **Five of the six unused columns are unused correctly** — only `visual_elements` was a genuine defect. |
 | D58 | **One default typeface per lettering style**, recorded in `lettering_faces`: Baloo 2 ExtraBold · Caveat Brush · Archivo Black · Libre Baskerville Bold · Permanent Marker · Montserrat ExtraBold · Big Shoulders Stencil Text Bold · Archivo Black + Caveat Brush. All verified against the font binaries for the full Spanish set; all OFL except Permanent Marker (Apache 2.0). An item may override its own. |
 | D59 | **Hollow outline is a coloring-page rule, not a lettering rule.** D23 makes quote type hollow so it can be *coloured*. Apparel has nothing to colour, so VV-Styles type is filled or knocked out (D34) and the outline criteria — heavy weight, low contrast, open counters — do not govern it. Playfair Display, rejected for coloring pages because its hairlines collide when outlined, is perfectly usable on a shirt. **The two products need different type judgments and must not share one test.** |
@@ -544,7 +544,7 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D45 | **Hair is item data, never a style block.** Encoding one texture as a rule stereotypes and removes variety. |
 | D46 | **Technique is stated positively; only content is excluded by name.** Four occurrences of the §2.5 trap, all of them technique negatives. |
 | D43 | **Density means the composition reaches every edge, not that every surface carries marks.** "Leaving no empty ground" left the model nowhere to stop and it textured skin and sky. A coloring page needs clean enclosed areas to put colour into. |
-| D39 | **Style blocks describe how a page is drawn; item briefs describe what is in it.** Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 180 pages repeat (§3.3). |
+| D39 | **Style blocks describe how a page is drawn; item briefs describe what is in it.** Objects, props and settings come from the item's own brief and are never promoted into a style block. Over-generalising six reference images into a house motif list would make 240 pages repeat (§3.3). |
 | D40 | **`Healing Seasons` is a series**, recorded on `collections.series`, sitting between category and collection so a second series never collides with the first. |
 | D41 | **The in-scene name-drop is per-item and opt-in** — `items.brand_mark`, null by default, either 'Healing Seasons' or 'Esoh Creations'. An occasional touch, never a signature. |
 | D42 | **Export filenames are spelled out in full**, including page type and art style: `african-american-fall-09-quote-page-zentangle-pattern-v2.png`. Internal storage keys stay opaque; the descriptive name is generated at export, because an exported file leaves the database behind and has to describe itself. |
@@ -556,6 +556,15 @@ Stage F may need to move earlier if publishing deadlines demand it.
 | D72 | **Nothing sits behind an apparel design, and the block layer must say so by name.** Two generations produced the D34 defect in shapes a border test cannot see: an irregular cream blob with a feathered edge, then a rounded-rectangle poster card, both floating clear of all four sides. The cause was this project's own wording — "composed as one self-contained unit" and "every element locks into that one shape" meant *not scattered* and were read as *one silhouette*, so the model supplied one. Grouping is now described as an arrangement, and panel, card, badge field and rounded rectangle are excluded by name. That naming is consistent with D46, not a breach of it: D46 governs rendering *technique*, and a panel is an object. |
 | D73 | **`background: "transparent"` is passed to the provider, not merely requested in prose.** The category carried the flag, the provider supported it, and nothing joined the two, so every apparel prompt asked for a knockout in words while the API parameter went unset. Setting it dropped the soft feathered edge from 4.9% of the image to 1.7%. It does not remove an enclosing panel — that is D72's job — so the two are needed together. |
 | D74 | **The knockout is measured, never eyeballed, and the measurements are these.** Four of eight live products only look clean because white fabric hides the box. Three checks in `lib/transparency.ts`: an alpha channel must exist and be used; the design must fill no more than 80% of its own bounding box, since real cut-out artwork leaves gaps between its elements and a panel welds them together; and no more than 3% of the image may be half-transparent, since a cut edge is hard and a feathered one is not. Accepted references measure 60–72% fill and 0.7–1.6% soft edge; the two failed generations measured 86–92% and 4.9%. A failing image is flagged, never discarded — it has been paid for, and whether to rework or re-run is not the tool's call. What this cannot catch is a mockup: a t-shirt silhouette fills about 65% of its own box, squarely inside the accepted range. |
+| D76 | **The phoenix is knocked out to artwork and type only — no poster rectangle.** Settles the D36 question. The flame at the base of the image is wanted and is the thing to watch: it is the element most likely to be lost or left with a feathered edge once the rectangle goes, so the test print is judged on whether the fire survives the knockout, not on whether the rectangle is gone. Measured against D74 like any other apparel file. |
+| D77 | **The tool writes back to the spreadsheet; it does not replace it.** The sheet stays the record of what exists, so the plan is readable and revisable outside the tool and survives it. Answers the §9 structure question. Write-back covers the columns the tool can fill — status, asset link, and the four direction columns per D78 — and never silently overwrites a value entered by hand. |
+| D78 | **The four direction columns are drafted by the tool and corrected by hand, not written from scratch.** 19 of 137 VV-Styles rows carry all four of Art Style, Lettering Style, Visual Elements and Color Direction (22 carry at least one); the rest carry Text/Quote, Category and Tone, which is the input a draft needs. The 19 briefed rows are the exemplars — a draft is generated against them so it inherits the house wording rather than inventing a new vocabulary per row. A drafted value is marked as drafted and is freely overwritten by the next draft; a hand-entered value never is (D77). **Stage C does not wait on this.** Its gate is one row reaching a print-ready transparent PNG, and 19 briefed rows are 18 more than that needs. Briefing the remaining 118 by hand ahead of the tool would be the manual work this project exists to remove. |
+| D79 | **The 12 books publish separately — one book per line per season.** Confirms the D25 grid as the shipping unit: African American, Hispanic and Multiracial, each across all four seasons. `Healing Seasons` stays a series (D40) as a branding and shelf relationship, not a bundle: nothing is sold as a collected volume, so each book carries its own title, keywords, description and cover. The consequence for listings is that the keyword plan is needed three times over — the existing one covers African American only, and Hispanic and Multiracial listings are still outstanding. The consequence for production is that a book, not the series, is the unit that has to be complete before anything can ship, so the 240-page queue is really twelve 20-page queues and priority should be read that way. |
+| D80 | **20 pages per book, not 15 — 240 pages total.** Supersedes the 180-page figure in D25 and §1. 15 pages per book was an artefact of the original tracker, and reads thin against KDP norms where buyers expect 30+. The increase is affordable precisely because of what this tool is for: 60 additional pages is roughly $45 of generation at three attempts each on the `lib/pricing.ts` estimates, against the hours of hand-work it would have cost before. **Per-book mix goes 5 Solo portrait / 5 Community scene / 4 Quote / 2 Environment / 2 Symbol / 2 Decorative.** Symbol and Decorative rise from one page to two on purpose — both lack an approved exemplar (§9), and a single specimen per book gives nothing to judge style consistency against. The one line item that does not scale for free is Quote: at 4 per book the series needs 48 bilingual quotes rather than 36, and Spanish copy is a judgment about tone and idiom, not a draftable column (§4.2, D78). |
+| D81 | **All 15 brand/legal flags are cleared; three phrases were rewritten to get there.** The test applied was not "is this a recovery phrase" — it was **does this reproduce fellowship literature or imply official affiliation**. Nothing in the set names AA or NA or uses their marks, which is the line marketplaces actually enforce on, so the exposure was always narrower than the flag count suggested. Three rewrites: `Newcomer: The Most Important Person in a Meeting` → **`Newcomer- The Real M.I.P.`** (the original was near-verbatim AA text; the rewrite carries the same meaning as original wording); `H.O.W. Honesty, Openminded, Willingness` → **`H.O.W.`** (the acronym circulates freely, the spelled-out expansion is the literature phrasing); `Clean & Serene since 1953 (or clean date)` → **`Clean & Serene since (clean date)`** (1953 is NA's founding year and pointed at a specific fellowship; the date was only ever meant as a personal one). The remaining twelve are sayings in general circulation or Esoh's own words — `Not a dumptruck` is original, on sponsors and support networks not existing to be dumped into, and `Listenin' for the GOOD E.S.H.` is Esoh's own coinage, a rewrite of "the good ish" onto Experience, Strength and Hope. The seven newest rows, 0131–0137, were never triaged and are cleared as written from experience rather than drawn from any source. |
+| D82 | **`(clean date)` is a fill-in-the-blank, and the tool has no concept of one.** VVS-0009 is the first personalised design in the library: the phrase is incomplete until a buyer's own date is set into it. That is a product capability — a variable field in the artwork, a buyer-supplied value, and a print file generated per order — and none of it exists. Until it does, the row is either produced with a blank rule to write on, or held. Not a Stage C blocker; it is one row, and it is recorded here so it is not discovered as a surprise at print time. |
+| D83 | **Cost is computed from returned tokens, not looked up by size — and the rates are verified.** `lib/pricing.ts` carried a warning that its numbers were unverified guesses. They were not: checked against 29 real jobs, gpt-image-1's image output tokens are fixed per size and quality (1024×1536 returns 408 / 1584 / 6240 for low / medium / high), and every cell of the table was those counts at **$40 per 1M output tokens**. The table was right; what it *omitted* was input — text at $5/1M and reference images at $10/1M — which the function never saw because it took size and quality rather than usage. `costFromUsage()` now computes the actual figure from `usage_json` and `estimateCostUsd()` is kept for the one job it is genuinely needed for: pricing a batch **before** it runs (Stage E), where no usage exists yet. The 29 historical rows are backfilled: $5.8850 → $5.9697. Input is 1.5% of spend today and will grow, because feeding reference images in is the premise of the Style Library (§6). |
+| D84 | **`Healings Seasons Workbook 1 - master_launch_sheet.csv` is the listing plan of record, and its 48 rows are 12 books × 4 candidate listings.** Supersedes `keyword_listing_plan_african_american...csv`, which covered one line in six columns. The workbook covers all three lines in twelve — title, subtitle, SEO slug, primary keywords, short and long description, target audience, cover concept and priority — with no empty cells. Within any one book slot the four rows carry an **identical subtitle and identical cover concept**, differing only in one word of the title and the keyword string, which settles what they are: keyword variants to choose between, exactly as D25 read the earlier "flagship 1–4" rows. **One ships per book, twelve in total.** Publishing all four would put 48 near-duplicate listings on KDP sharing covers and subtitles, which is keyword stuffing and is penalised. Ten of the twelve columns are listing metadata the generator never reads; `cover concept` and `commercial priority` are the two that touch production. |
 | D75 | **Naming the garment colour in the prompt ties the artwork to that garment.** It is what makes light detail survive on dark fabric, and it is why the coffee design reads on natural sand and nearly disappears on black. It also cuts against the arithmetic in §4.5 — 8 designs × 6 colours ≈ 48 products assumes one file works on every garment. Both can be true, but not for the same file: a design is either colour-directed for one garment or built with contrast that holds on any, and which one it is has to be decided per design rather than assumed. |
 
 ---
@@ -573,25 +582,25 @@ Stage F may need to move earlier if publishing deadlines demand it.
 
 **Blocked on a missing stage, not on wiring** (D57)
 - ~~**Quote pages cannot complete.**~~ **Done.** The prompt reserves the centre and forbids drawn letters (D23), but no overlay step exists. `POST /api/overlay` letters a generated page (D64, D65). `fontkit` replaced `opentype.js` — it instances variable fonts, which four of the eight faces need.
-- ~~VV-Styles has 130 items and no template~~ → built 2026-08-27 (migration 020). One template, nine apparel art styles, and `quote_text`, `visual_elements`, `lettering_style`, `color_direction` and `product_placement` all feed it. Twelve designs are art-directed; the other 118 have empty direction columns and are not yet briefed.
+- ~~VV-Styles has 130 items and no template~~ → built 2026-08-27 (migration 020). One template, nine apparel art styles, and `quote_text`, `visual_elements`, `lettering_style`, `color_direction` and `product_placement` all feed it. Twelve designs are art-directed; the other 118 have empty direction columns. They are drafted by the tool and corrected by hand (D78), not briefed by hand ahead of it, and they do not block Stage C.
 
 **Production**
-- Are the 12 books published separately, or bundled as one series?
-- The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.
+- ~~Are the 12 books published separately, or bundled as one series?~~ → separately, one per line per season, D79.
+- ~~The keyword listing plan covers African American only. Hispanic and Multiracial listings still to come.~~ → all three lines are covered by the launch workbook, D84.
 - ~~Should the 19 VV-Styles categories consolidate to the proposed 9?~~ → yes, applied 2026-08-27 (migration 021). The portfolio capsule's six collection names turned out to *be* six of the proposed nine under better wording, so the capsule's naming was taken where it existed and the proposed list used for the rest. All 130 items are sorted; one row with no `Category` at all stays in Unsorted. Two judgment calls stand flagged: `Love` went to Family & Faith as the nearest relational grouping, and `Self-Awareness` to Truth & Accountability as honest self-assessment rather than self-regard.
-- 14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged `Brand / Legal Review`. Decide before printing.
+- ~~14 VV-Styles quotes are recovery-fellowship-adjacent and pre-flagged `Brand / Legal Review`. Decide before printing.~~ → there were 15, all cleared, three rewritten; D81. VVS-0094 `I survived what was supposed to break me.` carried a separate `Sensitive Content Review` and is cleared too. **All 137 rows now read `Clear`; no review flag is outstanding.**
 
 **Current state of VV-Styles**
 - Store is built but **not public**. 8 shirt styles live, one tester shirt ordered and approved. Designs are currently made by hand in the Printify web editor — slow, and the reason this tool exists.
 
 **Style**
 - All seven existing shirts are catalogued in §4.5.
-- Photoreal Composite is **kept** (D36). Open: does the phoenix keep its poster rectangle, or get knocked out to phoenix-and-type only? One test print decides it.
+- Photoreal Composite is **kept** (D36). ~~Does the phoenix keep its poster rectangle?~~ → knocked out to artwork and type, D76. The base flame is the element to check on the test print.
 - No approved in-house exemplars exist yet for Quote, Symbol or Decorative pages. Stage B must produce the first ones.
 
 **Structure**
-- Should the tool write back to the spreadsheets, or replace them?
+- ~~Should the tool write back to the spreadsheets, or replace them?~~ → write back, D77.
 
 **Technical**
-- Verify the estimated rates in `lib/pricing.ts`.
+- ~~Verify the estimated rates in `lib/pricing.ts`.~~ → verified and rewritten to compute from usage, D83. Confirmed against the OpenAI dashboard on 2026-09-04: the five days the app generated on (15, 22, 25, 27, 31 August) are the only days with spend, and each matches to within a couple of cents. The $0.14 between the database's $5.97 and the reported $6.11 is hand-run testing on the same key, not a rate error. **Real cost is $0.25 per high-quality page.**
 - Vector trace step for apparel — later, not blocking.
