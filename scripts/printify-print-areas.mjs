@@ -56,17 +56,24 @@ async function get(path) {
       );
       process.exit(1);
     }
-    throw new Error(`GET ${path} → ${res.status} ${res.statusText}`);
+    const body = await res.text().catch(() => "");
+    throw new Error(
+      `GET ${path} → ${res.status} ${res.statusText}` +
+        (body ? `\n${body.slice(0, 400)}` : "")
+    );
   }
   return res.json();
 }
 
 /** Printify paginates products; the shop is small enough that one page is
- *  usually everything, but not assuming that costs nothing. */
+ *  usually everything, but not assuming that costs nothing.
+ *  50 is the API's maximum — asking for 100 is a 400, not a clamp. */
+const PAGE_SIZE = 50;
+
 async function allProducts(shopId) {
   const out = [];
   for (let page = 1; page <= 20; page++) {
-    const body = await get(`/shops/${shopId}/products.json?limit=100&page=${page}`);
+    const body = await get(`/shops/${shopId}/products.json?limit=${PAGE_SIZE}&page=${page}`);
     const data = body.data ?? [];
     out.push(...data);
     if (data.length < 100) break;
