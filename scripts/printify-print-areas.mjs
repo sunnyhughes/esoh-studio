@@ -11,9 +11,15 @@
 // Only products that already exist in the shop are walked, so what lands in
 // the table is the set of areas actually being sold into.
 //
-// The token needs catalog.read. Create one at
-// https://printify.com/app/account/api and pass it in the environment; it is
-// never written to disk by this script.
+// The token needs THREE scopes, not one. Getting this wrong returns a bare 403
+// with no indication of which is missing:
+//
+//   shops.read     — GET /shops.json
+//   products.read  — GET /shops/{id}/products.json
+//   catalog.read   — GET /catalog/blueprints/...
+//
+// Create one at https://printify.com/app/account/api and pass it in the
+// environment; it is never written to disk by this script.
 
 import pg from "pg";
 
@@ -34,6 +40,22 @@ async function get(path) {
     headers: { Authorization: `Bearer ${TOKEN}` },
   });
   if (!res.ok) {
+    // A 403 here is almost always a missing scope rather than a bad token —
+    // Printify accepts the token and refuses the endpoint. Say which one.
+    if (res.status === 403) {
+      const scope = path.startsWith("/catalog")
+        ? "catalog.read"
+        : path.startsWith("/shops/")
+          ? "products.read"
+          : "shops.read";
+      console.error(
+        `GET ${path} → 403 Forbidden.\n` +
+          `The token is missing the "${scope}" scope. This script needs all ` +
+          `three of shops.read, products.read and catalog.read.\n` +
+          `Edit the token at https://printify.com/app/account/api and re-run.`
+      );
+      process.exit(1);
+    }
     throw new Error(`GET ${path} → ${res.status} ${res.statusText}`);
   }
   return res.json();
