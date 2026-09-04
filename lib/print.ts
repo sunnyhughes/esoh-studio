@@ -30,6 +30,14 @@ import {
  * resampled to reach 300 DPI; the letters are geometry and are drawn as PDF
  * path operators, so they stay exact at any size the printer works at. That
  * difference is the whole reason the overlay was kept as paths.
+ *
+ * The type is re-laid here at print dimensions rather than read back from the
+ * .svg the overlay saved. That file is a record of what was drawn, not the
+ * print source. Embedding it would look like a saving and would not be one:
+ * it was laid out against a 1024-wide page, so printing it means scaling
+ * geometry that could simply be regenerated exact. The recorded `area` and
+ * `strokeWidth` are what carry across, and they are enough to put the letters
+ * in the same place at any size.
  */
 
 export const PRINT_DPI = 300;

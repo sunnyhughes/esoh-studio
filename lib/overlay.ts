@@ -339,11 +339,46 @@ export type QuoteLayout = {
  * typography — the SVG and the PDF are two renderings of this, not two
  * implementations of it.
  */
+/**
+ * fontkit answers an unsupported character with glyph 0, `.notdef`, and draws
+ * it as an empty box or nothing at all. Nothing throws, so a quote with one
+ * character the face lacks renders as a page that looks finished and is not.
+ *
+ * D19 commits the Quote pages to accented Spanish and the faces clear it, but
+ * the margin is thin — Hand-Marker (Permanent Marker) carries 229 glyphs, and
+ * its own note in `lettering_faces` says "Spanish and no further". A third
+ * language would fail here silently. Checking costs one pass over text the
+ * layout is about to walk anyway.
+ */
+function assertGlyphs(font: Font, text: string, family: string): void {
+  const run = font.layout(text);
+  const missing = new Set<string>();
+
+  // Glyph runs do not map one-to-one to characters, so report the characters
+  // the face does not claim rather than trying to index back from the run.
+  for (const ch of text) {
+    if (ch === " " || ch === "\n") continue;
+    if (font.layout(ch).glyphs.some((g) => g.id === 0)) missing.add(ch);
+  }
+
+  if (missing.size > 0 || run.glyphs.some((g) => g.id === 0)) {
+    const chars = [...missing].map((c) => JSON.stringify(c)).join(", ");
+    throw new Error(
+      `${family} has no glyph for ${chars || "one or more characters"}. ` +
+        `The page would print with empty boxes. Choose a lettering style with ` +
+        `wider coverage — Sans Display (Montserrat) has the broadest set.`
+    );
+  }
+}
+
 export async function layoutQuote(opts: OverlayOptions): Promise<QuoteLayout> {
   const face = await getFace(opts.letteringStyle);
   const { files, paired } = facesFor(face);
   const primary = loadFace(files[0], face.weight);
   const secondary = paired ? loadFace(files[1], face.weight) : primary;
+
+  assertGlyphs(primary, opts.text, face.family);
+  if (paired) assertGlyphs(secondary, opts.text, face.family);
 
   const e = ellipseOf(opts.area ?? DEFAULT_AREA, opts.width, opts.height);
 
