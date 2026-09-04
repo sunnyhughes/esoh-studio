@@ -137,8 +137,8 @@ export async function POST(req: Request) {
       `insert into generated_assets
          (generation_job_id, category_id, collection_id, item_id, asset_name,
           storage_path, width, height, file_size_bytes, source_variant_index,
-          metadata_json)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+          metadata_json, derived_from_asset_id)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        returning id, asset_name, storage_path, status, is_favorite,
                  source_variant_index`,
       [
@@ -166,6 +166,7 @@ export async function POST(req: Request) {
             from: asset.id,
           },
         }),
+        asset.id,
       ]
     );
 
