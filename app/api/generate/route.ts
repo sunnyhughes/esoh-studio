@@ -250,16 +250,35 @@ export async function POST(req: Request) {
           `select r.storage_path from reference_images r
             where r.usable_as_input
               and (r.category_id = $1 or r.category_id is null)
-              and (r.page_type is null
-                   or exists (select 1 from prompt_templates t
-                               where t.page_type = r.page_type
-                                 and t.has_people = $2))
+              and (
+                -- A reference with no page type is a general style plate and
+                -- applies anywhere.
+                r.page_type is null
+                -- Otherwise prefer an exact match on page type (047 gave
+                -- Environment pages their own).
+                or r.page_type = $2
+                -- Falling back across page types is only safe between pages
+                -- that have figures on them, because what a reference teaches
+                -- there is how a figure is rendered: a Community scene has no
+                -- exemplar of its own and is well served by a Solo portrait.
+                -- It is not safe the other way. A Quote page and an Environment
+                -- page share only the absence of people, and the best quote
+                -- page generated so far was made with no reference at all, so
+                -- handing it two photographs of living rooms would be a loss.
+                or (
+                  $3
+                  and not exists (select 1 from reference_images x
+                                   where x.usable_as_input and x.page_type = $2)
+                  and exists (select 1 from prompt_templates t
+                               where t.page_type = r.page_type and t.has_people)
+                )
+              )
             -- Four, not three: 046 approved two summer exemplars alongside
             -- the two autumn ones, and at three the newest would have
             -- pushed the oldest out silently. Esoh's call was to keep all
             -- four so the set carries two seasons.
             order by r.created_at desc limit 4`,
-          [body.categoryId ?? template.category_id, hasPeople]
+          [body.categoryId ?? template.category_id, template.page_type, hasPeople]
         )
       : [];
 
