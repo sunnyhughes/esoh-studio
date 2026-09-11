@@ -227,7 +227,28 @@ export async function POST(req: Request) {
     const n = body.n ?? settings.n ?? 4;
     const model = OPENAI_DEFAULT_MODEL;
 
-    // 4. Record the request BEFORE calling out, so a failure still leaves a
+    // 4. Pick the exemplars. Opt-in, and only ever our own approved work —
+    //    reference_images.usable_as_input is false by default (D31).
+    //
+    //    This runs before the job is recorded rather than after, because what
+    //    the model was shown is part of the request and belongs in the same
+    //    row as the prompt. D106 spent a controlled test on this flag and the
+    //    run could not be audited afterwards, since nothing wrote it down.
+    const references = body.useReferences
+      ? await query<{ storage_path: string }>(
+          `select storage_path from reference_images
+            where usable_as_input
+              and (category_id = $1 or category_id is null)
+            order by created_at desc limit 3`,
+          [body.categoryId ?? template.category_id]
+        )
+      : [];
+
+    const referenceImages = await Promise.all(
+      references.map((r) => read(r.storage_path))
+    );
+
+    // 5. Record the request BEFORE calling out, so a failure still leaves a
     //    trace with the exact prompt that caused it.
     const job = await one<{ id: string }>(
       `insert into generation_jobs
@@ -246,28 +267,20 @@ export async function POST(req: Request) {
         JSON.stringify(body.inputs ?? {}),
         DEFAULT_PROVIDER,
         model,
-        JSON.stringify({ size, quality, n, artStyle, density }),
+        JSON.stringify({
+          size, quality, n, artStyle, density,
+          // Asked-for and actually-supplied are recorded separately: a request
+          // can ask for exemplars and receive none, and a run that cannot say
+          // which of those happened cannot be used as evidence (D111).
+          useReferences: body.useReferences ?? false,
+          references: references.map((r) => r.storage_path),
+        }),
       ]
     );
     jobId = job!.id;
 
-    // 5. Generate. Exemplars are opt-in and only ever our own approved work —
-    //    reference_images.usable_as_input is false by default (D31).
-    const references = body.useReferences
-      ? await query<{ storage_path: string }>(
-          `select storage_path from reference_images
-            where usable_as_input
-              and (category_id = $1 or category_id is null)
-            order by created_at desc limit 3`,
-          [body.categoryId ?? template.category_id]
-        )
-      : [];
 
-    const referenceImages = await Promise.all(
-      references.map((r) => read(r.storage_path))
-    );
-
-    // The category knows whether its output is transparent (D34), the
+    // 6. Generate. The category knows whether its output is transparent (D34), the
     // provider knows how to ask for it, and until now nothing joined the two:
     // the flag was never passed, so every apparel prompt was asking for a
     // knockout in words while `background: "transparent"` went unset.
