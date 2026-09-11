@@ -51,3 +51,6 @@ next-env.d.ts
 
 # Database dumps — copies, not backups, until they leave this machine.
 /backups
+
+# Working contact sheets — local only, not part of the app
+/public/sheets/
