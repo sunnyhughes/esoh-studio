@@ -234,13 +234,28 @@ export async function POST(req: Request) {
     //    the model was shown is part of the request and belongs in the same
     //    row as the prompt. D106 spent a controlled test on this flag and the
     //    run could not be audited afterwards, since nothing wrote it down.
+    //    Matched on whether the page has figures on it (D117). Every usable
+    //    reference is a Solo portrait, and the selection used to be by category
+    //    alone, so a Quote, Symbol, Decorative or Environment page — none of
+    //    which has a person on it — was handed two close-up portraits of one
+    //    seated man as the thing to imitate. That is 84 of the 180 coloring
+    //    pages being shown a figure they are not allowed to draw.
+    //
+    //    A reference whose own page_type belongs to a template with figures is
+    //    only offered to a template with figures. A reference with no page_type
+    //    still applies to everything, which is how a general style plate would
+    //    be added later.
     const references = body.useReferences
       ? await query<{ storage_path: string }>(
-          `select storage_path from reference_images
-            where usable_as_input
-              and (category_id = $1 or category_id is null)
-            order by created_at desc limit 3`,
-          [body.categoryId ?? template.category_id]
+          `select r.storage_path from reference_images r
+            where r.usable_as_input
+              and (r.category_id = $1 or r.category_id is null)
+              and (r.page_type is null
+                   or exists (select 1 from prompt_templates t
+                               where t.page_type = r.page_type
+                                 and t.has_people = $2))
+            order by r.created_at desc limit 3`,
+          [body.categoryId ?? template.category_id, hasPeople]
         )
       : [];
 
