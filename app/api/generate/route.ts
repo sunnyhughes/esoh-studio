@@ -254,7 +254,11 @@ export async function POST(req: Request) {
                    or exists (select 1 from prompt_templates t
                                where t.page_type = r.page_type
                                  and t.has_people = $2))
-            order by r.created_at desc limit 3`,
+            -- Four, not three: 046 approved two summer exemplars alongside
+            -- the two autumn ones, and at three the newest would have
+            -- pushed the oldest out silently. Esoh's call was to keep all
+            -- four so the set carries two seasons.
+            order by r.created_at desc limit 4`,
           [body.categoryId ?? template.category_id, hasPeople]
         )
       : [];
