@@ -63,6 +63,14 @@ export default function LibraryPanel({
   const [season, setSeason] = useState("");
   const [line, setLine] = useState("");
   const [oldest, setOldest] = useState(true);
+  /**
+   * The filter row starts closed. A library is a place you look at pictures in,
+   * and a menu that cannot be got out of the way is worse than one more click —
+   * which is what the first version of this panel was. Status stays in the
+   * header bar, because choosing what to look at is not a filter, it is the
+   * whole question.
+   */
+  const [showFilters, setShowFilters] = useState(false);
 
   const [assets, setAssets] = useState<LibraryAsset[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -148,8 +156,10 @@ export default function LibraryPanel({
     { key: "", label: "Everything" },
   ];
 
+  const activeFilters = [category, pageType, season, line].filter(Boolean).length;
+
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
+    <div className="sheet-backdrop full" onClick={onClose}>
       <div
         className="sheet-panel library"
         onClick={(e) => e.stopPropagation()}
@@ -157,18 +167,8 @@ export default function LibraryPanel({
         aria-label="Library"
       >
         <header>
-          <div>
-            <strong>Library</strong>
-            <span className="hint">
-              Every page the studio has made, and what you did with it
-            </span>
-          </div>
-          <button onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </header>
+          <strong>Library</strong>
 
-        <div className="lib-controls">
           <div className="lib-tabs" role="tablist">
             {tabs.map((t) => (
               <button
@@ -188,6 +188,21 @@ export default function LibraryPanel({
             ))}
           </div>
 
+          <span className="spacer" />
+
+          <button
+            className={showFilters || activeFilters ? "on" : ""}
+            aria-expanded={showFilters}
+            onClick={() => setShowFilters((v) => !v)}
+          >
+            Filters{activeFilters ? ` (${activeFilters})` : ""} {showFilters ? "▴" : "▾"}
+          </button>
+          <button onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </header>
+
+        <div className="lib-controls" hidden={!showFilters}>
           <div className="lib-filters">
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">Every category</option>
@@ -231,6 +246,18 @@ export default function LibraryPanel({
               title="Oldest first shows how the pages have changed over time"
             >
               {oldest ? "Oldest first" : "Newest first"}
+            </button>
+
+            <button
+              onClick={() => {
+                setCategory("");
+                setPageType("");
+                setSeason("");
+                setLine("");
+              }}
+              disabled={!activeFilters}
+            >
+              Clear
             </button>
           </div>
         </div>

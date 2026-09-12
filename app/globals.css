@@ -398,18 +398,21 @@ header.top .spacer { flex: 1; }
 
 /* Library (the asset half of Stage D) ---------------------------------- */
 
-.sheet-panel.library { width: min(1180px, 100%); height: min(88vh, 100%); }
-
-.lib-controls {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+/* A library is a place you look at pictures in, so it takes the window rather
+   than floating in the middle of it with the page showing round the edges.
+   The first version was a centred dialog whose menu could not be got out of
+   the way, which left almost no room for the thing it exists to show. */
+.sheet-backdrop.full { padding: 0; }
+.sheet-panel.library {
+  width: 100%; height: 100%; max-height: 100%;
+  border: 0; border-radius: 0;
 }
 
-/* Status is the first question the library is asked — "show me what I kept" —
-   so it is a row of tabs carrying its own count rather than one more dropdown
-   among five. The count is the part that was missing before: 39 approved pages
-   existed with nothing anywhere saying so. */
+/* Status lives in the header bar, not in the filter drawer: choosing what to
+   look at is not a filter, it is the whole question. */
+.sheet-panel.library > header { flex-wrap: wrap; }
+.sheet-panel.library > header .spacer { flex: 1; }
+
 .lib-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
 .lib-tabs button {
   display: inline-flex; align-items: center; gap: 7px;
@@ -423,11 +426,21 @@ header.top .spacer { flex: 1; }
   font-variant-numeric: tabular-nums; opacity: 0.75;
 }
 
+.lib-controls {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+/* `hidden` loses to `display: flex` without this, and the drawer would never
+   close. */
+.lib-controls[hidden] { display: none; }
+
 .lib-filters { display: flex; gap: 8px; flex-wrap: wrap; }
 .lib-filters select, .lib-filters button { font-size: 13px; padding: 6px 8px; }
 .lib-filters button.on { border-color: var(--accent); }
+.lib-filters button:disabled { opacity: 0.45; }
 
-.lib-body { padding: 16px; overflow-y: auto; flex: 1; }
+.lib-body { padding: 16px; overflow-y: auto; flex: 1; min-height: 0; }
 
 /* Smaller than the results grid on purpose. The point of the library is the
    set — a season of pages in the order they were made — and comparing them
