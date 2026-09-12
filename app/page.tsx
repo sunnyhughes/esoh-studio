@@ -5,6 +5,7 @@ import PrintPanel from "./print-panel";
 import LetterPanel, { type Face } from "./letter-panel";
 import BooksPanel from "./books-panel";
 import LibraryPanel, { type Facets } from "./library-panel";
+import BatchPanel from "./batch-panel";
 
 type Category = {
   id: string;
@@ -101,6 +102,7 @@ export default function NewJobPage() {
   const [faces, setFaces] = useState<Face[]>([]);
   const [showBooks, setShowBooks] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showBatch, setShowBatch] = useState(false);
   /** True once this session has generated, so recent pages give way to results. */
   const [generated, setGenerated] = useState(false);
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -328,6 +330,7 @@ export default function NewJobPage() {
         <h1>Esoh Studio</h1>
         <span className="tag">New job</span>
         <span className="spacer" />
+        <button onClick={() => setShowBatch(true)}>Batch…</button>
         <button onClick={() => setShowLibrary(true)}>Library…</button>
         <button onClick={() => setShowBooks(true)}>Books…</button>
       </header>
@@ -691,6 +694,15 @@ export default function NewJobPage() {
               prev.map((a) => (a.id === id ? { ...a, status } : a))
             )
           }
+        />
+      )}
+
+      {showBatch && (
+        <BatchPanel
+          categories={categories}
+          collections={collections}
+          facets={facets}
+          onClose={() => setShowBatch(false)}
         />
       )}
 
