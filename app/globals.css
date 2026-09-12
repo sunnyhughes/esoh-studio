@@ -395,3 +395,72 @@ header.top .spacer { flex: 1; }
   border-top: 1px solid var(--warn);
   border-left: 5px solid var(--warn);
 }
+
+/* Library (the asset half of Stage D) ---------------------------------- */
+
+.sheet-panel.library { width: min(1180px, 100%); height: min(88vh, 100%); }
+
+.lib-controls {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Status is the first question the library is asked — "show me what I kept" —
+   so it is a row of tabs carrying its own count rather than one more dropdown
+   among five. The count is the part that was missing before: 39 approved pages
+   existed with nothing anywhere saying so. */
+.lib-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.lib-tabs button {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; font-size: 13px;
+}
+.lib-tabs button.on {
+  border-color: var(--accent); background: var(--accent); color: var(--accent-text);
+}
+.lib-tabs button em {
+  font-style: normal; font-size: 11px;
+  font-variant-numeric: tabular-nums; opacity: 0.75;
+}
+
+.lib-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.lib-filters select, .lib-filters button { font-size: 13px; padding: 6px 8px; }
+.lib-filters button.on { border-color: var(--accent); }
+
+.lib-body { padding: 16px; overflow-y: auto; flex: 1; }
+
+/* Smaller than the results grid on purpose. The point of the library is the
+   set — a season of pages in the order they were made — and comparing them
+   means fitting a good many on screen at once. The full page is one click
+   away on the image itself. */
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 12px;
+}
+
+.lib-card {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.lib-card.approved { border-color: var(--ok); }
+.lib-card.rejected { opacity: 0.5; }
+.lib-card img { width: 100%; display: block; background: #fff; }
+
+.lib-card figcaption {
+  padding: 6px 8px; display: flex; flex-direction: column; gap: 1px;
+  border-top: 1px solid var(--border);
+}
+.lib-ref { font-size: 12px; }
+.lib-meta { font-size: 11px; color: var(--muted); }
+
+.lib-actions { display: flex; gap: 4px; padding: 0 8px 8px; }
+.lib-actions button { flex: 1; padding: 4px; font-size: 12px; }
+.lib-actions button:disabled { opacity: 0.45; }
+
+.lib-more { display: flex; justify-content: center; padding: 18px 0 4px; }
+.lib-more button { padding: 8px 18px; font-size: 13px; }

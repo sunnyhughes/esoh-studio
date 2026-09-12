@@ -16,7 +16,7 @@ on conflict (slug) do nothing;
 insert into job_types (code, label, description) values
   ('coloring_page', 'Coloring Page',  'Full-page black and white line art for adult coloring books.'),
   ('social_post',   'Social Post',    'Square or vertical graphics for social channels.'),
-  ('print_design',  'Print Design',   'Artwork destined for apparel or physical product printing.'),
+  ('print_design',  'Print Design',   'Standalone printed matter — flyers, brochures. Never applied to a product (D124).'),
   ('brand_concept', 'Brand Concept',  'Exploratory concept and mood imagery.')
 on conflict (code) do nothing;
 

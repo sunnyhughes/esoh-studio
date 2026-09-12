@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import PrintPanel from "./print-panel";
 import LetterPanel, { type Face } from "./letter-panel";
 import BooksPanel from "./books-panel";
+import LibraryPanel, { type Facets } from "./library-panel";
 
 type Category = {
   id: string;
@@ -99,6 +100,7 @@ export default function NewJobPage() {
   const [lettering, setLettering] = useState<Asset | null>(null);
   const [faces, setFaces] = useState<Face[]>([]);
   const [showBooks, setShowBooks] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
   /** True once this session has generated, so recent pages give way to results. */
   const [generated, setGenerated] = useState(false);
   const [prompt, setPrompt] = useState<string | null>(null);
@@ -302,6 +304,22 @@ export default function NewJobPage() {
     );
   }
 
+  /**
+   * The library's filter vocabularies come from the planned items rather than
+   * from a hard-coded list, so a page type or season added to the queue shows
+   * up in the filters without anything else being edited.
+   */
+  const facets: Facets = useMemo(() => {
+    const uniq = (get: (i: Item) => string | null) =>
+      [...new Set(items.map(get).filter((v): v is string => !!v))].sort();
+    return {
+      categories: categories.map((c) => ({ code: c.code, label: c.label })),
+      pageTypes: uniq((i) => i.page_type),
+      seasons: uniq((i) => i.season),
+      lines: uniq((i) => i.ethnicity_line),
+    };
+  }, [items, categories]);
+
   const ready = categoryId && templateId && artStyle && !busy;
 
   return (
@@ -310,6 +328,7 @@ export default function NewJobPage() {
         <h1>Esoh Studio</h1>
         <span className="tag">New job</span>
         <span className="spacer" />
+        <button onClick={() => setShowLibrary(true)}>Library…</button>
         <button onClick={() => setShowBooks(true)}>Books…</button>
       </header>
 
@@ -661,6 +680,18 @@ export default function NewJobPage() {
 
       {printing && (
         <PrintPanel asset={printing} onClose={() => setPrinting(null)} />
+      )}
+
+      {showLibrary && (
+        <LibraryPanel
+          facets={facets}
+          onClose={() => setShowLibrary(false)}
+          onStatusChange={(id, status) =>
+            setAssets((prev) =>
+              prev.map((a) => (a.id === id ? { ...a, status } : a))
+            )
+          }
+        />
       )}
 
       {showBooks && <BooksPanel onClose={() => setShowBooks(false)} />}
