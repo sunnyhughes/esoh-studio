@@ -1,0 +1,13 @@
+ethnicity line,season,launch quarter,release order,primary window,bundle follow-up,notes
+African American,Spring,Q1,1.0,Spring campaign window,Spring bundle after initial single-book launch,Use spring as the release anchor for african american.
+African American,Summer,Q2,2.0,Summer campaign window,Summer bundle after initial single-book launch,Use summer as the release anchor for african american.
+African American,Fall,Q3,3.0,Fall campaign window,Fall bundle after initial single-book launch,Use fall as the release anchor for african american.
+African American,Winter,Q4,4.0,Winter campaign window,Winter bundle after initial single-book launch,Use winter as the release anchor for african american.
+Hispanic,Spring,Q1,1.0,Spring campaign window,Spring bundle after initial single-book launch,Use spring as the release anchor for hispanic.
+Hispanic,Summer,Q2,2.0,Summer campaign window,Summer bundle after initial single-book launch,Use summer as the release anchor for hispanic.
+Hispanic,Fall,Q3,3.0,Fall campaign window,Fall bundle after initial single-book launch,Use fall as the release anchor for hispanic.
+Hispanic,Winter,Q4,4.0,Winter campaign window,Winter bundle after initial single-book launch,Use winter as the release anchor for hispanic.
+Multiracial,Spring,Q1,1.0,Spring campaign window,Spring bundle after initial single-book launch,Use spring as the release anchor for multiracial.
+Multiracial,Summer,Q2,2.0,Summer campaign window,Summer bundle after initial single-book launch,Use summer as the release anchor for multiracial.
+Multiracial,Fall,Q3,3.0,Fall campaign window,Fall bundle after initial single-book launch,Use fall as the release anchor for multiracial.
+Multiracial,Winter,Q4,4.0,Winter campaign window,Winter bundle after initial single-book launch,Use winter as the release anchor for multiracial.

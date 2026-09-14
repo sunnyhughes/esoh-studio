@@ -1,0 +1,4 @@
+record_id,record_date,product_id,ethnicity_line,season,product_type,sales_channel,unit_price,units_sold,gross_revenue,discount_or_refund,net_revenue,traffic_source,customer_segment,customer_feedback,feedback_theme,rating,repeat_purchase,requested_product,action_needed,action_owner,follow_up_status,notes
+SAMPLE-001,,,,,,,,,,,,,,,,,,,,,,"Use one row per sale summary, customer review, survey response, or feedback item."
+SAMPLE-002,,,,,,,,,,,,,,,,,,,,,,"Suggested feedback themes: cover, representation, quote language, page complexity, print quality, file delivery, price, bundle value, season request, new line request."
+SAMPLE-003,,,,,,,,,,,,,,,,,,,,,,"For aggregated storefront sales, use weekly or monthly record_date and total units/revenue. For individual feedback, leave sales columns blank if unknown."

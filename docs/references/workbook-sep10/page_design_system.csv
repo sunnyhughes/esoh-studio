@@ -1,0 +1,39 @@
+section,item,spec
+Document setup,Trim size,8.5 x 11 in portrait
+Document setup,Bleed,0.125 in if printing full bleed; none for safe digital printables
+Document setup,Safe margin,0.375 in minimum from trim on all sides
+Document setup,Resolution,300 DPI export for PNG/PDF
+Document setup,Color mode,Black line art on white background for interiors
+Document setup,Master file types,"SVG or high-res PNG source, plus print-ready PDF"
+Line system,Primary contour,0.75–1.25 pt line weight for main forms
+Line system,Secondary detail,0.5–0.75 pt for interior objects and accents
+Line system,Tertiary texture,Use sparingly; avoid visual noise
+Line system,Fill areas,Keep broad open spaces for coloring comfort
+Line system,Border use,Light seasonal border only when it supports composition
+Line system,Contrast rule,Use at least two visibly distinct line weights
+Page composition,Portrait pages,"One focal figure, midground props, simple background"
+Page composition,Community pages,"2–5 people max, clear interaction, no crowding"
+Page composition,Quote pages,Short quote centered or upper-middle with seasonal framing
+Page composition,Environment pages,Room or outdoor retreat with clear entry points for color
+Page composition,Symbol pages,Clustered motifs with balanced white space
+Page composition,Complexity target,"Moderate detail for adults; calming, not dense"
+Trauma-informed rules,Allowed tone,"Calm, hopeful, reflective, grounded, supportive"
+Trauma-informed rules,Avoid,"Violence, drug use, visible injury, panic scenes, police, weapons, restraints"
+Trauma-informed rules,Body language,"Relaxed posture, open hands, soft expressions"
+Trauma-informed rules,Settings,"Homes, gardens, parks, meeting rooms, porches, reading nooks"
+Trauma-informed rules,Affirmation tone,"Gentle and empowering, never shaming or forceful"
+Trauma-informed rules,Emotional pacing,Each book should alternate social scenes and quiet scenes
+Representation rules,African American line,"Natural hairstyles, diverse skin tones, everyday clothing, respectful community/home details"
+Representation rules,Hispanic line,"Varied skin tones and hair textures, bilingual quote option where relevant, culturally warm domestic details"
+Representation rules,Multiracial line,"Mixed-feature faces, blended families, visibly diverse tones and textures"
+Representation rules,General rule,"Representation should feel lived-in, not costume-based or stereotyped"
+Season system,Spring,"Flowers, rain, fresh air, journals, new beginnings"
+Season system,Summer,"Sunlight, porches, gardens, walking paths, community warmth"
+Season system,Fall,"Leaves, tea, blankets, candles, gratitude, release"
+Season system,Winter,"Snow, quilts, lamps, cocoa, candles, indoor calm"
+Export checklist,Check 1,No text closer than safe margin
+Export checklist,Check 2,No lines below 0.5 pt in print export
+Export checklist,Check 3,No muddy gray fills; interiors remain black-and-white
+Export checklist,Check 4,Page reads clearly at 100 percent print size
+Export checklist,Check 5,Quote spelling and accents verified
+Export checklist,Check 6,PNG and PDF outputs both tested
