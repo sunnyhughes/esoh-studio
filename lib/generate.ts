@@ -5,6 +5,7 @@ import { OPENAI_DEFAULT_MODEL } from "@/lib/providers/openai";
 import { costFromUsage, estimateCostUsd } from "@/lib/pricing";
 import { assetKey, save, read } from "@/lib/storage";
 import { inspectTransparency } from "@/lib/transparency";
+import { inspectPage } from "@/lib/page-check";
 
 /**
  * A refusal, not a failure: the request was understood and is wrong — a Quote
@@ -356,6 +357,14 @@ export async function runGeneration(body: GenerateBody) {
         ? await inspectTransparency(image.data)
         : null;
 
+      // The export checklist from `page_design_system`, measured at generation
+      // rather than at export, because the answer is about the artwork and the
+      // artwork does not change on the way to the sheet. Apparel is measured by
+      // its knockout instead — a transparent design has no paper to be grey.
+      const pageCheck = templateMeta?.transparent
+        ? null
+        : await inspectPage(image.data);
+
       const asset = await one(
         `insert into generated_assets
            (generation_job_id, category_id, collection_id, item_id, asset_name,
@@ -375,7 +384,7 @@ export async function runGeneration(body: GenerateBody) {
           Number.isFinite(h) ? h : null,
           bytes,
           image.index,
-          JSON.stringify({ size, quality, transparency }),
+          JSON.stringify({ size, quality, transparency, pageCheck }),
         ]
       );
       // The card needs to know whether this page can be lettered, and with
@@ -383,6 +392,7 @@ export async function runGeneration(body: GenerateBody) {
       assets.push({
         ...(asset as object),
         transparency,
+        pageCheck,
         page_type: item?.page_type ?? null,
         quote_text: item?.quote_text ?? null,
         lettering_style: item?.lettering_style ?? null,
