@@ -50,12 +50,18 @@ export async function POST(req: Request) {
       quote_text: string | null;
       lettering_style: string | null;
       page_type: string | null;
+      quote_id: string | null;
+      review_status: string | null;
+      translation_review_status: string | null;
+      language: string | null;
     }>(
       `select a.id, a.generation_job_id, a.category_id, a.collection_id,
               a.item_id, a.storage_path, a.asset_name, a.source_variant_index,
-              i.quote_text, i.lettering_style, i.page_type
+              i.quote_text, i.lettering_style, i.page_type, i.quote_id,
+              q.review_status, q.translation_review_status, q.language
          from generated_assets a
          left join items i on i.id = a.item_id
+         left join quotes q on q.id = i.quote_id
         where a.id = $1`,
       [body.assetId]
     );
@@ -77,6 +83,39 @@ export async function POST(req: Request) {
         },
         { status: 409 }
       );
+    }
+
+    // 065: the affirmation carries its own review state, and lettering is the
+    // step that makes it permanent — the SVG is what goes to print (D61), so a
+    // page lettered with an unapproved line is a page that has to be made
+    // again. All 12 Hispanic quotes are Spanish and marked "Needs Native
+    // Review", and Esoh's launch tracker holds those four products until a
+    // native speaker has seen them.
+    //
+    // Text passed explicitly in the request is a deliberate override and is let
+    // through — proofing a wording is exactly what that argument is for.
+    if (!body.text && asset.quote_id) {
+      if (asset.review_status !== "Approved") {
+        return NextResponse.json(
+          {
+            error:
+              `This affirmation is ${(asset.review_status ?? "unreviewed").toLowerCase()}, ` +
+              "not approved. Approve it in the quote library before lettering, " +
+              "or pass `text` to proof a wording.",
+          },
+          { status: 409 }
+        );
+      }
+      if (asset.translation_review_status === "Needs Native Review") {
+        return NextResponse.json(
+          {
+            error:
+              `The ${asset.language ?? "translated"} wording still needs a ` +
+              "native-speaker review. That review is a launch gate on this line.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const text = (body.text ?? asset.quote_text ?? "").trim();
