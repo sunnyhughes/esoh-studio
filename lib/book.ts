@@ -59,28 +59,27 @@ export type BookPlan = {
   complete: boolean;
 };
 
-type ItemRow = {
-  id: string;
+/** A row of `page_readiness` — the one place that decides if a page can print. */
+type ReadyRow = {
+  item_id: string;
   ref: string;
   title: string;
   page_type: string | null;
+  asset_id: string | null;
+  storage_path: string | null;
+  asset_status: string | null;
+  asset_metadata: { overlay?: PageOverlay } | null;
+  lettered: boolean;
+  blocked: string | null;
 };
 
-type PickRow = {
-  item_id: string;
-  id: string;
-  storage_path: string;
-  status: string;
-  lettered: boolean;
-  metadata_json: {
-    overlay?: {
-      text: string;
-      letteringStyle: string;
-      area?: Area | null;
-      strokeWidth?: number | null;
-      from: string;
-    };
-  } | null;
+/** What `/api/overlay` writes onto a lettered page (D23, D61). */
+type PageOverlay = {
+  text: string;
+  letteringStyle: string;
+  area?: Area | null;
+  strokeWidth?: number | null;
+  from: string;
 };
 
 /**
@@ -103,53 +102,29 @@ export async function planBook(collectionId: string): Promise<BookPlan | null> {
   );
   if (!collection) return null;
 
-  const items = await query<ItemRow>(
-    `select id, ref, title, page_type
-       from items where collection_id = $1
+  // One read of `page_readiness` (064). The gates and the asset pick live in
+  // the view, because this used to be computed here and counted again in SQL
+  // for the books list, and the two drifted apart the day the gates arrived.
+  const rows = await query<ReadyRow>(
+    `select item_id, ref, title, page_type, asset_id, storage_path,
+            asset_status, asset_metadata, lettered, blocked
+       from page_readiness
+      where collection_id = $1
       order by ref`,
     [collectionId]
   );
 
-  // One asset per item: an approved page beats a draft, a lettered Quote page
-  // beats the bare art it was set over, and the most recent breaks the tie.
-  const picks = await query<PickRow>(
-    `select distinct on (a.item_id)
-            a.item_id, a.id, a.storage_path, a.status, a.metadata_json,
-            (a.metadata_json -> 'overlay') is not null as lettered
-       from generated_assets a
-       join items i on i.id = a.item_id
-      where i.collection_id = $1
-      order by a.item_id,
-               (a.status = 'approved') desc,
-               (i.page_type = 'Quote page'
-                 and (a.metadata_json -> 'overlay') is not null) desc,
-               a.created_at desc`,
-    [collectionId]
-  );
-
-  const byItem = new Map(picks.map((p) => [p.item_id, p]));
-
-  const pages: BookPage[] = items.map((item) => {
-    const pick = byItem.get(item.id);
-    const overlay = pick?.metadata_json?.overlay;
-
-    let blocked: string | null = null;
-    if (!pick) blocked = "No page has been generated yet.";
-    else if (item.page_type === "Quote page" && !pick.lettered) {
-      // The art alone is not the page. Printing it would ship a book with a
-      // blank oval where the quote belongs.
-      blocked = "Generated but not lettered — the quote is still missing.";
-    }
-
+  const pages: BookPage[] = rows.map((r) => {
+    const overlay = r.asset_metadata?.overlay;
     return {
-      itemId: item.id,
-      ref: item.ref,
-      title: item.title,
-      pageType: item.page_type,
-      assetId: pick?.id ?? null,
-      storagePath: pick?.storage_path ?? null,
-      status: pick?.status ?? null,
-      lettered: pick?.lettered ?? false,
+      itemId: r.item_id,
+      ref: r.ref,
+      title: r.title,
+      pageType: r.page_type,
+      assetId: r.asset_id,
+      storagePath: r.storage_path,
+      status: r.asset_status,
+      lettered: r.lettered,
       quote: overlay
         ? {
             text: overlay.text,
@@ -158,7 +133,7 @@ export async function planBook(collectionId: string): Promise<BookPlan | null> {
             strokeWidth: overlay.strokeWidth ?? undefined,
           }
         : null,
-      blocked,
+      blocked: r.blocked,
     };
   });
 

@@ -6,29 +6,22 @@ export const dynamic = "force-dynamic";
 /**
  * Every book, with how much of it exists.
  *
- * The readiness count is worked out in SQL rather than by planning each book in
- * turn: the list is only ever a way in, and the per-page detail belongs to
- * `/api/books/<id>?format=json`. The two must agree on what "ready" means —
- * a page counts when it has an asset, and a Quote page counts only once that
- * asset carries lettering.
+ * The readiness count comes from the `page_readiness` view, which is also what
+ * `lib/book.ts` plans from. It used to be written twice — once here in SQL and
+ * once there in TypeScript — with a comment insisting the two must agree. They
+ * stopped agreeing the moment 063 added the production gates, and the list went
+ * on reporting pages ready that the plan refused to print (064).
  */
 export async function GET() {
   try {
     const books = await query(
       `select c.id, c.name, c.series, c.slug,
-              count(i.id)::int as total,
-              count(*) filter (
-                where exists (
-                  select 1 from generated_assets a
-                   where a.item_id = i.id
-                     and (i.page_type <> 'Quote page'
-                          or (a.metadata_json -> 'overlay') is not null)
-                )
-              )::int as ready
+              count(p.item_id)::int as total,
+              count(*) filter (where p.blocked is null)::int as ready
          from collections c
-         join items i on i.collection_id = c.id
+         join page_readiness p on p.collection_id = c.id
         group by c.id, c.name, c.series, c.slug
-       having count(i.id) > 0
+       having count(p.item_id) > 0
         order by c.series nulls last, c.name`
     );
 
