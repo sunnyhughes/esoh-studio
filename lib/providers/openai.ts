@@ -38,7 +38,15 @@ export async function generateOpenAI(
             toFile(buf, `reference-${i + 1}.png`, { type: "image/png" })
           )
         ),
-        ...(req.transparent ? { background: "transparent" as const } : {}),
+        // Asked for either way. Omitted, gpt-image-1 falls back to `auto` and
+        // decides for itself — and on sparse line art it decides transparent:
+        // three African American Spring pages came back 80% clear with a
+        // greyish RGB underneath, which reads as a dark page in any viewer that
+        // composites on anything but white. Print was never affected, because
+        // `padToPrint` flattens onto white, which is also why it went unnoticed.
+        background: req.transparent
+          ? ("transparent" as const)
+          : ("opaque" as const),
       })
     : await getClient().images.generate({
         model,
@@ -48,7 +56,15 @@ export async function generateOpenAI(
         size: req.size as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         quality: req.quality as any,
-        ...(req.transparent ? { background: "transparent" as const } : {}),
+        // Asked for either way. Omitted, gpt-image-1 falls back to `auto` and
+        // decides for itself — and on sparse line art it decides transparent:
+        // three African American Spring pages came back 80% clear with a
+        // greyish RGB underneath, which reads as a dark page in any viewer that
+        // composites on anything but white. Print was never affected, because
+        // `padToPrint` flattens onto white, which is also why it went unnoticed.
+        background: req.transparent
+          ? ("transparent" as const)
+          : ("opaque" as const),
       });
 
   // gpt-image-1 always returns base64; there is no URL response mode.
