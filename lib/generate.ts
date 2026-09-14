@@ -102,6 +102,7 @@ export async function runGeneration(body: GenerateBody) {
           page_type: string | null;
           hair: string | null;
           facial_hair: string | null;
+          personal_details: string | null;
           visual_elements: string | null;
           collection_id: string;
           quote_text: string | null;
@@ -111,6 +112,7 @@ export async function runGeneration(body: GenerateBody) {
         }>(
           `select brief, art_style, background_density, brand_mark,
                   ethnicity_line, season, page_type, hair, facial_hair,
+                  personal_details,
                   visual_elements, collection_id, quote_text, lettering_style,
                   color_direction, product_placement
              from items where id = $1`,
@@ -155,6 +157,12 @@ export async function runGeneration(body: GenerateBody) {
     if (item?.hair && !inputs.hair?.trim()) inputs.hair = item.hair;
     if (item?.facial_hair && !inputs.facial_hair?.trim()) {
       inputs.facial_hair = item.facial_hair;
+    }
+    // 072. Earrings, a tattoo, a beauty mark — Esoh's to choose per page, and
+    // silent when unset: the empty slot drops the whole block, so a page nobody
+    // has annotated is unchanged.
+    if (item?.personal_details && !inputs.personal_details?.trim()) {
+      inputs.personal_details = item.personal_details;
     }
 
     // What is in the room comes from the item (D39). Without this the
