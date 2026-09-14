@@ -50,6 +50,7 @@ export type Block = {
   position: number;
   art_style: string | null;
   background_density: string | null;
+  ethnicity_line: string | null;
 };
 
 const SLOT = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
@@ -90,21 +91,29 @@ export async function getTemplate(id: string): Promise<Template | null> {
 export async function getBlocks(
   templateId: string,
   artStyle?: string | null,
-  density?: string | null
+  density?: string | null,
+  /**
+   * D132's third selector. `art_direction_specs` gives each of the three lines
+   * its own character rules, scene rules and forbidden list, and until 062 the
+   * tool's whole implementation of that was one generated sentence. A block
+   * naming no line applies to every line.
+   */
+  ethnicityLine?: string | null
 ): Promise<Block[]> {
   return query<Block>(
     `
     select b.slug, b.kind, b.body_text, tb.position,
-           b.art_style, b.background_density
+           b.art_style, b.background_density, b.ethnicity_line
       from template_blocks tb
       join prompt_blocks b on b.id = tb.block_id
      where tb.template_id = $1
        and b.is_active
        and (b.art_style is null or b.art_style = $2)
        and (b.background_density is null or b.background_density = $3)
+       and (b.ethnicity_line is null or b.ethnicity_line = $4)
      order by tb.position
   `,
-    [templateId, artStyle ?? null, density ?? null]
+    [templateId, artStyle ?? null, density ?? null, ethnicityLine ?? null]
   );
 }
 
@@ -148,12 +157,13 @@ export async function buildPrompt(
   templateId: string,
   inputs: Record<string, string>,
   artStyle?: string | null,
-  density?: string | null
+  density?: string | null,
+  ethnicityLine?: string | null
 ): Promise<{ template: Template; prompt: string; blocks: Block[] }> {
   const template = await getTemplate(templateId);
   if (!template) throw new Error(`Template not found: ${templateId}`);
 
-  const blocks = await getBlocks(templateId, artStyle, density);
+  const blocks = await getBlocks(templateId, artStyle, density, ethnicityLine);
   if (blocks.length === 0) {
     throw new Error(`Template "${template.name}" has no blocks attached.`);
   }

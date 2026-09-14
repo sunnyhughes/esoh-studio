@@ -194,11 +194,16 @@ export async function runGeneration(body: GenerateBody) {
     const artStyle = body.artStyle ?? item?.art_style ?? null;
     const density = body.density ?? item?.background_density ?? null;
 
+    // The line selects its own identity block (062). Only a page with figures
+    // on it carries one, so this is null on the other five templates whatever
+    // the item says — the outline's point, and D117's: representation rules on
+    // a page with nobody in it are how a person ends up in an empty room.
     const { template, prompt } = await buildPrompt(
       body.templateId,
       inputs,
       artStyle,
-      density
+      density,
+      item?.ethnicity_line ?? null
     );
 
     // 2. A Quote page drawn by the Solo Portrait template is a silently wrong
