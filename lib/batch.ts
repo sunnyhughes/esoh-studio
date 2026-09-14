@@ -65,6 +65,12 @@ const DEFAULTS: Required<Pick<BatchSettings, "size" | "quality" | "n">> = {
  * assigned template draws a different kind of page, that row is skipped with
  * the mismatch named — D56's guard, moved to where a run can read it before
  * spending rather than one page at a time in the middle of one.
+ *
+ * Page types are a colouring-book idea. An apparel design has none, and neither
+ * does the apparel template, so the two match on `is distinct from` and a
+ * VV-Styles run plans normally (067). Batch had never once planned an apparel
+ * row before that — the original join was `t.page_type = i.page_type`, and in
+ * SQL `null = null` is not true.
  */
 export async function planRows(
   categoryId: string,
@@ -94,13 +100,15 @@ export async function planRows(
     `select i.id as item_id, i.ref, i.title, i.page_type, i.priority, i.season,
             t.id as template_id, t.name as template_name,
             case
-              when i.page_type is null
-                then 'This page has no page type, so no template claims it.'
               when t.id is null
-                then 'No active template is assigned to this page.'
+                then 'No active template is assigned to this item.'
+              -- IS DISTINCT FROM, so an apparel design and an apparel template,
+              -- which both legitimately have no page type, match each other.
+              -- An earlier version refused anything without one, which is every
+              -- VV-Styles row there is.
               when t.page_type is distinct from i.page_type
                 then 'Assigned ' || t.name || ', which draws ' ||
-                     coalesce(t.page_type, 'nothing') || ' pages.'
+                     coalesce(t.page_type, 'pages of no stated type') || '.'
               else null
             end as skip_reason
        from items i
