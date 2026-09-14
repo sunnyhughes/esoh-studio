@@ -8,6 +8,7 @@ import { PRINT_DPI, placeOnPaper } from "./print";
  * not, and saying so is more useful than a metric that pretends:
  *
  *   1. No text closer than the safe margin      → `safeMarginInkFraction`
+ *      (which found the pipeline violating it, and now guards the fix)
  *   2. No lines below 0.5 pt in print export    → **not measurable, see below**
  *   3. No muddy grey fills                      → `greyFillFraction`
  *   4. Reads clearly at 100% print size         → a person has to look
@@ -69,10 +70,15 @@ const PAPER = 232;
 const MAX_GREY_FILL = 0.12;
 
 /**
- * Advisory, not a verdict. Approved exemplars run from 0.09% to 10.5%, so this
- * cannot separate good from bad on its own — what it can do is say, before a
- * book is built, that this page puts a tenth of its ink where a trimmer might
- * take it.
+ * This measured 2-10% on approved pages and now measures 0.00% on all 105,
+ * because the finding was acted on: `DEFAULT_MARGIN_IN` went from 0 to the
+ * spec's 0.375 on 2026-09-14, so the art is inside the safe band by
+ * construction.
+ *
+ * It is kept as a canary rather than deleted. It reads zero only while the
+ * default holds; export a page at `marginIn: 0`, or change the sheet, and the
+ * number climbs again. A check that found something once and now reads zero is
+ * worth keeping precisely because zero is the answer we want to keep getting.
  */
 const MAX_SAFE_MARGIN_INK = 0.05;
 const SAFE_MARGIN_IN = 0.375;

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEFAULT_MARGIN_IN } from "@/lib/page-spec";
 import { buildBook, planBook } from "@/lib/book";
 import type { PrintOptions } from "@/lib/print";
 
@@ -43,7 +44,7 @@ export async function GET(
       exactColor: q.has("exact"),
     };
 
-    const margin = Number(q.get("margin") ?? 0);
+    const margin = Number(q.get("margin") ?? DEFAULT_MARGIN_IN);
     if (!Number.isFinite(margin) || margin < 0 || margin > 2) {
       return NextResponse.json(
         { error: "margin must be between 0 and 2 inches." },

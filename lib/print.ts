@@ -40,7 +40,8 @@ import {
  * in the same place at any size.
  */
 
-export const PRINT_DPI = 300;
+export { PRINT_DPI, DEFAULT_MARGIN_IN } from "./page-spec";
+import { PRINT_DPI, DEFAULT_MARGIN_IN } from "./page-spec";
 const PT_PER_INCH = 72;
 
 /** Page pixels to PDF points. */
@@ -50,13 +51,13 @@ export type Paper = { widthIn: number; heightIn: number };
 
 export const LETTER: Paper = { widthIn: 8.5, heightIn: 11 };
 
+
 export type PrintOptions = {
   paper?: Paper;
   /**
-   * White held back on every side, in inches. Zero by default: at letter the
-   * art is narrower than the page in proportion, so containing it already
-   * leaves 0.58" left and right, and the prompts generate borderless with
-   * their own safe margin (D24). Set this only to inset further.
+   * White held back on every side, in inches. Defaults to
+   * `DEFAULT_MARGIN_IN` — the spec's 0.375. Pass 0 to place the art edge to
+   * edge, which is what every export did before 2026-09-14.
    */
   marginIn?: number;
   /**
@@ -106,7 +107,7 @@ export function placeOnPaper(
   const width = Math.round(paper.widthIn * PRINT_DPI);
   const height = Math.round(paper.heightIn * PRINT_DPI);
 
-  const inset = Math.round((opts.marginIn ?? 0) * PRINT_DPI);
+  const inset = Math.round((opts.marginIn ?? DEFAULT_MARGIN_IN) * PRINT_DPI);
   const boxW = width - inset * 2;
   const boxH = height - inset * 2;
   if (boxW <= 0 || boxH <= 0) throw new Error("Margin leaves no room for art.");

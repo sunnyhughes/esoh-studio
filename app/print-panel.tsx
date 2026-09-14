@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DEFAULT_MARGIN_IN } from "@/lib/page-spec";
 
 /**
  * Print preview and export control.
@@ -43,7 +44,7 @@ export default function PrintPanel({
   asset: PrintTarget;
   onClose: () => void;
 }) {
-  const [marginIn, setMarginIn] = useState(0);
+  const [marginIn, setMarginIn] = useState(DEFAULT_MARGIN_IN);
   const [format, setFormat] = useState<"pdf" | "png">("pdf");
   const [exact, setExact] = useState(false);
   const [guide, setGuide] = useState(false);
