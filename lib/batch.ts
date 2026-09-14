@@ -56,10 +56,15 @@ const DEFAULTS: Required<Pick<BatchSettings, "size" | "quality" | "n">> = {
  * The rows a filter selects, each already matched to the template that will
  * draw it — or to the reason it cannot be drawn.
  *
- * Matching is strict on page type. A template with no page type of its own
- * (`adult-coloring-clean-line`) would otherwise catch every item whose page
- * type is null and draw it through a template that answers to nothing, which
- * is the mismatch guard of D56 being walked around rather than enforced.
+ * Each page names its own template (058, 059, 060). Matching on `page_type`
+ * stopped being possible the moment there were ten templates instead of six:
+ * three of them serve Solo portrait and two serve Community scene, so a join on
+ * page type would plan every solo page three times and pay for it three times.
+ *
+ * The page-type check survives as a *reason*, not as the join. If an item's
+ * assigned template draws a different kind of page, that row is skipped with
+ * the mismatch named — D56's guard, moved to where a run can read it before
+ * spending rather than one page at a time in the middle of one.
  */
 export async function planRows(
   categoryId: string,
@@ -92,13 +97,15 @@ export async function planRows(
               when i.page_type is null
                 then 'This page has no page type, so no template claims it.'
               when t.id is null
-                then 'No template in this category draws ' || i.page_type || ' pages.'
+                then 'No active template is assigned to this page.'
+              when t.page_type is distinct from i.page_type
+                then 'Assigned ' || t.name || ', which draws ' ||
+                     coalesce(t.page_type, 'nothing') || ' pages.'
               else null
             end as skip_reason
        from items i
   left join prompt_templates t
-         on t.category_id = i.category_id
-        and t.page_type = i.page_type
+         on t.id = i.prompt_template_id
         and t.is_active
       where ${where.join(" and ")}
       order by i.ref`,
