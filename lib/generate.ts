@@ -289,6 +289,22 @@ export async function runGeneration(body: GenerateBody) {
                   and exists (select 1 from prompt_templates t
                                where t.page_type = r.page_type and t.has_people)
                 )
+                -- One narrow exception the other way, Esoh's call 2026-09-14.
+                -- A Symbol page has no reference of its own and is the page
+                -- type he has twice called doodles. A Quote page is its nearest
+                -- relative — motifs worked at several scales around an open
+                -- centre, nobody in it — and 073 registered three of them at
+                -- exactly the botanical density a symbol cluster is missing.
+                -- D122's reasoning against cross-type fallback stands where it
+                -- was aimed (a living room teaches a quote page nothing); this
+                -- is the case it did not have evidence for, and it lapses the
+                -- moment Symbol has references of its own.
+                or (
+                  $2 = 'Symbol page'
+                  and r.page_type = 'Quote page'
+                  and not exists (select 1 from reference_images x
+                                   where x.usable_as_input and x.page_type = 'Symbol page')
+                )
               )
             -- Four, not three: 046 approved two summer exemplars alongside
             -- the two autumn ones, and at three the newest would have
