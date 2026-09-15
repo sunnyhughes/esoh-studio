@@ -15,6 +15,19 @@ import { inspectPage } from "@/lib/page-check";
  */
 export class GenerationRefused extends Error {}
 
+/**
+ * Page types are stored the way they read in the form — "Environment page",
+ * "Solo portrait", "Community scene" — so a refusal that appends "pages" says
+ * "Decorative page pages". Both shapes pluralize correctly here.
+ */
+function plural(pageType: string): string {
+  return /\bpage$/i.test(pageType)
+    ? pageType.replace(/page$/i, "pages")
+    : `${pageType}s`;
+}
+
+const article = (word: string) => (/^[aeiou]/i.test(word) ? "an" : "a");
+
 export type GenerateBody = {
   templateId: string;
   /** Optional — defaults to the template's own category. */
@@ -26,6 +39,16 @@ export type GenerateBody = {
   artStyle?: string;
   /** D27 — Open | Medium | Dense. Optional; the art style sets its own if absent. */
   density?: string;
+  /**
+   * What kind of page this is, when there is no item to say so. D56's guard
+   * only ever compared `item.page_type` against the template's, so generating
+   * ad hoc bypassed it entirely: a porch — an Environment page — was drawn on
+   * the Decorative Border template, came back as a swing floating inside a
+   * flower frame, and nothing had refused it. Every page-type safety this
+   * project has runs through the item row, and the form lets you generate
+   * without one.
+   */
+  pageType?: string;
   /** Pass approved exemplars as image input (D20). Ignored if none are usable. */
   useReferences?: boolean;
   inputs: Record<string, string>;
@@ -216,14 +239,47 @@ export async function runGeneration(body: GenerateBody) {
     );
 
     // 2. A Quote page drawn by the Solo Portrait template is a silently wrong
-    //    page, not an error, so it has to be caught here. Items with no page
-    //    type set are left alone.
-    if (item?.page_type && template.page_type &&
-        item.page_type !== template.page_type) {
+    //    page, not an error, so it has to be caught here.
+    //
+    //    The page type comes from the item when there is one, and otherwise
+    //    from the caller. Before this, "otherwise" was "not at all" — the guard
+    //    read `item?.page_type` and an ad-hoc request skipped it, which is how
+    //    a porch got drawn as an ornament. Nothing is inferred from the words
+    //    in the subject; the caller says which kind of page it is, or is asked.
+    const declaredPageType = item?.page_type ?? body.pageType ?? null;
+
+    if (declaredPageType && template.page_type &&
+        declaredPageType !== template.page_type) {
+      // Name the template that does draw it. A refusal that only says no costs
+      // the same as the wrong page did and teaches less.
+      const alternatives = await query<{ name: string }>(
+        `select name from prompt_templates
+          where is_active and page_type = $1
+          order by slug`,
+        [declaredPageType]
+      );
+      const names = alternatives.map((t) => `"${t.name}"`);
+      const list =
+        names.length > 1
+          ? `${names.slice(0, -1).join(", ")} or ${names[names.length - 1]}`
+          : names[0];
+      const suggestion = names.length
+        ? ` Use ${list} instead.`
+        : ` No active template draws ${plural(declaredPageType)} yet.`;
+
       throw new GenerationRefused(
-        `This item is a ${item.page_type}, but "${template.name}" draws ` +
-          `${template.page_type} pages. Pick the matching template, or ` +
-          `clear the item to describe the page by hand.`
+        `This is ${article(declaredPageType)} ${declaredPageType}, but ` +
+          `"${template.name}" draws ${plural(template.page_type)}.${suggestion}`
+      );
+    }
+
+    // No item and nothing declared: ask rather than draw. The cost of guessing
+    // is a page nobody wanted, paid for at full price.
+    if (!declaredPageType && template.page_type) {
+      throw new GenerationRefused(
+        `Say which kind of page this is. "${template.name}" draws ` +
+          `${plural(template.page_type)} — if that is what you want, choose ` +
+          `${template.page_type} and it will go ahead.`
       );
     }
 

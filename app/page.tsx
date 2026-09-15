@@ -88,6 +88,10 @@ export default function NewJobPage() {
   const [itemId, setItemId] = useState("");
   const [artStyle, setArtStyle] = useState("");
   const [density, setDensity] = useState("");
+  // Only used when no item is selected. With an item the row says what kind of
+  // page it is; without one, nothing did, and the guard had nothing to check.
+  const [pageType, setPageType] = useState("");
+
   const [useReferences, setUseReferences] = useState(true);
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [size, setSize] = useState("1024x1536");
@@ -234,6 +238,22 @@ export default function NewJobPage() {
     }
   }, [categoryTemplates, templateId]);
 
+  // The kinds of page this category can actually draw, and which template draws
+  // each — taken from the templates themselves so the list cannot drift.
+  const categoryPageTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          categoryTemplates
+            .map((t) => t.page_type)
+            .filter((pt): pt is string => Boolean(pt))
+        )
+      ).sort(),
+    [categoryTemplates]
+  );
+  const templatesFor = (pt: string) =>
+    categoryTemplates.filter((t) => t.page_type === pt);
+
   useEffect(() => {
     if (artStyle && !categoryArtStyles.includes(artStyle)) setArtStyle("");
   }, [categoryArtStyles, artStyle]);
@@ -274,6 +294,7 @@ export default function NewJobPage() {
           itemId: itemId || undefined,
           artStyle: artStyle || undefined,
           density: density || undefined,
+          pageType: itemId ? undefined : pageType || undefined,
           useReferences,
           inputs,
           size,
@@ -322,7 +343,16 @@ export default function NewJobPage() {
     };
   }, [items, categories]);
 
-  const ready = categoryId && templateId && artStyle && !busy;
+  // Without an item, the kind of page has to be stated and has to match the
+  // template. The server refuses either way; disabling the button here just
+  // means the refusal costs nothing to find out.
+  const pageTypeSettled =
+    Boolean(itemId) ||
+    !template?.page_type ||
+    (Boolean(pageType) && pageType === template.page_type);
+
+  const ready =
+    categoryId && templateId && artStyle && pageTypeSettled && !busy;
 
   return (
     <div className="shell">
@@ -392,6 +422,40 @@ export default function NewJobPage() {
               ))}
             </select>
           </div>
+
+          {/* Without an item nothing says what kind of page this is, so the
+              mismatch guard had nothing to compare and a porch could be drawn
+              on the Decorative Border template. Asked here, checked server-side
+              too — this field is a convenience, not the guard. */}
+          {!itemId && categoryPageTypes.length > 0 && (
+            <div className="field">
+              <label htmlFor="pageType">Kind of page</label>
+              <select
+                id="pageType"
+                value={pageType}
+                onChange={(e) => setPageType(e.target.value)}
+              >
+                <option value="">Choose one…</option>
+                {categoryPageTypes.map((pt) => (
+                  <option key={pt} value={pt}>
+                    {pt}
+                  </option>
+                ))}
+              </select>
+              {pageType && template?.page_type &&
+                pageType !== template.page_type && (
+                  <p className="warn">
+                    {`"${template.name}" draws ${template.page_type} pages, not `}
+                    {`${pageType} pages. `}
+                    {templatesFor(pageType).length > 0
+                      ? `Use ${templatesFor(pageType)
+                          .map((t) => `"${t.name}"`)
+                          .join(" or ")} instead.`
+                      : `No active template draws ${pageType} pages yet.`}
+                  </p>
+                )}
+            </div>
+          )}
 
           {/* What the row already knows, shown before anything is spent. An
               empty field here is a field the prompt will not receive. */}
