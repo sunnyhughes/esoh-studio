@@ -44,7 +44,13 @@ next-env.d.ts
 # Generated output is regenerable and large, so it stays out of git — with one
 # exception. The exemplars are what the Style Library was tuned against (D89);
 # losing them means re-deriving the house style, not re-running a generation.
-/storage
+#
+# The trailing /* is load-bearing and must not be simplified back to /storage.
+# Git does not descend into an ignored directory, so a negation below one can
+# never match: /storage ignored the exemplars too, and had since the rule was
+# written (D138). Excluding the *contents* leaves the directory itself
+# traversable, which is what lets the two negations take effect.
+/storage/*
 !/storage/exemplars
 !/storage/exemplars/**
 .env.local
