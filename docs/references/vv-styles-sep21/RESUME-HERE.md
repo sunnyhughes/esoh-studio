@@ -99,61 +99,34 @@ merges into Product / Placement, or is discarded.
 - Coloring-book styles in the apparel list were transferred by accident. They
   are a problem, and §5 says why.
 
-## 5. The blocker has not moved: 13 missing style blocks
+## 5. The style blocks are written — migration 091, applied 2026-09-28
 
-A style block is the paragraph the tool pastes into the prompt when a design
-names that art style. `prompt_blocks`, kind `base_style`, category `vv-styles`.
-**Twelve exist. The Lists tab names 25.** A design naming a style with no block
-gets no style instruction at all and the model invents one.
+**Resolved.** `091_the_missing_styles_get_their_paragraphs.sql` added the
+thirteen missing `base_style` blocks. `prompt_blocks` now holds **25 active
+vv-styles base styles**, matching the Lists tab.
 
-Of the 137 designs:
+- **All 78 rows that name an art style are buildable** (was 41).
+- **59 rows still name no art style at all.** They have Visual Elements but no
+  style, so nothing selects a block for them. A style has to be chosen per row
+  and that is Sunshine's call, not something a block can fix.
 
-- **41 are buildable** — they name an art style that has a block.
-- **37 name a style with no block behind it.**
-- **59 name no art style at all**, though all 59 now have Visual Elements.
+Six of the thirteen names also exist under `coloring-books` and **none were
+reused**. Verified after applying: no vv-styles block contains "coloured by
+hand", "open white" or "line illustration". Soft Botanical Line Art is the case
+to watch — the coloring-book block leaves interiors "open white, ready to be
+coloured", the apparel block leaves them "open to the garment", which is the
+transparent knockout.
 
-| missing style | rows waiting |
-|---|---|
-| Minimal Symbolic | 9 ⚠ |
-| Emotional Illustrative | 7 |
-| Architectural / Blueprint Editorial | 5 |
-| Botanical Editorial Illustration | 4 |
-| Editorial Scene | 2 ⚠ |
-| Urban graffiti | 2 |
-| Feminine | 2 |
-| Geometric Abstract ⚠, Soft Botanical Line Art ⚠, Split-Scene Editorial Illustration, Retro Diner / Comic, Art Deco Editorial, Celestial ⚠ | 1 each |
-
-⚠ = **a block of that name already exists under `coloring-books` and must not be
-reused.** Those read "black and white line illustration … every enclosed area
-open white, ready to be coloured by hand." Pointed at a shirt they produce line
-art to be coloured in, not a print. They need apparel-side blocks of their own.
-This is the D103 shape — a wrong slot overriding silently is worse than an empty
-one.
-
-`Modern Transit Poster`, `Tattoo Linework` and `Zentangle Pattern` are on the
-Lists tab but no design uses them. Only Tattoo Linework has a block.
-
-**The shape to write them in**, from the two he has seen and approved:
-
-> **Vintage Badge** — Flat screen-printed emblem artwork in the manner of an old
-> athletic patch or tour shirt. Shapes are solid and hard-edged, arranged with
-> arched banners and centred symmetry. Age is carried in the ink itself — the
-> fill breaks up into fine speckle as though the print has been washed many times.
-
-> **Streetwear Graffiti** — Layered screen-print poster artwork. Oversized
-> compressed lettering stacked into blocks, shapes overprinting one another where
-> they meet, and rough torn edges cut from solid ink. Every layer is one flat
-> colour; depth comes from overlap and scale.
-
-Positive description of technique, no negatives (§2.5). Draft them from the Art
-Style names plus the Visual Elements and Color Direction now written on those
-rows, then he reviews the wording.
+Wording was drafted from the Visual Elements and Color Direction on the rows
+using each style, and is Sunshine's to correct. Two he flagged as worth a second
+look: **Urban graffiti** must stay distinct from Streetwear Graffiti (aerosol
+technique vs layered screen-print) and **Feminine** was read from just two rows,
+both soft-heart-and-botanicals.
 
 ## 6. Where to pick up
 
 1. Settle VVS-0050 (§2) — one cell.
-2. Write the 13 style blocks (§5). This is what actually unblocks Stage C, and
-   the Visual Elements text needed to draft them is now complete.
+2. ~~Write the 13 style blocks.~~ Done, migration 091.
 3. Import the safe, additive data — art direction, Priority, Notes, the quote
    corrections, Status with case mapping. **Hold Collection** until §3 is
    settled.
