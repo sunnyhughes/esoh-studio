@@ -45,7 +45,18 @@ if (!template) {
   process.exit(1);
 }
 
-const blocks: Block[] = await getBlocks(template.id, artStyle);
+// 093 gave lettering its own blocks, so a preview that cannot select one shows
+// a prompt with no lettering in it. Taken from `lettering=` among the pairs,
+// which is where the caller already puts it.
+const letteringStyle = inputs.lettering ?? null;
+
+const blocks: Block[] = await getBlocks(
+  template.id,
+  artStyle,
+  null,
+  null,
+  letteringStyle
+);
 
 if (blocks.length === 0) {
   console.error(`No blocks for template "${templateSlug}" / "${artStyle}".`);

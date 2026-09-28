@@ -37,6 +37,8 @@ export type GenerateBody = {
   itemId?: string;
   /** D26 — selects the base style block. Required unless the item carries one. */
   artStyle?: string;
+  /** 093 — selects the lettering block. Falls back to the item's own value. */
+  letteringStyle?: string;
   /** D27 — Open | Medium | Dense. Optional; the art style sets its own if absent. */
   density?: string;
   /**
@@ -226,6 +228,14 @@ export async function runGeneration(body: GenerateBody) {
     const artStyle = body.artStyle ?? item?.art_style ?? null;
     const density = body.density ?? item?.background_density ?? null;
 
+    // 093. `inputs.lettering` is still read here because the New Job form sends
+    // the lettering style that way and has no item behind it.
+    const letteringStyle =
+      body.letteringStyle ??
+      item?.lettering_style ??
+      inputs.lettering?.trim() ??
+      null;
+
     // The line selects its own identity block (062). Only a page with figures
     // on it carries one, so this is null on the other five templates whatever
     // the item says — the outline's point, and D117's: representation rules on
@@ -235,7 +245,8 @@ export async function runGeneration(body: GenerateBody) {
       inputs,
       artStyle,
       density,
-      item?.ethnicity_line ?? null
+      item?.ethnicity_line ?? null,
+      letteringStyle
     );
 
     // 2. A Quote page drawn by the Solo Portrait template is a silently wrong

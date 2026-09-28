@@ -51,6 +51,7 @@ export type Block = {
   art_style: string | null;
   background_density: string | null;
   ethnicity_line: string | null;
+  lettering_style: string | null;
 };
 
 const SLOT = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
@@ -98,12 +99,20 @@ export async function getBlocks(
    * tool's whole implementation of that was one generated sentence. A block
    * naming no line applies to every line.
    */
-  ethnicityLine?: string | null
+  ethnicityLine?: string | null,
+  /**
+   * 093's selector. The lettering instruction used to be one sentence with the
+   * style's name dropped into it — "The words are set as Bold Sans." — against
+   * an art-style block carrying 270 characters of technique, so the art style
+   * decided the lettering every time. A block naming no lettering style applies
+   * to every one.
+   */
+  letteringStyle?: string | null
 ): Promise<Block[]> {
   return query<Block>(
     `
     select b.slug, b.kind, b.body_text, tb.position,
-           b.art_style, b.background_density, b.ethnicity_line
+           b.art_style, b.background_density, b.ethnicity_line, b.lettering_style
       from template_blocks tb
       join prompt_blocks b on b.id = tb.block_id
      where tb.template_id = $1
@@ -111,9 +120,16 @@ export async function getBlocks(
        and (b.art_style is null or b.art_style = $2)
        and (b.background_density is null or b.background_density = $3)
        and (b.ethnicity_line is null or b.ethnicity_line = $4)
+       and (b.lettering_style is null or b.lettering_style = $5)
      order by tb.position
   `,
-    [templateId, artStyle ?? null, density ?? null, ethnicityLine ?? null]
+    [
+      templateId,
+      artStyle ?? null,
+      density ?? null,
+      ethnicityLine ?? null,
+      letteringStyle ?? null,
+    ]
   );
 }
 
@@ -158,12 +174,19 @@ export async function buildPrompt(
   inputs: Record<string, string>,
   artStyle?: string | null,
   density?: string | null,
-  ethnicityLine?: string | null
+  ethnicityLine?: string | null,
+  letteringStyle?: string | null
 ): Promise<{ template: Template; prompt: string; blocks: Block[] }> {
   const template = await getTemplate(templateId);
   if (!template) throw new Error(`Template not found: ${templateId}`);
 
-  const blocks = await getBlocks(templateId, artStyle, density, ethnicityLine);
+  const blocks = await getBlocks(
+    templateId,
+    artStyle,
+    density,
+    ethnicityLine,
+    letteringStyle
+  );
   if (blocks.length === 0) {
     throw new Error(`Template "${template.name}" has no blocks attached.`);
   }
