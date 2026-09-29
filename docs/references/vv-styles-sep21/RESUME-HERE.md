@@ -1,3 +1,95 @@
+# STOP HERE — 2026-09-28, end of day
+
+Six commits today, `1aa2efc` to `3c4a981`. Working tree clean, migrations 091
+to 095 applied, nothing half-finished.
+
+## Pick up here: tone blocks
+
+**The Tone column is filled on all 137 rows and the tool reads none of it.**
+15 distinct values, zero effect on any prompt. This is the same shape as the
+lettering defect fixed today — a column Sunshine already filled that nothing
+consumes — and it is the agreed next step.
+
+The mechanism to copy is migration 093: add `prompt_blocks.tone`, extend the
+kind constraint with `'tone'`, write 15 blocks, wire them to `vvs-front-print`,
+and thread a `tone` selector through `getBlocks` / `buildPrompt` / `generate.ts`
+**in the same commit**. `items` has no `tone` column either, so that comes too.
+
+Why it matters, from the evidence below: `Humorous` should mean *the design
+shows the joke happening — a character, a hand, a moment caught mid-action —
+rather than naming it*. That makes every humorous row livelier without
+rewriting a single brief.
+
+## Two defects found today, both open
+
+**1. D74's 80% fill ceiling now fails good designs.** Four dense generations
+measured 78%, 80%, 85%, 88%; the last two were flagged. D74 reasons that a
+design filling its bounding box "is the shape of a solid panel rather than a
+cut-out" — the same badge-versus-background conflation D141 removed from
+`vvs-output`, surviving one layer down in `lib/transparency.ts`. There are now
+four real dense designs to judge a new threshold against. Deliberately not
+changed yet: moving a measurement and the thing it measures in one step leaves
+nothing to check against.
+
+**2. Secondary text garbles on label-heavy designs.** One variant produced
+"CHOAT-CHOPFY" and "PUSHY-SHOVEY PFY" where four quadrant labels were needed.
+D70 predicted exactly this — "the phrase is safe; secondary text inside the
+scene is not". The sibling variant got all four right, so it is a per-generation
+risk, not a certainty. Generating n=2 and choosing is the current mitigation.
+
+## The finding that reframes the work
+
+**Sunshine's hand-written briefs are more cautious than the model's own
+instincts, and that is most of the quality gap — not the tool.**
+
+Proved by isolation on VVS-0082: same blocks, same art style, same lettering,
+same palette, only `visual_elements` changed. His text asks for "labeled buttons
+and abstract impact shapes" and produced a pie chart. A brief describing the
+action produced a cartoon with a fist, a slapping hand and two figures shoving.
+
+Printify's livelier version almost certainly came from the quote alone, with no
+brief constraining it. D78 argued these columns should be drafted by the tool
+and corrected by hand; the hand-writing went the other way.
+
+**This is Sunshine's art direction, not a defect to fix.** Whether "abstract
+impact shapes" stays is his call and his comfort with depicting the joke. Do not
+quietly rewrite his Visual Elements.
+
+## Still open from earlier, lower priority
+
+- **The clean script** has never been run on the real sheet. Verified today that
+  its patterns *do* fire: 60 tail strips, 9 negative rewrites, 63 cells. It
+  rewrites hand-entered text, so it is Sunshine's call. Two of its fixes were
+  applied by hand to VVS-0082 for today's tests and are **not** in the sheet.
+- **VVS-0050** Collection reads `Power Series`; he decided it becomes
+  `Boundaries Series`, and `Power Series` comes off the Lists tab. Both are
+  sheet edits only he can make — the Drive connector cannot see the file.
+- **The import itself** — §3 below. Its one blocking decision is how the sheet's
+  seven collection names map onto the database's nine.
+- **D78's numbers are stale** (it says 19 of 137 rows carry all four direction
+  columns; it is now ~77, with Visual Elements at 137). No hand-entered marker
+  exists, so a drafting feature would overwrite his week of work.
+
+## What was built today
+
+| migration | what |
+|---|---|
+| 091 | the 13 missing art-style blocks |
+| 092 | wiring them — 091 wrote blocks nothing could select |
+| 093 | `prompt_blocks.lettering_style` + 25 lettering blocks + engine selector |
+| 094 | 6 contemporary art styles |
+| 095 | D141/D142 — badge-is-not-a-background, keyline, density |
+
+31 art styles, 25 lettering styles, all wired. Stage C's gate — one design
+reaching a print-ready transparent PNG — was met and passed.
+
+Reference images in `docs/references/printify-examples/`. Note the fifth,
+`Feelings Control Pie Chart Panel_tshirt.png`, is no longer on disk; its
+measurements are recorded in D142 (100% fill, ~179 distinct tones, no alpha
+channel).
+
+---
+
 # VV-Styles import — reviewed 2026-09-28, resume here
 
 Still nothing written to the database. The tool is unchanged.
