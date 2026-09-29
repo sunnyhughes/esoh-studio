@@ -3,7 +3,103 @@
 Six commits today, `1aa2efc` to `3c4a981`. Working tree clean, migrations 091
 to 095 applied, nothing half-finished.
 
-## Pick up here: tone blocks
+## Sunshine's four questions, 2026-09-29 — answer these first
+
+He asked these before clearing context. They outrank the tone blocks.
+
+### Q1. Why do the images look flat, reuse the same colours, and have no "uumph"?
+
+**Measured answer: 78% of every VV-Styles prompt is word-for-word identical.**
+
+Of ~3,340 characters, 2,612 are the same on every single design — composition,
+colour-life, flat-ink, edge-quality, keyline, output, exclusions, plus the fixed
+wrapper text inside the quote and garment blocks. Only **725 characters** change
+from design to design:
+
+| what changes | chars |
+|---|---|
+| art style (1 of 31) | 276 |
+| lettering (1 of 25) | 174 |
+| visual_elements — the brief | 185 |
+| the quote itself | ~40 |
+| the palette value | ~45 |
+| the garment colour | ~5 |
+
+That is the sameness, structurally. Four-fifths of the instruction is a constant.
+**This is the finding to act on**, and it was not known when the tone-block plan
+was made.
+
+Two causes already proved, both still true:
+- the muted palettes come from the sheet's own **Color Direction** column;
+- the flat, diagrammatic subjects come from the sheet's own **Visual Elements**
+  text — see [[the brief is the ceiling]] and the isolation test on VVS-0082.
+
+### Q2. Can the lettering and art styles be made more current?
+
+Partly done 2026-09-28 and explicitly a first pass: 25 lettering blocks (093)
+and 6 contemporary art styles — Modern Grunge Halftone, Oversized Condensed
+Statement, Chrome Y2K, Collage Zine Cutout, Neo-Brutalist Grid, Modern Script
+Statement (094). **They have never been corrected against his reference images**,
+which is what he was collecting when the session ended. Four of the five are in
+`docs/references/printify-examples/`.
+
+Of the 12 original styles, 6 are period pieces and 2 are used by no design at
+all. Nothing retro was removed, on his instruction.
+
+### Q3. How do we stop VV-Styles using coloring-book wording?
+
+**Verified 2026-09-29: it already does not.** Two checks, both clean:
+
+- **Zero blocks are shared between the two categories.** No block is wired to
+  templates in more than one category. The stacks are fully separate.
+- **No coloring-book language in the vv-styles stack.** The only hit for "page"
+  is `vvs-let-serif-editorial` saying type carries "the authority of a printed
+  page", which is a typography metaphor.
+
+The overlap he is remembering was real but was **name collision, not text
+bleed**: six art-style *names* existed in both categories, and 091 wrote fresh
+apparel-native blocks rather than reusing them. Tell him it is fixed and show
+him these two checks rather than re-deriving them.
+
+### Q4. Do we even need Art Style, Lettering and Tone as separate fields — or should they go into Visual Elements?
+
+**Recommendation: keep them, and cut the boilerplate instead.** They are not
+what makes the designs samey; Q1's 78% is. Folding them into `visual_elements`
+would mean every one of 137 designs is hand-written prose with nothing
+recombining — it would end the mix-and-match he described as the point of the
+tool ("new prompts for images by using the database or choices through mix and
+match"), and it would make his own week of brief-writing the *only* lever.
+
+But his instinct is pointing at something real, and it is Q1: the selectors give
+725 characters of variation against 2,612 of constant. **The fix is to make more
+of the prompt vary, not to remove the parts that already do.**
+
+Candidates to examine, in order:
+1. `vvs-comp-front-print` (434 chars, identical every time) — composition is the
+   single biggest lever on whether a design reads as a badge, a statement, a
+   scene or a panel, and right now every design gets the same instruction.
+2. `vvs-colour-life` (216, identical) — says "bright, saturated and cheerful" on
+   a Confrontational design and a Supportive one alike.
+3. `vvs-keyline` (400, identical) and `vvs-output` (401, identical) — both new or
+   newly rewritten, both unvarying.
+4. Tone (his filled column, read by nothing) is the natural selector for 2 and
+   possibly 1.
+
+### The bigger thing he asked for
+
+*"I think I may need to go back and re-examine the hardcoded rules of the tool."*
+He is right to want that, and Q1 is the evidence. Several rules were written
+early against a specific defect and then applied to everything forever — D72's
+shape ban was one and D141 undid it; D74's 80% fill ceiling is the same shape
+and is still standing. **Look for rules that solved one bad generation and were
+never scoped.** Do not start over: the engine, the block system and the
+transparency checks are sound, and Stage C's gate has been met.
+
+## Then: tone blocks
+
+Agreed as next on 2026-09-28, before Q1's 78% measurement existed. Q1 may
+reorder this — tone is a good selector *for* the constant blocks, which is a
+better reason to build it than the one originally given.
 
 **The Tone column is filled on all 137 rows and the tool reads none of it.**
 15 distinct values, zero effect on any prompt. This is the same shape as the
