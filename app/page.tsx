@@ -54,6 +54,7 @@ type Item = {
   brand_mark: string | null;
   quote_text: string | null;
   lettering_style: string | null;
+  tone: string | null;
   status: string;
 };
 type Asset = {
@@ -81,6 +82,14 @@ export default function NewJobPage() {
     Record<string, string[]>
   >({});
   const [densities, setDensities] = useState<string[]>([]);
+  // 093 and 096. Both are block selectors, both read per category so the
+  // categories with no such blocks show no field.
+  const [letteringStylesByCategory, setLetteringStylesByCategory] = useState<
+    Record<string, string[]>
+  >({});
+  const [tonesByCategory, setTonesByCategory] = useState<
+    Record<string, string[]>
+  >({});
 
   const [categoryId, setCategoryId] = useState("");
   const [collectionId, setCollectionId] = useState("");
@@ -88,6 +97,8 @@ export default function NewJobPage() {
   const [itemId, setItemId] = useState("");
   const [artStyle, setArtStyle] = useState("");
   const [density, setDensity] = useState("");
+  const [letteringStyle, setLetteringStyle] = useState("");
+  const [tone, setTone] = useState("");
   // Only used when no item is selected. With an item the row says what kind of
   // page it is; without one, nothing did, and the guard had nothing to check.
   const [pageType, setPageType] = useState("");
@@ -136,6 +147,8 @@ export default function NewJobPage() {
           items,
           artStyles,
           artStylesByCategory,
+          letteringStylesByCategory,
+          tonesByCategory,
           densities,
           letteringStyles,
         } = d.data;
@@ -147,6 +160,8 @@ export default function NewJobPage() {
         setArtStyles(artStyles ?? []);
         setArtStylesByCategory(artStylesByCategory ?? {});
         setDensities(densities ?? []);
+        setLetteringStylesByCategory(letteringStylesByCategory ?? {});
+        setTonesByCategory(tonesByCategory ?? {});
         if (categories[0]) setCategoryId(categories[0].id);
         if (templates[0]) setTemplateId(templates[0].id);
       })
@@ -202,6 +217,8 @@ export default function NewJobPage() {
     if (match) setTemplateId(match.id);
     if (item.art_style) setArtStyle(item.art_style);
     if (item.background_density) setDensity(item.background_density);
+    if (item.lettering_style) setLetteringStyle(item.lettering_style);
+    if (item.tone) setTone(item.tone);
   }, [item, templates]);
 
   // Drop the item if it no longer belongs to what is selected above it.
@@ -230,6 +247,15 @@ export default function NewJobPage() {
     return artStylesByCategory[category.code] ?? [];
   }, [artStylesByCategory, artStyles, category]);
 
+  const categoryLetteringStyles = useMemo(
+    () => (category ? letteringStylesByCategory[category.code] ?? [] : []),
+    [letteringStylesByCategory, category]
+  );
+  const categoryTones = useMemo(
+    () => (category ? tonesByCategory[category.code] ?? [] : []),
+    [tonesByCategory, category]
+  );
+
   // Keep template and art style valid whenever the category changes, the same
   // way the collection already is.
   useEffect(() => {
@@ -257,6 +283,16 @@ export default function NewJobPage() {
   useEffect(() => {
     if (artStyle && !categoryArtStyles.includes(artStyle)) setArtStyle("");
   }, [categoryArtStyles, artStyle]);
+
+  useEffect(() => {
+    if (letteringStyle && !categoryLetteringStyles.includes(letteringStyle)) {
+      setLetteringStyle("");
+    }
+  }, [categoryLetteringStyles, letteringStyle]);
+
+  useEffect(() => {
+    if (tone && !categoryTones.includes(tone)) setTone("");
+  }, [categoryTones, tone]);
 
   // Adopt the template's own defaults, and seed selects with their first option.
   useEffect(() => {
@@ -294,6 +330,8 @@ export default function NewJobPage() {
           itemId: itemId || undefined,
           artStyle: artStyle || undefined,
           density: density || undefined,
+          letteringStyle: letteringStyle || undefined,
+          tone: tone || undefined,
           pageType: itemId ? undefined : pageType || undefined,
           useReferences,
           inputs,
@@ -540,6 +578,48 @@ export default function NewJobPage() {
               </select>
             </div>
           </div>
+
+          {/* 093 and 096 select a block each. Shown only where such blocks
+              exist, which today is apparel: a coloring page's words are
+              overlaid as vector type (D23), not lettered by the model. */}
+          {(categoryLetteringStyles.length > 0 || categoryTones.length > 0) && (
+            <div className="row">
+              {categoryLetteringStyles.length > 0 && (
+                <div className="field">
+                  <label htmlFor="letteringStyle">Lettering style</label>
+                  <select
+                    id="letteringStyle"
+                    value={letteringStyle}
+                    onChange={(e) => setLetteringStyle(e.target.value)}
+                  >
+                    <option value="">Art style decides</option>
+                    {categoryLetteringStyles.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {categoryTones.length > 0 && (
+                <div className="field">
+                  <label htmlFor="tone">Tone</label>
+                  <select
+                    id="tone"
+                    value={tone}
+                    onChange={(e) => setTone(e.target.value)}
+                  >
+                    <option value="">Unstated</option>
+                    {categoryTones.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
 
           <label className="check">
             <input

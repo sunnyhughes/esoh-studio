@@ -4,6 +4,15 @@ import { getTemplates } from "@/lib/prompt-engine";
 
 export const dynamic = "force-dynamic";
 
+type CategoryVocab = { code: string } & Record<string, string[]>;
+
+/** One vocabulary column of the per-category query, keyed by category code. */
+function byCode(rows: unknown, column: string): Record<string, string[]> {
+  return Object.fromEntries(
+    (rows as CategoryVocab[]).map((row) => [row.code, row[column] ?? []])
+  );
+}
+
 /** Everything the New Job form needs to render itself. */
 export async function GET() {
   try {
@@ -26,7 +35,7 @@ export async function GET() {
         query(`select id, collection_id, category_id, ref, title, page_type,
                       art_style, background_density, season, ethnicity_line,
                       hair, facial_hair, brief, visual_elements, brand_mark,
-                      quote_text, lettering_style, status
+                      quote_text, lettering_style, tone, status
                  from items order by ref`),
         // Art style and density come from the blocks that implement them, so
         // adding a style in SQL adds it to the form with no code change.
@@ -43,11 +52,27 @@ export async function GET() {
         // above spans all four, and a coloring-book style has no block in the
         // VV-Styles template — offering it would only produce "No base style
         // block for art style ...". The form filters on this instead.
+        //
+        // 093's lettering styles and 096's tones ride along for the same
+        // reason, and to close a gap the form had since 093: it offered eleven
+        // hand-written lettering *descriptions* that matched no block's
+        // `lettering_style`, so an ad-hoc apparel job reached the model with no
+        // lettering instruction at all, and tone had no field to be chosen in.
+        // Both lists are empty on the categories whose blocks have none, which
+        // is what the form hides on.
         query(`select c.code,
                       coalesce(
                         array_agg(distinct b.art_style)
                           filter (where b.art_style is not null), '{}')
-                        as art_styles
+                        as art_styles,
+                      coalesce(
+                        array_agg(distinct b.lettering_style)
+                          filter (where b.lettering_style is not null), '{}')
+                        as lettering_styles,
+                      coalesce(
+                        array_agg(distinct b.tone)
+                          filter (where b.tone is not null), '{}')
+                        as tones
                  from categories c
                  left join prompt_blocks b
                    on b.category_id = c.id and b.is_active
@@ -63,11 +88,9 @@ export async function GET() {
         templates,
         items,
         artStyles: (vocab[0] as { art_styles: string[] })?.art_styles ?? [],
-        artStylesByCategory: Object.fromEntries(
-          (categoryVocab as { code: string; art_styles: string[] }[]).map(
-            (row) => [row.code, row.art_styles]
-          )
-        ),
+        artStylesByCategory: byCode(categoryVocab, "art_styles"),
+        letteringStylesByCategory: byCode(categoryVocab, "lettering_styles"),
+        tonesByCategory: byCode(categoryVocab, "tones"),
         densities: (vocab[0] as { densities: string[] })?.densities ?? [],
         letteringStyles,
       },
