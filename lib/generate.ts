@@ -39,6 +39,8 @@ export type GenerateBody = {
   artStyle?: string;
   /** 093 — selects the lettering block. Falls back to the item's own value. */
   letteringStyle?: string;
+  /** 096 — selects the tone block. Falls back to the item's own value. */
+  tone?: string;
   /** D27 — Open | Medium | Dense. Optional; the art style sets its own if absent. */
   density?: string;
   /**
@@ -132,6 +134,7 @@ export async function runGeneration(body: GenerateBody) {
           collection_id: string;
           quote_text: string | null;
           lettering_style: string | null;
+          tone: string | null;
           color_direction: string | null;
           product_placement: string | null;
         }>(
@@ -139,7 +142,7 @@ export async function runGeneration(body: GenerateBody) {
                   ethnicity_line, season, page_type, hair, facial_hair,
                   personal_details,
                   visual_elements, collection_id, quote_text, lettering_style,
-                  color_direction, product_placement
+                  tone, color_direction, product_placement
              from items where id = $1`,
           [body.itemId]
         )
@@ -236,6 +239,10 @@ export async function runGeneration(body: GenerateBody) {
       inputs.lettering?.trim() ??
       null;
 
+    // 096. Same shape, and the same fallback for the form, which sends the tone
+    // as an input because an ad-hoc job has no item row to carry one.
+    const tone = body.tone ?? item?.tone ?? inputs.tone?.trim() ?? null;
+
     // The line selects its own identity block (062). Only a page with figures
     // on it carries one, so this is null on the other five templates whatever
     // the item says — the outline's point, and D117's: representation rules on
@@ -246,7 +253,8 @@ export async function runGeneration(body: GenerateBody) {
       artStyle,
       density,
       item?.ethnicity_line ?? null,
-      letteringStyle
+      letteringStyle,
+      tone
     );
 
     // 2. A Quote page drawn by the Solo Portrait template is a silently wrong

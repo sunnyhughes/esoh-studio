@@ -52,6 +52,7 @@ export type Block = {
   background_density: string | null;
   ethnicity_line: string | null;
   lettering_style: string | null;
+  tone: string | null;
 };
 
 const SLOT = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
@@ -107,12 +108,18 @@ export async function getBlocks(
    * decided the lettering every time. A block naming no lettering style applies
    * to every one.
    */
-  letteringStyle?: string | null
+  letteringStyle?: string | null,
+  /**
+   * 096's selector. The sheet's Tone column was filled on every row and read by
+   * nothing. A block naming no tone applies to every one.
+   */
+  tone?: string | null
 ): Promise<Block[]> {
   return query<Block>(
     `
     select b.slug, b.kind, b.body_text, tb.position,
-           b.art_style, b.background_density, b.ethnicity_line, b.lettering_style
+           b.art_style, b.background_density, b.ethnicity_line,
+           b.lettering_style, b.tone
       from template_blocks tb
       join prompt_blocks b on b.id = tb.block_id
      where tb.template_id = $1
@@ -121,6 +128,7 @@ export async function getBlocks(
        and (b.background_density is null or b.background_density = $3)
        and (b.ethnicity_line is null or b.ethnicity_line = $4)
        and (b.lettering_style is null or b.lettering_style = $5)
+       and (b.tone is null or b.tone = $6)
      order by tb.position
   `,
     [
@@ -129,6 +137,7 @@ export async function getBlocks(
       density ?? null,
       ethnicityLine ?? null,
       letteringStyle ?? null,
+      tone ?? null,
     ]
   );
 }
@@ -175,7 +184,8 @@ export async function buildPrompt(
   artStyle?: string | null,
   density?: string | null,
   ethnicityLine?: string | null,
-  letteringStyle?: string | null
+  letteringStyle?: string | null,
+  tone?: string | null
 ): Promise<{ template: Template; prompt: string; blocks: Block[] }> {
   const template = await getTemplate(templateId);
   if (!template) throw new Error(`Template not found: ${templateId}`);
@@ -185,7 +195,8 @@ export async function buildPrompt(
     artStyle,
     density,
     ethnicityLine,
-    letteringStyle
+    letteringStyle,
+    tone
   );
   if (blocks.length === 0) {
     throw new Error(`Template "${template.name}" has no blocks attached.`);

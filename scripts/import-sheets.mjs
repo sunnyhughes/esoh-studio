@@ -104,7 +104,8 @@ async function upsertCollection(catId, name) {
 async function upsertItem(item) {
   const cols = [
     "collection_id", "category_id", "ref", "title", "brief", "page_type",
-    "ethnicity_line", "season", "art_style", "lettering_style", "background_density",
+    "ethnicity_line", "season", "art_style", "lettering_style", "tone",
+    "background_density",
     "quote_text", "quote_lang", "color_direction", "product_placement",
     "visual_elements", "priority", "status", "review_flag", "notes", "source_row",
   ];
@@ -178,6 +179,9 @@ async function importVvStyles(catId) {
       visual_elements: r["Visual Elements"] || null,
       art_style: r["Art Style"] || null,
       lettering_style: r["Lettering Style"] || null,
+      // 096. The Tone column has been filled on every row since the sheet was
+      // written and nothing read it until the tone blocks existed.
+      tone: r["Tone"] || null,
       color_direction: r["Color Direction"] || null,
       product_placement: r["Product / Placement"] || null,
       priority: r["Priority"] || null,

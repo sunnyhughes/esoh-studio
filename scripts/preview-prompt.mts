@@ -50,12 +50,16 @@ if (!template) {
 // which is where the caller already puts it.
 const letteringStyle = inputs.lettering ?? null;
 
+// 096, the same way: `tone=` selects the tone block.
+const tone = inputs.tone ?? null;
+
 const blocks: Block[] = await getBlocks(
   template.id,
   artStyle,
   null,
   null,
-  letteringStyle
+  letteringStyle,
+  tone
 );
 
 if (blocks.length === 0) {
