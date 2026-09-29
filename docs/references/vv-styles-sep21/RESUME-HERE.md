@@ -1,4 +1,70 @@
-# STOP HERE — 2026-09-28, end of day
+# STOP HERE — 2026-09-29
+
+Three commits today, `3afa006` to `25aadad`, migrations 096 to 098 applied.
+Working tree clean, nothing half-finished. **Nothing has been generated** — the
+whole day's work is prompt text, verified by composing prompts and by SQL.
+
+## What changed
+
+Q1's 78% is the thing that got acted on. Two of its four candidates are done.
+
+| migration | what |
+|---|---|
+| 096 | `items.tone`, `prompt_blocks.tone`, the `tone` kind, 19 tone blocks, the selector through `getBlocks` / `buildPrompt` / `generate.ts` / the preview script, and the importer |
+| 097 | `vvs-comp-front-print` cut back to what is true of every front print; 31 new arrangement blocks keyed to `art_style`, seven archetypes |
+| 098 | the form's eleven prose lettering options retired; real Lettering style and Tone selects, filled from the blocks |
+
+Measured on a Retro Comic / Bold Sans / Humorous prompt: **selected text per
+prompt goes from ~450 characters to 1,077, and the identical share from 78% to
+71%.** The constant itself did not shrink — it is the same ~2,620 characters —
+so the prompt got longer rather than leaner. Recorded as D143 and D144.
+
+097 also closed a live contradiction: the old composition block told seven art
+styles to close up their spacing while their own style blocks asked for
+generous space. Both sentences were in every one of those prompts.
+
+## Do this next, in this order
+
+**1. Look at the output. Nothing has been drawn since any of this shipped.**
+Four archetypes are worth one design each — emblem (`Collegiate / Varsity
+Emblem`), statement (`Oversized Condensed Statement`), scene (`Retro Comic`),
+open (`Luxury Editorial Typography`) — and the open one is the risk: D142
+measured our output as too sparse and 097 deliberately stopped forcing density
+on the seven open styles. `boundsFillFraction` on those is where it shows, but
+the picture is the judgment, not the number. Generation is billed and there is
+no stub provider, so this is Sunshine's call to spend.
+
+**2. The import is now the highest-value step left, and it got bigger.**
+Measured today: **113 of the 130 database rows carry no art style and no
+lettering style.** The sheet has Art Style on 78 rows and Lettering Style on 77.
+So the import roughly quadruples the rows that can drive their own prompt — and
+everything built today is keyed on exactly those columns. Tone is the exception:
+filled on all 130 rows already, which is why it was the selector to build first.
+Its one blocking decision is unchanged — how the sheet's seven collection names
+map onto the database's nine.
+
+**3. The next lever is cutting, not varying.** `vvs-keyline` (400),
+`vvs-output` (401), `vvs-exclusions` (289), `vvs-garment` (274) and `vvs-quote`
+(272) are ~1,600 characters of constant, and 097 made the prompt longer. Trim
+before adding.
+
+**4. `vvs-colour-life` by tone is still open, and needs care.** It says "bright,
+saturated and cheerful" to a Confrontational design and a Supportive one alike,
+which is the second candidate in Q1's list. The trap: its other clause — light,
+mid and dark values all present — is the anti-flatness rule that answers
+Sunshine's first complaint, and it has to survive in every variant. Only the
+character word should vary.
+
+## Two defects still open, unchanged
+
+D74's 80% fill ceiling still flags good dense designs (78/80/85/88% measured
+2026-09-28), and secondary text still garbles on label-heavy designs. Neither
+was touched today. 097 makes the first one more urgent, not less: the emblem and
+statement archetypes ask for tighter groups than the old constant did.
+
+---
+
+# 2026-09-28, end of day — and Sunshine's four questions
 
 Six commits today, `1aa2efc` to `3c4a981`. Working tree clean, migrations 091
 to 095 applied, nothing half-finished.
@@ -85,6 +151,10 @@ Candidates to examine, in order:
 4. Tone (his filled column, read by nothing) is the natural selector for 2 and
    possibly 1.
 
+**Status 2026-09-29:** candidate 1 done (097), candidate 4 done as a selector
+(096), candidate 2 still open — see the note at the top about its value-range
+clause. Candidate 3 is now better served by trimming than by splitting.
+
 ### The bigger thing he asked for
 
 *"I think I may need to go back and re-examine the hardcoded rules of the tool."*
@@ -95,7 +165,7 @@ and is still standing. **Look for rules that solved one bad generation and were
 never scoped.** Do not start over: the engine, the block system and the
 transparency checks are sound, and Stage C's gate has been met.
 
-## Then: tone blocks
+## Then: tone blocks — done 2026-09-29 in 096
 
 Agreed as next on 2026-09-28, before Q1's 78% measurement existed. Q1 may
 reorder this — tone is a good selector *for* the constant blocks, which is a
