@@ -35,7 +35,8 @@ export async function GET() {
         query(`select id, collection_id, category_id, ref, title, page_type,
                       art_style, background_density, season, ethnicity_line,
                       hair, facial_hair, brief, visual_elements, brand_mark,
-                      quote_text, lettering_style, tone, status
+                      quote_text, lettering_style, tone,
+                      lettering_accent, art_accent, status
                  from items order by ref`),
         // Art style and density come from the blocks that implement them, so
         // adding a style in SQL adds it to the form with no code change.
@@ -72,7 +73,15 @@ export async function GET() {
                       coalesce(
                         array_agg(distinct b.tone)
                           filter (where b.tone is not null), '{}')
-                        as tones
+                        as tones,
+                      coalesce(
+                        array_agg(distinct b.lettering_accent)
+                          filter (where b.lettering_accent is not null), '{}')
+                        as lettering_accents,
+                      coalesce(
+                        array_agg(distinct b.art_accent)
+                          filter (where b.art_accent is not null), '{}')
+                        as art_accents
                  from categories c
                  left join prompt_blocks b
                    on b.category_id = c.id and b.is_active
@@ -91,6 +100,8 @@ export async function GET() {
         artStylesByCategory: byCode(categoryVocab, "art_styles"),
         letteringStylesByCategory: byCode(categoryVocab, "lettering_styles"),
         tonesByCategory: byCode(categoryVocab, "tones"),
+        letteringAccentsByCategory: byCode(categoryVocab, "lettering_accents"),
+        artAccentsByCategory: byCode(categoryVocab, "art_accents"),
         densities: (vocab[0] as { densities: string[] })?.densities ?? [],
         letteringStyles,
       },

@@ -41,6 +41,9 @@ export type GenerateBody = {
   letteringStyle?: string;
   /** 096 — selects the tone block. Falls back to the item's own value. */
   tone?: string;
+  /** 099 — optional accent lettering and secondary art style. Fall back to the item. */
+  letteringAccent?: string;
+  artAccent?: string;
   /** D27 — Open | Medium | Dense. Optional; the art style sets its own if absent. */
   density?: string;
   /**
@@ -135,6 +138,9 @@ export async function runGeneration(body: GenerateBody) {
           quote_text: string | null;
           lettering_style: string | null;
           tone: string | null;
+          lettering_accent: string | null;
+          art_accent: string | null;
+          sheet_category: string | null;
           color_direction: string | null;
           product_placement: string | null;
         }>(
@@ -142,7 +148,9 @@ export async function runGeneration(body: GenerateBody) {
                   ethnicity_line, season, page_type, hair, facial_hair,
                   personal_details,
                   visual_elements, collection_id, quote_text, lettering_style,
-                  tone, color_direction, product_placement
+                  tone, lettering_accent, art_accent,
+                  source_row->>'Category' as sheet_category,
+                  color_direction, product_placement
              from items where id = $1`,
           [body.itemId]
         )
@@ -243,19 +251,39 @@ export async function runGeneration(body: GenerateBody) {
     // as an input because an ad-hoc job has no item row to carry one.
     const tone = body.tone ?? item?.tone ?? inputs.tone?.trim() ?? null;
 
+    // 099. Both optional; blank selects no block, so a row without them is
+    // composed exactly as before.
+    const letteringAccent =
+      body.letteringAccent ?? item?.lettering_accent ?? null;
+    const artAccent = body.artAccent ?? item?.art_accent ?? null;
+
+    // 099. Sunshine, 2026-10-06: "symbols allowed, acts are not" — a dagger
+    // through a heart or a skull and crossbones as a tattoo-flash emblem, only
+    // on Bold and Confrontational designs and never on Survivorship ones. The
+    // category check is why this is code and not a tone block: VVS-0002 and
+    // VVS-0109 are Bold Survivorship designs. The database still files those
+    // rows as `DV` until the sheet is imported, so both names count. An ad-hoc
+    // job has no row to carry a category, and goes by tone alone.
+    const survivorship = /surviv|^dv\b/i.test(item?.sheet_category ?? "");
+    const emblemRule =
+      tone && ["Bold", "Confrontational"].includes(tone) && !survivorship
+        ? "symbolic"
+        : "banned";
+
     // The line selects its own identity block (062). Only a page with figures
     // on it carries one, so this is null on the other five templates whatever
     // the item says — the outline's point, and D117's: representation rules on
     // a page with nobody in it are how a person ends up in an empty room.
-    const { template, prompt } = await buildPrompt(
-      body.templateId,
-      inputs,
+    const { template, prompt } = await buildPrompt(body.templateId, inputs, {
       artStyle,
       density,
-      item?.ethnicity_line ?? null,
+      ethnicityLine: item?.ethnicity_line ?? null,
       letteringStyle,
-      tone
-    );
+      tone,
+      letteringAccent,
+      artAccent,
+      emblemRule,
+    });
 
     // 2. A Quote page drawn by the Solo Portrait template is a silently wrong
     //    page, not an error, so it has to be caught here.
@@ -414,7 +442,7 @@ export async function runGeneration(body: GenerateBody) {
         DEFAULT_PROVIDER,
         model,
         JSON.stringify({
-          size, quality, n, artStyle, density,
+          size, quality, n, artStyle, density, artAccent, letteringAccent,
           // Asked-for and actually-supplied are recorded separately: a request
           // can ask for exemplars and receive none, and a run that cannot say
           // which of those happened cannot be used as evidence (D111).

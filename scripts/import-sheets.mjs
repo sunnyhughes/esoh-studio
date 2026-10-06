@@ -105,7 +105,7 @@ async function upsertItem(item) {
   const cols = [
     "collection_id", "category_id", "ref", "title", "brief", "page_type",
     "ethnicity_line", "season", "art_style", "lettering_style", "tone",
-    "background_density",
+    "art_accent", "lettering_accent", "background_density",
     "quote_text", "quote_lang", "color_direction", "product_placement",
     "visual_elements", "priority", "status", "review_flag", "notes", "source_row",
   ];
@@ -182,6 +182,9 @@ async function importVvStyles(catId) {
       // 096. The Tone column has been filled on every row since the sheet was
       // written and nothing read it until the tone blocks existed.
       tone: r["Tone"] || null,
+      // 099. Optional, and absent from the sheet until Sunshine adds them.
+      art_accent: r["Secondary Art Style"] || null,
+      lettering_accent: r["Lettering Accent"] || null,
       color_direction: r["Color Direction"] || null,
       product_placement: r["Product / Placement"] || null,
       priority: r["Priority"] || null,

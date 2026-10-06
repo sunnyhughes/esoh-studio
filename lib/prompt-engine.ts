@@ -82,38 +82,48 @@ export async function getTemplate(id: string): Promise<Template | null> {
 }
 
 /**
- * Art style (D26) crosses page type (D17), so a template carries every
- * art-style variant of its base_style block and exactly one is chosen here.
- * Blocks with art_style null apply to every style.
- *
- * Passing no art style yields only the universal blocks — useful for seeing
- * what a template contributes on its own, but it will not produce a usable
- * page, since the base_style block is where the drawing style is described.
+ * What picks one block out of several variants. Every field is optional, and a
+ * block whose matching column is null applies whatever the value is.
  */
-export async function getBlocks(
-  templateId: string,
-  artStyle?: string | null,
-  density?: string | null,
+export type BlockSelectors = {
+  /**
+   * Art style (D26) crosses page type (D17), so a template carries every
+   * art-style variant of its base_style block and exactly one is chosen here.
+   * Passing none yields only the universal blocks — useful for seeing what a
+   * template contributes on its own, but not a usable page, since the
+   * base_style block is where the drawing style is described.
+   */
+  artStyle?: string | null;
+  density?: string | null;
   /**
    * D132's third selector. `art_direction_specs` gives each of the three lines
    * its own character rules, scene rules and forbidden list, and until 062 the
-   * tool's whole implementation of that was one generated sentence. A block
-   * naming no line applies to every line.
+   * tool's whole implementation of that was one generated sentence.
    */
-  ethnicityLine?: string | null,
+  ethnicityLine?: string | null;
   /**
    * 093's selector. The lettering instruction used to be one sentence with the
    * style's name dropped into it — "The words are set as Bold Sans." — against
    * an art-style block carrying 270 characters of technique, so the art style
-   * decided the lettering every time. A block naming no lettering style applies
-   * to every one.
+   * decided the lettering every time.
    */
-  letteringStyle?: string | null,
+  letteringStyle?: string | null;
+  /** 096's selector. The sheet's Tone column was filled and read by nothing. */
+  tone?: string | null;
   /**
-   * 096's selector. The sheet's Tone column was filled on every row and read by
-   * nothing. A block naming no tone applies to every one.
+   * 099. An optional second voice for one word or line of the phrase, and an
+   * optional secondary art influence that adds motifs without replacing the
+   * main style's technique. Blank selects nothing.
    */
-  tone?: string | null
+  letteringAccent?: string | null;
+  artAccent?: string | null;
+  /** 099. `banned` or `symbolic` — decided in lib/generate.ts, not by the form. */
+  emblemRule?: string | null;
+};
+
+export async function getBlocks(
+  templateId: string,
+  sel: BlockSelectors = {}
 ): Promise<Block[]> {
   return query<Block>(
     `
@@ -129,15 +139,22 @@ export async function getBlocks(
        and (b.ethnicity_line is null or b.ethnicity_line = $4)
        and (b.lettering_style is null or b.lettering_style = $5)
        and (b.tone is null or b.tone = $6)
+       and (b.lettering_accent is null or b.lettering_accent = $7)
+       and (b.art_accent is null or b.art_accent = $8)
+       and (b.emblem_rule is null or b.emblem_rule = $9)
      order by tb.position
   `,
     [
       templateId,
-      artStyle ?? null,
-      density ?? null,
-      ethnicityLine ?? null,
-      letteringStyle ?? null,
-      tone ?? null,
+      sel.artStyle ?? null,
+      sel.density ?? null,
+      sel.ethnicityLine ?? null,
+      sel.letteringStyle ?? null,
+      sel.tone ?? null,
+      sel.letteringAccent ?? null,
+      // A secondary that repeats the main style adds nothing but repetition.
+      sel.artAccent && sel.artAccent !== sel.artStyle ? sel.artAccent : null,
+      sel.emblemRule ?? null,
     ]
   );
 }
@@ -181,31 +198,20 @@ export function composePrompt(
 export async function buildPrompt(
   templateId: string,
   inputs: Record<string, string>,
-  artStyle?: string | null,
-  density?: string | null,
-  ethnicityLine?: string | null,
-  letteringStyle?: string | null,
-  tone?: string | null
+  sel: BlockSelectors = {}
 ): Promise<{ template: Template; prompt: string; blocks: Block[] }> {
   const template = await getTemplate(templateId);
   if (!template) throw new Error(`Template not found: ${templateId}`);
 
-  const blocks = await getBlocks(
-    templateId,
-    artStyle,
-    density,
-    ethnicityLine,
-    letteringStyle,
-    tone
-  );
+  const blocks = await getBlocks(templateId, sel);
   if (blocks.length === 0) {
     throw new Error(`Template "${template.name}" has no blocks attached.`);
   }
 
   if (!blocks.some((b) => b.kind === "base_style")) {
     throw new Error(
-      artStyle
-        ? `No base style block for art style "${artStyle}".`
+      sel.artStyle
+        ? `No base style block for art style "${sel.artStyle}".`
         : "An art style is required — it supplies the base style block."
     );
   }

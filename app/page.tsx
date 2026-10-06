@@ -55,6 +55,8 @@ type Item = {
   quote_text: string | null;
   lettering_style: string | null;
   tone: string | null;
+  lettering_accent: string | null;
+  art_accent: string | null;
   status: string;
 };
 type Asset = {
@@ -90,6 +92,13 @@ export default function NewJobPage() {
   const [tonesByCategory, setTonesByCategory] = useState<
     Record<string, string[]>
   >({});
+  // 099. Optional second voices: accent lettering and a secondary art style.
+  const [letteringAccentsByCategory, setLetteringAccentsByCategory] = useState<
+    Record<string, string[]>
+  >({});
+  const [artAccentsByCategory, setArtAccentsByCategory] = useState<
+    Record<string, string[]>
+  >({});
 
   const [categoryId, setCategoryId] = useState("");
   const [collectionId, setCollectionId] = useState("");
@@ -99,6 +108,8 @@ export default function NewJobPage() {
   const [density, setDensity] = useState("");
   const [letteringStyle, setLetteringStyle] = useState("");
   const [tone, setTone] = useState("");
+  const [letteringAccent, setLetteringAccent] = useState("");
+  const [artAccent, setArtAccent] = useState("");
   // Only used when no item is selected. With an item the row says what kind of
   // page it is; without one, nothing did, and the guard had nothing to check.
   const [pageType, setPageType] = useState("");
@@ -149,6 +160,8 @@ export default function NewJobPage() {
           artStylesByCategory,
           letteringStylesByCategory,
           tonesByCategory,
+          letteringAccentsByCategory,
+          artAccentsByCategory,
           densities,
           letteringStyles,
         } = d.data;
@@ -162,6 +175,8 @@ export default function NewJobPage() {
         setDensities(densities ?? []);
         setLetteringStylesByCategory(letteringStylesByCategory ?? {});
         setTonesByCategory(tonesByCategory ?? {});
+        setLetteringAccentsByCategory(letteringAccentsByCategory ?? {});
+        setArtAccentsByCategory(artAccentsByCategory ?? {});
         if (categories[0]) setCategoryId(categories[0].id);
         if (templates[0]) setTemplateId(templates[0].id);
       })
@@ -219,6 +234,8 @@ export default function NewJobPage() {
     if (item.background_density) setDensity(item.background_density);
     if (item.lettering_style) setLetteringStyle(item.lettering_style);
     if (item.tone) setTone(item.tone);
+    setLetteringAccent(item.lettering_accent ?? "");
+    setArtAccent(item.art_accent ?? "");
   }, [item, templates]);
 
   // Drop the item if it no longer belongs to what is selected above it.
@@ -254,6 +271,14 @@ export default function NewJobPage() {
   const categoryTones = useMemo(
     () => (category ? tonesByCategory[category.code] ?? [] : []),
     [tonesByCategory, category]
+  );
+  const categoryLetteringAccents = useMemo(
+    () => (category ? letteringAccentsByCategory[category.code] ?? [] : []),
+    [letteringAccentsByCategory, category]
+  );
+  const categoryArtAccents = useMemo(
+    () => (category ? artAccentsByCategory[category.code] ?? [] : []),
+    [artAccentsByCategory, category]
   );
 
   // Keep template and art style valid whenever the category changes, the same
@@ -294,6 +319,16 @@ export default function NewJobPage() {
     if (tone && !categoryTones.includes(tone)) setTone("");
   }, [categoryTones, tone]);
 
+  useEffect(() => {
+    if (letteringAccent && !categoryLetteringAccents.includes(letteringAccent)) {
+      setLetteringAccent("");
+    }
+  }, [categoryLetteringAccents, letteringAccent]);
+
+  useEffect(() => {
+    if (artAccent && !categoryArtAccents.includes(artAccent)) setArtAccent("");
+  }, [categoryArtAccents, artAccent]);
+
   // Adopt the template's own defaults, and seed selects with their first option.
   useEffect(() => {
     if (!template) return;
@@ -332,6 +367,8 @@ export default function NewJobPage() {
           density: density || undefined,
           letteringStyle: letteringStyle || undefined,
           tone: tone || undefined,
+          letteringAccent: letteringAccent || undefined,
+          artAccent: artAccent || undefined,
           pageType: itemId ? undefined : pageType || undefined,
           useReferences,
           inputs,
@@ -562,6 +599,25 @@ export default function NewJobPage() {
                 ))}
               </select>
             </div>
+            {categoryArtAccents.length > 0 && (
+              <div className="field">
+                <label htmlFor="artAccent">Secondary art style</label>
+                <select
+                  id="artAccent"
+                  value={artAccent}
+                  onChange={(e) => setArtAccent(e.target.value)}
+                >
+                  <option value="">None</option>
+                  {categoryArtAccents
+                    .filter((a) => a !== artStyle)
+                    .map((a) => (
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
             <div className="field">
               <label htmlFor="density">Density</label>
               <select
@@ -594,6 +650,23 @@ export default function NewJobPage() {
                   >
                     <option value="">Art style decides</option>
                     {categoryLetteringStyles.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {categoryLetteringAccents.length > 0 && (
+                <div className="field">
+                  <label htmlFor="letteringAccent">Accent lettering</label>
+                  <select
+                    id="letteringAccent"
+                    value={letteringAccent}
+                    onChange={(e) => setLetteringAccent(e.target.value)}
+                  >
+                    <option value="">None</option>
+                    {categoryLetteringAccents.map((l) => (
                       <option key={l} value={l}>
                         {l}
                       </option>

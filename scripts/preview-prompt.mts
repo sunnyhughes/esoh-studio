@@ -53,14 +53,18 @@ const letteringStyle = inputs.lettering ?? null;
 // 096, the same way: `tone=` selects the tone block.
 const tone = inputs.tone ?? null;
 
-const blocks: Block[] = await getBlocks(
-  template.id,
+// 099: `accent=` and `secondary=` select the accent lettering and the secondary
+// art style. The emblem rule is passed as `emblems=` (banned | symbolic) rather
+// than re-derived, so a preview can show either; generation decides it from
+// tone and category.
+const blocks: Block[] = await getBlocks(template.id, {
   artStyle,
-  null,
-  null,
   letteringStyle,
-  tone
-);
+  tone,
+  letteringAccent: inputs.accent ?? null,
+  artAccent: inputs.secondary ?? null,
+  emblemRule: inputs.emblems ?? "banned",
+});
 
 if (blocks.length === 0) {
   console.error(`No blocks for template "${templateSlug}" / "${artStyle}".`);

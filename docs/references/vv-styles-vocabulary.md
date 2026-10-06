@@ -668,3 +668,114 @@ that argued with them would put two instructions in one prompt.
 
 > The design puts the uncomfortable part in plain sight. The imagery shows what the words name rather than gesturing at it, and nothing is arranged to make it easier to look at.
 
+
+---
+
+# Part 3 — main + secondary (migration 099, 2026-10-06)
+
+Two optional sheet columns, read by the importer under these exact headers:
+**`Lettering Accent`** and **`Secondary Art Style`**. Blank means none, and the
+design is composed exactly as before. A combined lettering name such as
+`Bold Sans + Script accent` still works as a main style on its own.
+
+Changed for every design the same day: the phrase block no longer ties the
+lettering to the artwork's linework, `vvs-keyline` (stacked outlines) is retired,
+and weapons follow the rule *symbols allowed, acts not* — symbolic emblems only on
+Bold and Confrontational designs, never Survivorship.
+
+## New main lettering styles
+
+**Big Top Display** — The words are set in circus-poster display lettering — tall condensed capitals with heavy slab terminals on an arched or banner-set baseline.
+
+**Distressed Block Caps** — The words are set in heavy block capitals whose fill breaks into fine speckle and worn gaps, as though printed and washed many times, while every letter stays fully legible.
+
+**High-Contrast Serif** — The words are set in a high-contrast display serif — thin hairlines against heavy stems, sharp unbracketed serifs — at large size with generous, even letterspacing.
+
+**Serif Display** — The words are set in a large display serif with strong bracketed serifs and moderate contrast, set tight and confident so the line reads as one shape.
+
+## Lettering accents (column `Lettering Accent`)
+
+**Brush Script** — Accent lettering: one short word or line of the phrase — never the whole phrase, and spelled exactly as written — is set in a brush script that swells on the pull and tapers at the lift, sweeping across the main lettering. The main lettering carries everything else.
+
+**Condensed Sans** — Accent lettering: one short line of the phrase — never the whole phrase, and spelled exactly as written — is set in a plain, tall condensed sans, compact and upright, as a secondary line. The main lettering carries everything else.
+
+**Hand-Marker** — Accent lettering: one short word or line of the phrase — never the whole phrase, and spelled exactly as written — is drawn fast with a marker, a little irregular, as though added by hand after the main lettering was set. The main lettering carries everything else.
+
+**Handwritten Script** — Accent lettering: one short word or line of the phrase — never the whole phrase, and spelled exactly as written — is set in loose handwritten script, smaller and at a jaunty angle, tucked into a gap the main lettering leaves. The main lettering carries everything else.
+
+**Italic** — Accent lettering: one short word of the phrase, spelled exactly as written, is set in a steeply sloped italic matched to the main lettering's weight, so the slope alone carries the emphasis. The main lettering carries everything else.
+
+**Label-Maker** — Accent lettering: one or two short words of the phrase, spelled exactly as written, are set in tight monospaced capitals reversed out of a solid rounded-corner bar, as though punched from a label maker. The main lettering carries everything else.
+
+**Script** — Accent lettering: one short word or line of the phrase — never the whole phrase, and spelled exactly as written — is set in a connected script at a larger scale and a slight angle, crossing the main lettering. The main lettering carries everything else.
+
+**Small Sans** — Accent lettering: one short line of the phrase — never the whole phrase, and spelled exactly as written — is set in small sans capitals with very wide letterspacing above or beneath the main lettering, a quiet counterpoint to it. The main lettering carries everything else.
+
+**Technical** — Accent lettering: one short word or line of the phrase — never the whole phrase, and spelled exactly as written — is set in small, widely spaced monospaced capitals with a tick mark or hairline rule beside it, like an annotation on a drawing. The main lettering carries everything else.
+
+## Secondary art styles (column `Secondary Art Style`)
+
+Same names as the main art styles. Each adds motifs only; the main style keeps its technique.
+
+**Architectural / Blueprint Editorial** — Secondary influence, blueprint: hairline measure lines, section marks and small numbered callouts annotate the main forms. These are added as detail; the main style keeps its own technique.
+
+**Art Deco Editorial** — Secondary influence, Art Deco: stepped tiers, fanned sunburst repeats and fine parallel rules frame the central forms. These are added as detail; the main style keeps its own technique.
+
+**Bold Minimal** — Secondary influence, bold minimal: one element is reduced to a large, clean geometric silhouette that anchors the rest. The main style keeps its own technique everywhere else.
+
+**Botanical Editorial Illustration** — Secondary influence, botanical: leaves, stems and blooms drawn as clean filled silhouettes with a few interior veins run as a border, arch or sprig. These are added as detail; the main style keeps its own technique.
+
+**Celestial** — Secondary influence, celestial: crescents, small stars and fine radiating lines are set around the main forms with deliberate symmetry. These are added as detail; the main style keeps its own technique.
+
+**Chrome Y2K** — Secondary influence, Y2K chrome: one or two forms are rendered as swollen liquid chrome in hard-edged bands of light and dark, with small four-point sparkle stars. The main style keeps its own technique everywhere else.
+
+**Collage Zine Cutout** — Secondary influence, zine collage: a few elements look torn or scissor-cut and are layered slightly out of square. These are added as detail; the main style keeps its own technique.
+
+**Collegiate / Varsity Emblem** — Secondary influence, varsity: an arched banner, block numerals or a layered offset outline around one key element. These are added as detail; the main style keeps its own technique.
+
+**Editorial Scene** — Secondary influence, editorial scene: a small staged moment — a figure or object caught mid-action — is set within the design. The main style keeps its own technique.
+
+**Editorial Typographic** — Secondary influence, editorial typography: a few precise hairline rules and small refined details are placed around the phrase. These are added as detail; the main style keeps its own technique.
+
+**Emotional Illustrative** — Secondary influence, emotional illustration: a small warm illustrated figure or object, its solid shapes softened by fine interior linework. The main style keeps its own technique everywhere else.
+
+**Feminine** — Secondary influence, feminine: fine hairline flourishes, rounded corners and one warm metallic note. These are added as detail; the main style keeps its own technique.
+
+**Geometric Abstract** — Secondary influence, geometric: a repeating pattern of true circles and angled bars, aligned to one grid, fills a frame or background shape. The main style keeps its own technique everywhere else.
+
+**Hand-Drawn Doodle** — Secondary influence, doodle: small loose marker doodles — stars, arrows, squiggles — gather around the main group. These are added as detail; the main style keeps its own technique.
+
+**Luxury Editorial Typography** — Secondary influence, luxury editorial: one hairline rule, a small refined mark and extra breathing room around the phrase. The main style keeps its own technique.
+
+**Minimal Symbolic** — Secondary influence, minimal symbol: one reduced symbol, built from the fewest shapes that carry the idea, serves as a focal mark. The main style keeps its own technique everywhere else.
+
+**Modern Grunge Halftone** — Secondary influence, grunge halftone: coarse halftone dot fields sit inside a few of the larger shapes, their edges slightly broken. The main style keeps its own technique everywhere else.
+
+**Modern Script Statement** — Secondary influence, modern script: a single fluid swash or underline stroke sweeps through the design. The main style keeps its own technique.
+
+**Neo-Brutalist Grid** — Secondary influence, neo-brutalist: one heavy rule and a hard rectangular field of saturated colour cut through the design. The main style keeps its own technique everywhere else.
+
+**Oversized Condensed Statement** — Secondary influence, oversized: one element is pushed to oversized scale and cropped by the edge of the design. The main style keeps its own technique.
+
+**Photoreal Composite** — Secondary influence, photo composite: one small photographic element is cut cleanly to its own silhouette and set among the drawn forms. The main style keeps its own technique everywhere else.
+
+**Retro Comic** — Secondary influence, comic: action bursts, speed lines and halftone dots drawn as solid shapes. These are added as detail; the main style keeps its own technique.
+
+**Retro Diner / Comic** — Secondary influence, retro diner: small stamped emblems, starbursts and a rounded mid-century sign shape. These are added as detail; the main style keeps its own technique.
+
+**Retro Groovy** — Secondary influence, groovy: wavy bands, a rounded sunburst and soft 70s curves run behind the main forms. These are added as detail; the main style keeps its own technique.
+
+**Soft Botanical Line Art** — Secondary influence, line botanical: a single continuous-line sprig with open interiors curls around the group. This is added as detail; the main style keeps its own technique.
+
+**Split-Scene Editorial Illustration** — Secondary influence, split scene: one clean division splits a key element into two contrasting halves. The main style keeps its own technique.
+
+**Streetwear Graffiti** — Secondary influence, streetwear: torn-edge blocks and overprinted layers sit behind the main group. These are added as detail; the main style keeps its own technique.
+
+**Tattoo Linework** — Secondary influence, tattoo flash: confident black contours of varied weight and dense parallel-line shading on the key forms, with flash motifs such as a rose, a swallow or a banner. The main style keeps its own technique everywhere else.
+
+**Urban graffiti** — Secondary influence, aerosol: overspray halos, drips and scattered paint flecks at the edges of the main shapes. These are added as detail; the main style keeps its own technique.
+
+**Vintage Badge** — Secondary influence, vintage badge: arched banners and fine washed speckle in the fill, as on a well-worn patch. These are added as detail; the main style keeps its own technique.
+
+**Vintage Poster** — Secondary influence, vintage poster: a plain rule frames the whole and a faint press texture shows where inks overlap. These are added as detail; the main style keeps its own technique.
+
